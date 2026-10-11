@@ -25,6 +25,7 @@
 ## Features
 
 - **Live GPS Map**: Full-screen moving map (OpenStreetMap / custom tiles) with heading-up tracking, breadcrumb trail and auto-zoom, fed by any NMEA serial GPS (e.g. Garmin GPS 17x HVS) or gpsd. See [GPS navigation](docs/gps_navigation_en.md).
+- **Live Vehicle Data and Alarms**: Configurable full-screen tiles for any signal (generic OBD-II PIDs via CAN or ELM327, vehicle CAN, GPS, system) with trends, min/max and alarm limits that raise a banner on every screen. See [Live vehicle data](docs/vehicle_data_en.md).
 - **Real-Time CAN and OBD Telemetry**: Decodes live powertrain and chassis frames via SocketCAN and flexible JSON vehicle profiles.
 - **Dynamic Powertrain Engine**: Real-time calculations of horsepower, instantaneous torque, engine load, and longitudinal G-forces.
 - **Modular Multi-Theme UI (QML)**:

@@ -29,6 +29,7 @@ Item {
 
     function canonicalRoute(nextRoute) {
         if (nextRoute === "map" || nextRoute === "navigation") return "map"
+        if (nextRoute === "live" || nextRoute === "data") return "live"
         if (nextRoute === "menu") return "driving"
         if (nextRoute === "diagnostic") return "vehicle"
         if (nextRoute === "transmission" || nextRoute === "vehicle_maintenance") return "vehicle"
@@ -100,6 +101,22 @@ Item {
         function onCockpitRequested() { root.route = "home" }
         function onSettingsRequested() { root.openRoute("driving") }
     }
+    Loader {
+        id: liveLoader
+        objectName: "liveLoader"
+        anchors.fill: parent
+        active: root.route === "live"
+        visible: active
+        source: "../shared_pages/LiveDataPage.qml"
+    }
+    Connections {
+        target: liveLoader.item; ignoreUnknownSignals: true
+        function onCockpitRequested() { root.route = "home" }
+    }
+    Shortcut {
+        sequence: "Ctrl+D"
+        onActivated: root.route === "live" ? root.openRoute("home") : root.openRoute("live")
+    }
     Shortcut {
         sequence: "Ctrl+M"
         onActivated: root.route === "map" ? root.openRoute("home") : root.openRoute("map")
@@ -107,7 +124,7 @@ Item {
 
     SettingsShell {
         anchors.fill: parent
-        visible: root.route !== "home" && root.route !== "map"
+        visible: ["home", "map", "live"].indexOf(root.route) < 0
         route: root.route
         requestedRoute: root.requestedRoute
         onCockpitRequested: root.route = "home"
@@ -147,6 +164,24 @@ Item {
         tripSummary: S.UiState.resumableTrip
         onResumeRequested: bridge.executeUiCommand("resume_trip", S.UiState.speed)
         onNewTripRequested: bridge.executeUiCommand("new_trip", S.UiState.speed)
+    }
+
+    // Alarme de surveillance visible sur tous les écrans sauf la page Live.
+    Item {
+        objectName: "liveAlarmBanner"
+        z: 9200
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: alarmBanner.width; height: alarmBanner.y + alarmBanner.height
+        visible: alarmBanner.shown
+        C.AlertBanner {
+            id: alarmBanner
+            level: "danger"
+            shown: S.UiState.liveAlarms.length > 0 && root.route !== "live"
+            message: S.UiState.liveAlarms.length > 0
+                     ? "⚠ " + S.UiState.liveAlarms[0].text + (S.UiState.liveAlarms.length > 1 ? "  (+" + (S.UiState.liveAlarms.length - 1) + ")" : "")
+                     : ""
+        }
+        MouseArea { anchors.fill: parent; onClicked: root.openRoute("live") }
     }
 
     NotificationCenter { z: 9400 }

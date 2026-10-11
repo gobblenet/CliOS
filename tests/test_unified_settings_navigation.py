@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 
@@ -65,6 +66,32 @@ class UnifiedSettingsNavigationTest(unittest.TestCase):
         self.app.processEvents()
         self.assertEqual(self.shell.property("route"), "home")
         self.assertFalse(self.shell.findChild(QObject, "mapLoader").property("active"))
+
+    def test_live_page_adds_tiles_and_saves_limits(self):
+        def saved_tiles():
+            return json.loads(self.bridge._config["ui"]["live_tiles"])
+
+        self.shell.openRoute("data")
+        self.app.processEvents()
+        self.assertEqual(self.shell.property("route"), "live")
+        page = self.shell.findChild(QObject, "liveDataPage")
+        self.assertIsNotNone(page)
+        initial = len(page.property("tiles").toVariant())
+
+        page.addTile("navigation", "gps_speed")
+        self.app.processEvents()
+        tiles = saved_tiles()
+        self.assertEqual(len(tiles), initial + 1)
+        self.assertEqual(tiles[-1]["key"], "gps_speed")
+
+        page.setLimits(0, "", "6500,5")
+        tiles = saved_tiles()
+        self.assertIsNone(tiles[0]["low"])
+        self.assertEqual(tiles[0]["high"], 6500.5)
+
+        page.moveTile(0, 1)
+        page.removeTile(0)
+        self.assertEqual(len(saved_tiles()), initial)
 
     def test_legacy_maintenance_signal_opens_storage(self):
         self.bridge.openMaintenanceRequested.emit()

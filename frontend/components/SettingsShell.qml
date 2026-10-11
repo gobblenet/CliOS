@@ -14,6 +14,7 @@ Item {
     signal styleRequested(string styleId)
     readonly property var sections: [
         { id: "map", label: "Carte", detail: "Position GPS en direct" },
+        { id: "live", label: "Données", detail: "Surveillance temps réel" },
         { id: "driving", label: "Conduite", detail: "Trajets" },
         { id: "appearance", label: "Apparence", detail: "Styles et lumière" },
         { id: "vehicle", label: "Véhicule", detail: "Entretien et OBD" },

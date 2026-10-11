@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import "SignalCatalog.js" as Catalog
 
 QtObject {
     id: state
@@ -26,6 +27,7 @@ QtObject {
     readonly property var environment: presentedDomain("environment")
     readonly property var alerts: presentedDomain("alerts")
     readonly property var navigation: vehicleState.navigation || ({})
+    readonly property var obd: vehicleState.obd || ({})
     readonly property var tripState: presentedStandaloneDomain("trip", rawTripState)
     readonly property var serviceHealth: systemState.health || ({})
     readonly property var storageState: systemState.storage || ({})
@@ -143,6 +145,12 @@ QtObject {
     readonly property string gpsMode: text(navigation.gps_mode, "NO_FIX")
     readonly property string gpsSource: text(navigation.gps_source, "")
     readonly property string mapTileUrl: text(navigation.tile_url, "https://tile.openstreetmap.org/%z/%x/%y.png")
+
+    // Données temps réel (page Live) : tuiles choisies et alarmes actives.
+    readonly property bool obdConnected: obd.obd_connected === true
+    readonly property string obdInterface: text(obd.obd_interface, "")
+    readonly property var liveTiles: parseLiveTiles(config.ui && config.ui.live_tiles)
+    readonly property var liveAlarms: buildLiveAlarms()
     readonly property real rpm: rawRpm
     readonly property string gear: text(motion.gear, "N")
     property real engineTemp: rawEngineTemp
@@ -411,9 +419,44 @@ QtObject {
         })
     }
 
+    function parseLiveTiles(raw) {
+        let tiles = raw
+        if (typeof raw === "string" && raw !== "") {
+            try { tiles = JSON.parse(raw) } catch (error) { tiles = null }
+        }
+        if (!Array.isArray(tiles)) return Catalog.defaultTiles
+        return tiles.filter(function(tile) {
+            return tile && typeof tile.domain === "string" && typeof tile.key === "string"
+        })
+    }
+
+    function signalInfo(domainName, key) {
+        const values = vehicleState[domainName] || {}
+        const metadata = (dataQuality[domainName] || {})[key] || {}
+        const present = values[key] !== undefined
+        return {
+            present: present,
+            value: values[key],
+            unit: Catalog.unit(metadata.unit || ""),
+            stale: !present || metadata.quality === "STALE",
+            label: Catalog.label(domainName, key)
+        }
+    }
+
+    function buildLiveAlarms() {
+        const alarms = []
+        liveTiles.forEach(function(tile) {
+            const info = signalInfo(tile.domain, tile.key)
+            if (info.stale) return
+            if (Catalog.level(tile, info.value) === "alarm")
+                alarms.push({ label: info.label, text: info.label + " : " + Catalog.format(info.value) + " " + info.unit })
+        })
+        return alarms
+    }
+
     function buildDebugSignals() {
         const rows = []
-        const domainNames = ["powertrain", "motion", "wheels", "body", "assistance", "dynamics", "environment", "controls", "alerts"]
+        const domainNames = ["powertrain", "motion", "wheels", "body", "assistance", "dynamics", "environment", "controls", "alerts", "navigation", "obd"]
         domainNames.forEach(function(domainName) {
             const values = vehicleState[domainName] || {}
             const quality = dataQuality[domainName] || {}
