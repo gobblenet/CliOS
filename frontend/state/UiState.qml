@@ -25,6 +25,7 @@ QtObject {
     readonly property var dynamics: presentedDomain("dynamics")
     readonly property var environment: presentedDomain("environment")
     readonly property var alerts: presentedDomain("alerts")
+    readonly property var navigation: vehicleState.navigation || ({})
     readonly property var tripState: presentedStandaloneDomain("trip", rawTripState)
     readonly property var serviceHealth: systemState.health || ({})
     readonly property var storageState: systemState.storage || ({})
@@ -126,6 +127,22 @@ QtObject {
     // 3. MÉTROLOGIE MOTEUR, VITESSE & TRANSMISSION
     // =========================================================================
     property real speed: rawSpeed
+
+    // Navigation GPS (service clios.gps)
+    readonly property bool gpsFix: navigation.gps_fix === true && navigation.latitude !== undefined
+                                   && signalFresh("navigation", "latitude")
+    readonly property real latitude: number(navigation.latitude, 0)
+    readonly property real longitude: number(navigation.longitude, 0)
+    readonly property real gpsSpeed: number(navigation.gps_speed, 0)
+    readonly property real heading: number(navigation.heading, 0)
+    readonly property bool headingValid: navigation.heading_valid === true
+    readonly property real altitude: number(navigation.altitude_m, 0)
+    readonly property real gpsAccuracy: number(navigation.gps_accuracy_m, 0)
+    readonly property int gpsSatellites: intValue(navigation.gps_satellites, 0)
+    readonly property int gpsSatellitesInView: intValue(navigation.gps_satellites_in_view, 0)
+    readonly property string gpsMode: text(navigation.gps_mode, "NO_FIX")
+    readonly property string gpsSource: text(navigation.gps_source, "")
+    readonly property string mapTileUrl: text(navigation.tile_url, "https://tile.openstreetmap.org/%z/%x/%y.png")
     readonly property real rpm: rawRpm
     readonly property string gear: text(motion.gear, "N")
     property real engineTemp: rawEngineTemp

@@ -57,6 +57,13 @@ class FakeBridge(QObject):
             "environment": {"outside_temp": 23.5, "cabin_db_spl": 68.0, "cabin_freq_hz": 110},
             "controls": {},
             "alerts": {"engine_light": "OFF"},
+            "navigation": {
+                "gps_fix": True, "gps_mode": "3D", "gps_quality": "GPS", "gps_satellites": 9,
+                "gps_satellites_in_view": 12, "gps_source": "serial:/dev/ttyUSB0@4800",
+                "latitude": 48.8584, "longitude": 2.2945, "gps_speed": 82.0, "heading": 135.0,
+                "heading_valid": True, "altitude_m": 35.0, "gps_accuracy_m": 4.0,
+                "tile_url": "http://127.0.0.1:9/%z/%x/%y.png",
+            },
         }
         self._trip_state = {
             "is_active": True, "distance_km": 48.6, "session_fuel_l": 4.18,
@@ -385,7 +392,7 @@ def main():
 
     routes_by_style = {
         style: ["home", "driving", "appearance", "accent", "leds", "vehicle", "diagnostic", "transmission",
-                "system", "updates", "maintenance", "power", "advanced", "services", "developer", "logs"]
+                "system", "updates", "maintenance", "power", "advanced", "services", "developer", "logs", "map"]
         for style in ("apex", "atelier_luxe", "gt_modern", "jdm_mugen", "legacy_dashboard")
     }
     styles = ["apex", "atelier_luxe", "gt_modern", "jdm_mugen", "legacy_dashboard"]

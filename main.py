@@ -43,6 +43,7 @@ from src.storage import PersistentStorage
 from src.runtime import VehicleRuntime
 from src.qt_bridge import DashboardBridge
 from src.services.dynamics_service import DynamicsService
+from src.services.gps_service import GpsService
 from src.logging_runtime import init_logging, relocate_log_dir, set_global_context, shutdown_logging, get_logger
 from src.crash_hooks import install_crash_hooks, relocate_crash_log
 from src.storage_manager import StorageManager, StorageMode
@@ -199,6 +200,7 @@ def setup_services(runtime, storage, orchestrator, can_provider, vehicle_config,
         (dynamics_service, "services.Dynamics.enabled", True),
         (gear_calib_service, "services.GearCalibration.enabled", True),
         (SystemMonitorService(runtime, storage), "services.Monitor.enabled", True),
+        (GpsService(runtime, storage, mock=mock), "services.GPS.enabled", True),
         (EngineSoundService(runtime, storage, engine_path=engine_dir), "services.EngineSound.enabled", False),
         (CabinNoiseService(runtime, storage), "services.Noise.enabled", True),
         (led_service, "services.Leds.enabled", True),

@@ -11,10 +11,10 @@ from typing import Any
 
 DOMAINS = (
     "powertrain", "motion", "wheels", "body", "assistance", "dynamics",
-    "environment", "controls", "alerts", "trip", "diagnostics", "session",
-    "calibration", "system",
+    "environment", "controls", "alerts", "navigation", "trip", "diagnostics",
+    "session", "calibration", "system",
 )
-VEHICLE_DOMAINS = DOMAINS[:9]
+VEHICLE_DOMAINS = DOMAINS[:10]
 
 
 @dataclass(frozen=True)

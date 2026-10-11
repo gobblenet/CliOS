@@ -52,6 +52,20 @@ class UnifiedSettingsNavigationTest(unittest.TestCase):
         self.shell.openRoute("home")
         self.assertEqual(self.shell.property("route"), "home")
 
+    def test_map_route_is_fullscreen_and_returns_to_cockpit(self):
+        self.shell.openRoute("map")
+        self.app.processEvents()
+        self.assertEqual(self.shell.property("route"), "map")
+        page = self.shell.findChild(QObject, "mapPage")
+        self.assertIsNotNone(page)
+        settings = self.shell.findChild(QObject, "unifiedSettingsShell")
+        self.assertFalse(settings.property("visible"))
+
+        page.cockpitRequested.emit()
+        self.app.processEvents()
+        self.assertEqual(self.shell.property("route"), "home")
+        self.assertFalse(self.shell.findChild(QObject, "mapLoader").property("active"))
+
     def test_legacy_maintenance_signal_opens_storage(self):
         self.bridge.openMaintenanceRequested.emit()
         self.app.processEvents()

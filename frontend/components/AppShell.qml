@@ -28,6 +28,7 @@ Item {
     })
 
     function canonicalRoute(nextRoute) {
+        if (nextRoute === "map" || nextRoute === "navigation") return "map"
         if (nextRoute === "menu") return "driving"
         if (nextRoute === "diagnostic") return "vehicle"
         if (nextRoute === "transmission" || nextRoute === "vehicle_maintenance") return "vehicle"
@@ -84,9 +85,29 @@ Item {
         }
     }
 
+    // Chargée à la demande : QtLocation et le cache de tuiles ne coûtent
+    // rien tant que la carte n'est pas ouverte.
+    Loader {
+        id: mapLoader
+        objectName: "mapLoader"
+        anchors.fill: parent
+        active: root.route === "map"
+        visible: active
+        source: "../shared_pages/MapPage.qml"
+    }
+    Connections {
+        target: mapLoader.item; ignoreUnknownSignals: true
+        function onCockpitRequested() { root.route = "home" }
+        function onSettingsRequested() { root.openRoute("driving") }
+    }
+    Shortcut {
+        sequence: "Ctrl+M"
+        onActivated: root.route === "map" ? root.openRoute("home") : root.openRoute("map")
+    }
+
     SettingsShell {
         anchors.fill: parent
-        visible: root.route !== "home"
+        visible: root.route !== "home" && root.route !== "map"
         route: root.route
         requestedRoute: root.requestedRoute
         onCockpitRequested: root.route = "home"
