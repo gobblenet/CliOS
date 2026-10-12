@@ -9,9 +9,10 @@ Item {
     signal actionRequested(string action)
 
     function adjustFuelPrice(delta) {
-        const current = S.UiState.number(S.UiState.fuelPrice, 1.70)
-        const next = Math.max(0.50, Math.min(3.50, Math.round((current + delta) * 100) / 100))
-        root.actionRequested("set_fuel_price:" + next)
+        const shown = S.UiState.toPrice(S.UiState.number(S.UiState.fuelPrice, 1.70))
+        const perLiter = S.UiState.fromPrice(Math.round((shown + delta) * 100) / 100)
+        const next = Math.max(0.50, Math.min(3.50, perLiter))
+        root.actionRequested("set_fuel_price:" + next.toFixed(4))
     }
 
     ColumnLayout {
@@ -28,9 +29,9 @@ Item {
                 Layout.fillWidth: true; Layout.fillHeight: true; title: "Trip summary"
                 RowLayout {
                     anchors.fill: parent; spacing: 30
-                    GtMetric { Layout.preferredWidth: 190; Layout.minimumWidth: 190; label: "Distance"; value: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0"); unit: "km" }
-                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Fuel"; value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"); unit: "L" }
-                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Estimated cost"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€" }
+                    GtMetric { Layout.preferredWidth: 190; Layout.minimumWidth: 190; label: "Distance"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0"); unit: S.UiState.distanceUnit }
+                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Fuel"; value: S.UiState.fixed(S.UiState.toVolume(S.UiState.tripFuelLiters), 2, "0.00"); unit: S.UiState.volumeUnit }
+                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Estimated cost"; value: S.UiState.money(S.UiState.tripCost); unit: "" }
                     Item { Layout.fillWidth: true }
                 }
             }
@@ -55,7 +56,7 @@ Item {
                         GtButton { Layout.preferredWidth: 68; Layout.preferredHeight: 54; text: "−"; onClicked: root.adjustFuelPrice(-0.01) }
                         Text {
                             Layout.fillWidth: true
-                            text: S.UiState.fixed(S.UiState.fuelPrice, 2, "1,70") + " €/L"
+                            text: S.UiState.fixed(S.UiState.toPrice(S.UiState.fuelPrice), 2, "1.70") + " " + S.UiState.priceUnit
                             color: T.StyleManager.text
                             font.family: T.StyleManager.fontFamily
                             font.pixelSize: 25
@@ -78,7 +79,7 @@ Item {
                 ColumnLayout {
                     anchors.fill: parent; spacing: 18
                     GtMetric { Layout.fillWidth: true; label: "Average aggressiveness"; value: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0"); unit: "%" }
-                    GtMetric { Layout.fillWidth: true; label: "Coasting decel."; value: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0,0"); unit: "km" }
+                    GtMetric { Layout.fillWidth: true; label: "Coasting decel."; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.decelerationWithoutThrottleKm), 1, "0.0"); unit: S.UiState.distanceUnit }
                     GtProgress {
                         Layout.fillWidth: true; height: 12
                         value: S.UiState.decelerationWithoutThrottleKm
@@ -92,7 +93,7 @@ Item {
                 ColumnLayout {
                     anchors.fill: parent; spacing: 18
                     GtMetric { Layout.fillWidth: true; label: "Average rpm"; value: S.UiState.fixed(S.UiState.avgRpm, 0, "0"); unit: "rpm" }
-                    GtMetric { Layout.fillWidth: true; label: "Gear shift"; value: S.UiState.fixed(S.UiState.shiftTimeSec, 2, "0,00"); unit: "s" }
+                    GtMetric { Layout.fillWidth: true; label: "Gear shift"; value: S.UiState.fixed(S.UiState.shiftTimeSec, 2, "0.00"); unit: "s" }
                 }
             }
             GtCard {

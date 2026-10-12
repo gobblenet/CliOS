@@ -28,13 +28,13 @@ Item {
         width: 440
         height: 440
         minValue: 0
-        maxValue: S.UiState.number(S.UiState.maxSpeed, 250)
-        currentValue: S.UiState.speed
+        maxValue: S.UiState.number(S.UiState.displayMaxSpeed, 250)
+        currentValue: S.UiState.displaySpeed
         startAngle: 225
         spanAngle: 270
         majorStep: 50
         minorTicksCount: 4
-        unitText: "KM / H"
+        unitText: S.UiState.imperial ? "MPH" : "KM / H"
     }
 
     // Indicateur Régulateur / Limiteur intégré DIRECTEMENT au cadran
@@ -58,7 +58,7 @@ Item {
                 color: S.UiState.cruiseStatus === "ACTIVE" ? T.StyleManager.accent : "#8A9BAF"
             }
             Text {
-                text: S.UiState.cruiseMode + " " + S.UiState.fixed(S.UiState.cruiseTarget, 0, "—") + " km/h"
+                text: S.UiState.cruiseMode + " " + S.UiState.fixed(S.UiState.toSpeed(S.UiState.cruiseTarget), 0, "—") + " " + S.UiState.speedUnit
                 color: S.UiState.cruiseStatus === "ACTIVE" ? "#FFFFFF" : "#BAC8D9"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 11
@@ -94,7 +94,7 @@ Item {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: Math.round(S.UiState.speed).toString()
+                text: Math.round(S.UiState.displaySpeed).toString()
                 color: "#FFFFFF"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 42
@@ -103,7 +103,7 @@ Item {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "KM / H"
+                text: S.UiState.imperial ? "MPH" : "KM / H"
                 color: "#BAC8D9"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 11
@@ -197,7 +197,7 @@ Item {
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: S.UiState.fixed(S.UiState.odometer, 0, "0") + " km"
+                    text: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "0") + " " + S.UiState.distanceUnit
                     color: "#FFFFFF"
                     font.family: T.StyleManager.fontFamily
                     font.pixelSize: 17

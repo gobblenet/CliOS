@@ -53,7 +53,7 @@ Item {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0,00") + " G LONG."
+                    text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0.00") + " G LONG."
                     color: T.StyleManager.text
                     font.pixelSize: 34
                     font.weight: Font.DemiBold

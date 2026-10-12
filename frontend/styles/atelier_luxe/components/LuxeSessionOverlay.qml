@@ -49,7 +49,7 @@ Rectangle {
                     Layout.fillWidth: true
                     spacing: 4
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: "DISTANCE"; color: "#BAC8D9"; font.pixelSize: 12; font.weight: Font.Bold; font.letterSpacing: 1.2 }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0") + " km"; color: "#FFFFFF"; font.pixelSize: 28; font.weight: Font.Bold }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0") + " " + S.UiState.distanceUnit; color: "#FFFFFF"; font.pixelSize: 28; font.weight: Font.Bold }
                 }
 
                 Rectangle { width: 1; height: 50; color: Qt.rgba(1, 1, 1, 0.1) }
@@ -58,7 +58,7 @@ Rectangle {
                     Layout.fillWidth: true
                     spacing: 4
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: "FUEL"; color: "#BAC8D9"; font.pixelSize: 12; font.weight: Font.Bold; font.letterSpacing: 1.2 }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00") + " L"; color: "#FFFFFF"; font.pixelSize: 28; font.weight: Font.Bold }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.toVolume(S.UiState.tripFuelLiters), 2, "0.00") + " " + S.UiState.volumeUnit; color: "#FFFFFF"; font.pixelSize: 28; font.weight: Font.Bold }
                 }
 
                 Rectangle { width: 1; height: 50; color: Qt.rgba(1, 1, 1, 0.1) }
@@ -67,7 +67,7 @@ Rectangle {
                     Layout.fillWidth: true
                     spacing: 4
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: "ESTIMATED COST"; color: "#BAC8D9"; font.pixelSize: 12; font.weight: Font.Bold; font.letterSpacing: 1.2 }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.tripCost, 2, "0,00") + " €"; color: T.StyleManager.accent; font.pixelSize: 28; font.weight: Font.Bold }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.money(S.UiState.tripCost); color: T.StyleManager.accent; font.pixelSize: 28; font.weight: Font.Bold }
                 }
             }
 

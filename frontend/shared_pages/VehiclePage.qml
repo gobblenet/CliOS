@@ -22,15 +22,15 @@ Item {
             RowLayout { anchors.fill: parent; visible: root.tab === 0; spacing: 14
                 Card { Layout.fillWidth: true; Layout.fillHeight: true; title: "Next service"; highlighted: S.UiState.serviceWarning
                     ColumnLayout { anchors.fill: parent; spacing: 16
-                        Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Distance remaining"; value: S.UiState.fixed(S.UiState.kmBeforeService, 0, "—"); unit: "km"; alignment: Text.AlignHCenter; valueSize: 48 }
-                        Text { Layout.fillWidth: true; text: "Configured interval: " + S.UiState.fixed(S.UiState.revisionIntervalKm, 0, "—") + " km"; color: T.StyleManager.textSecondary; font.pixelSize: 17; horizontalAlignment: Text.AlignHCenter }
+                        Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Distance remaining"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.kmBeforeService), 0, "—"); unit: S.UiState.distanceUnit; alignment: Text.AlignHCenter; valueSize: 48 }
+                        Text { Layout.fillWidth: true; text: "Configured interval: " + S.UiState.fixed(S.UiState.toDistance(S.UiState.revisionIntervalKm), 0, "—") + " " + S.UiState.distanceUnit; color: T.StyleManager.textSecondary; font.pixelSize: 17; horizontalAlignment: Text.AlignHCenter }
                         Button { Layout.fillWidth: true; Layout.preferredHeight: 72; text: "CONFIRM SERVICE"; primary: true; onClicked: root.actionRequested("reset_maintenance") }
                     }
                 }
                 Card { Layout.fillWidth: true; Layout.fillHeight: true; title: "Mechanical status"
                     GridLayout { anchors.fill: parent; columns: 2; rowSpacing: 12; columnSpacing: 12
                         Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Engine temperature"; value: S.UiState.fixed(S.UiState.engineTemp, 0, "—"); unit: "°C"; alignment: Text.AlignHCenter }
-                        Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Odometer"; value: S.UiState.fixed(S.UiState.odometer, 0, "—"); unit: "km"; alignment: Text.AlignHCenter }
+                        Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Odometer"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "—"); unit: S.UiState.distanceUnit; alignment: Text.AlignHCenter }
                         Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Fuel"; value: S.UiState.fixed(S.UiState.fuelLevel, 0, "—"); unit: "%"; alignment: Text.AlignHCenter }
                         Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Alerts"; value: S.UiState.engineWarning || S.UiState.serviceWarning ? "CHECK" : "OK"; alignment: Text.AlignHCenter; valueSize: 25 }
                     }

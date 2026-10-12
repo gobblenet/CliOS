@@ -130,6 +130,42 @@ QtObject {
     // =========================================================================
     property real speed: rawSpeed
 
+    // Display units. Runtime data and logic stay metric; only what is shown
+    // on screen is converted. ui.units = "imperial" (default) or "metric".
+    readonly property string unitSystem: text(config.ui && config.ui.units, "imperial")
+    readonly property bool imperial: unitSystem !== "metric"
+    readonly property string speedUnit: imperial ? "mph" : "km/h"
+    readonly property string distanceUnit: imperial ? "mi" : "km"
+    readonly property string volumeUnit: imperial ? "gal" : "L"
+    readonly property string consumptionUnit: imperial ? "MPG" : "L/100"
+    readonly property string currency: imperial ? "$" : "€"
+    readonly property string priceUnit: currency + "/" + volumeUnit
+    readonly property string altitudeUnit: imperial ? "ft" : "m"
+    readonly property real displaySpeed: toSpeed(speed)
+    readonly property real displayMaxSpeed: imperial ? Math.ceil(toSpeed(maxSpeed) / 10) * 10 : maxSpeed
+
+    function toSpeed(kmh) { return imperial ? number(kmh, 0) * 0.621371 : number(kmh, 0) }
+    function toDistance(km) { return imperial ? number(km, 0) * 0.621371 : number(km, 0) }
+    function toVolume(liters) { return imperial ? number(liters, 0) * 0.264172 : number(liters, 0) }
+    // L/100 km -> US MPG is an inverse relation; 0 means "no consumption data".
+    function toConsumption(l100) {
+        const value = number(l100, 0)
+        if (!imperial) return value
+        return value > 0.05 ? 235.215 / value : 0
+    }
+    function toPrice(perLiter) { return imperial ? number(perLiter, 0) * 3.785411784 : number(perLiter, 0) }
+    function fromPrice(perVolume) { return imperial ? number(perVolume, 0) / 3.785411784 : number(perVolume, 0) }
+    function toAltitude(meters) { return imperial ? number(meters, 0) * 3.28084 : number(meters, 0) }
+    // Converts a runtime value tagged with a metric unit to the display units.
+    function displayUnits(value, unit) {
+        const factors = { "km/h": [0.621371, "mph"], "km": [0.621371, "mi"], "L": [0.264172, "gal"],
+                          "L/h": [0.264172, "gal/h"], "m": [3.28084, "ft"] }
+        const factor = factors[unit]
+        if (!imperial || !factor || typeof value !== "number") return { value: value, unit: unit }
+        return { value: value * factor[0], unit: factor[1] }
+    }
+    function money(value) { return currency + fixed(value, 2, "0.00") }
+
     // GPS navigation (clios.gps service)
     readonly property bool gpsFix: navigation.gps_fix === true && navigation.latitude !== undefined
                                    && signalFresh("navigation", "latitude")
@@ -434,10 +470,11 @@ QtObject {
         const values = vehicleState[domainName] || {}
         const metadata = (dataQuality[domainName] || {})[key] || {}
         const present = values[key] !== undefined
+        const shown = displayUnits(values[key], metadata.unit || "")
         return {
             present: present,
-            value: values[key],
-            unit: Catalog.unit(metadata.unit || ""),
+            value: shown.value,
+            unit: Catalog.unit(shown.unit),
             stale: !present || metadata.quality === "STALE",
             label: Catalog.label(domainName, key)
         }

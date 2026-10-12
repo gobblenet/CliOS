@@ -103,7 +103,7 @@ Item {
                             color: T.StyleManager.surface; border.width: 1; border.color: T.StyleManager.outline
                             Column { anchors.centerIn: parent; spacing: 2
                                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: "TRIP A"; color: T.StyleManager.textSecondary; font.pixelSize: 11; font.bold: true }
-                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.tripA, 1, "0,0") + " km"; color: T.StyleManager.text; font.pixelSize: 21; font.bold: true }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripA), 1, "0.0") + " " + S.UiState.distanceUnit; color: T.StyleManager.text; font.pixelSize: 21; font.bold: true }
                             }
                         }
                         Rectangle {
@@ -111,7 +111,7 @@ Item {
                             color: T.StyleManager.surface; border.width: 1; border.color: T.StyleManager.outline
                             Column { anchors.centerIn: parent; spacing: 2
                                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: "TRIP B"; color: T.StyleManager.textSecondary; font.pixelSize: 11; font.bold: true }
-                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.tripB, 1, "0,0") + " km"; color: T.StyleManager.text; font.pixelSize: 21; font.bold: true }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0") + " " + S.UiState.distanceUnit; color: T.StyleManager.text; font.pixelSize: 21; font.bold: true }
                             }
                         }
                     }

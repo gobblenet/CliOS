@@ -171,7 +171,7 @@ Item {
 
                         // Distance parcourue (Grand Format)
                         Text {
-                            text: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0") + " km"
+                            text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0") + " " + S.UiState.distanceUnit
                             color: "#FFFFFF"
                             font.family: T.StyleManager.fontFamily
                             font.pixelSize: 42
@@ -190,7 +190,7 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 2
                                 Text { text: "FUEL"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
-                                Text { text: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00") + " L"; color: "#FFFFFF"; font.pixelSize: 22; font.weight: Font.Bold }
+                                Text { text: S.UiState.fixed(S.UiState.toVolume(S.UiState.tripFuelLiters), 2, "0.00") + " " + S.UiState.volumeUnit; color: "#FFFFFF"; font.pixelSize: 22; font.weight: Font.Bold }
                             }
 
                             Rectangle { width: 1; Layout.fillHeight: true; color: "#1E2C40" }
@@ -200,7 +200,7 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 2
                                 Text { text: "ESTIMATED COST"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
-                                Text { text: S.UiState.fixed(S.UiState.tripCost, 2, "0,00") + " €"; color: T.StyleManager.accent; font.pixelSize: 22; font.weight: Font.Bold }
+                                Text { text: S.UiState.money(S.UiState.tripCost); color: T.StyleManager.accent; font.pixelSize: 22; font.weight: Font.Bold }
                             }
                         }
 
@@ -213,7 +213,7 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 2
                                 Text { text: "COASTING DECELERATION"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
-                                Text { text: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0,0") + " km"; color: T.StyleManager.success; font.pixelSize: 20; font.weight: Font.Bold }
+                                Text { text: S.UiState.fixed(S.UiState.toDistance(S.UiState.decelerationWithoutThrottleKm), 1, "0.0") + " " + S.UiState.distanceUnit; color: T.StyleManager.success; font.pixelSize: 20; font.weight: Font.Bold }
                             }
                             ColumnLayout {
                                 spacing: 2
@@ -284,7 +284,7 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 2
                                 Text {
-                                    text: S.UiState.fixed(S.UiState.tripB, 1, "0,0") + " km"
+                                    text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0") + " " + S.UiState.distanceUnit
                                     color: "#FFFFFF"
                                     font.family: T.StyleManager.fontFamily
                                     font.pixelSize: 32
@@ -299,13 +299,13 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 2
                                 Text {
-                                    text: S.UiState.fixed(S.UiState.avgConsB, 1, "0,0") + " L"
+                                    text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "0.0") + " " + S.UiState.consumptionUnit
                                     color: T.StyleManager.accent
                                     font.family: T.StyleManager.fontFamily
                                     font.pixelSize: 32
                                     font.weight: Font.Bold
                                 }
-                                Text { text: "AVERAGE / 100 KM"; color: "#8A9BAF"; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: S.UiState.imperial ? "AVERAGE MPG" : "AVERAGE / 100 KM"; color: "#8A9BAF"; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
                             }
                         }
 
@@ -355,7 +355,7 @@ Item {
                                 spacing: 2
                                 Text { text: "SERVICE DUE"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Text {
-                                    text: S.UiState.fixed(S.UiState.kmBeforeService, 0, "—") + " km remaining"
+                                    text: S.UiState.fixed(S.UiState.toDistance(S.UiState.kmBeforeService), 0, "—") + " " + S.UiState.distanceUnit + " remaining"
                                     color: S.UiState.serviceWarning ? T.StyleManager.warning : "#FFFFFF"
                                     font.family: T.StyleManager.fontFamily
                                     font.pixelSize: 16

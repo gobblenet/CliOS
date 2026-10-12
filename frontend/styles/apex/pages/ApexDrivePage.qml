@@ -45,14 +45,14 @@ Item {
                             Layout.fillWidth: true
                             spacing: -3
                             Text {
-                                text: Math.round(S.UiState.autonomy)
+                                text: Math.round(S.UiState.toDistance(S.UiState.autonomy))
                                 color: "#FFFFFF"
                                 font.pixelSize: 58
                                 font.weight: Font.Black
                                 font.letterSpacing: -2
                             }
                             Text {
-                                text: "KM RANGE"
+                                text: S.UiState.distanceUnit.toUpperCase() + " RANGE"
                                 color: "#AABACA"
                                 font.pixelSize: 13
                                 font.weight: Font.Bold
@@ -65,7 +65,7 @@ Item {
                             spacing: 1
                             Text {
                                 anchors.right: parent.right
-                                text: S.UiState.fixed(S.UiState.fuelLevel, 1, "—") + " L"
+                                text: S.UiState.fixed(S.UiState.toVolume(S.UiState.fuelLevel), 1, "—") + " " + S.UiState.volumeUnit
                                 color: S.UiState.lowFuel ? "#FFB84D" : T.StyleManager.accent
                                 font.pixelSize: 26
                                 font.weight: Font.Black
@@ -124,15 +124,15 @@ Item {
                         spacing: 0
                         Column {
                             Layout.fillWidth: true
-                            Text { text: S.UiState.fixed(S.UiState.instantCons, 1, "—"); color: "#FFFFFF"; font.pixelSize: 28; font.bold: true }
-                            Text { text: "L/100 INSTANT"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
+                            Text { text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.instantCons), 1, "—"); color: "#FFFFFF"; font.pixelSize: 28; font.bold: true }
+                            Text { text: S.UiState.consumptionUnit.toUpperCase() + " INSTANT"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
                         }
                         Rectangle { width: 1; height: 42; color: "#30465A" }
                         Column {
                             Layout.fillWidth: true
                             leftPadding: 22
-                            Text { text: S.UiState.fixed(S.UiState.avgConsB, 1, "—"); color: T.StyleManager.accent; font.pixelSize: 28; font.bold: true }
-                            Text { text: "L/100 AVERAGE"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
+                            Text { text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "—"); color: T.StyleManager.accent; font.pixelSize: 28; font.bold: true }
+                            Text { text: S.UiState.consumptionUnit.toUpperCase() + " AVERAGE"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
                         }
                     }
                 }
@@ -150,13 +150,13 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         Text {
-                            text: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0")
+                            text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0")
                             color: "#FFFFFF"
                             font.pixelSize: 46
                             font.weight: Font.Black
                             font.letterSpacing: -1
                         }
-                        Text { text: "KM"; color: "#B3C1CE"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 9 }
+                        Text { text: S.UiState.distanceUnit.toUpperCase(); color: "#B3C1CE"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 9 }
                         Item { Layout.fillWidth: true }
                         Rectangle {
                             width: stateText.implicitWidth + 22
@@ -180,9 +180,9 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 12
-                        ApexMetric { Layout.fillWidth: true; label: "TRIP A"; value: S.UiState.fixed(S.UiState.tripA, 1, "0,0"); unit: "km"; valueSize: 24 }
-                        ApexMetric { Layout.fillWidth: true; label: "TRIP B"; value: S.UiState.fixed(S.UiState.tripB, 1, "0,0"); unit: "km"; valueSize: 24 }
-                        ApexMetric { Layout.fillWidth: true; label: "EST. COST"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€"; valueSize: 24 }
+                        ApexMetric { Layout.fillWidth: true; label: "TRIP A"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripA), 1, "0.0"); unit: S.UiState.distanceUnit; valueSize: 24 }
+                        ApexMetric { Layout.fillWidth: true; label: "TRIP B"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0"); unit: S.UiState.distanceUnit; valueSize: 24 }
+                        ApexMetric { Layout.fillWidth: true; label: "EST. COST"; value: S.UiState.money(S.UiState.tripCost); unit: ""; valueSize: 24 }
                     }
 
                     Item { Layout.fillHeight: true }
@@ -295,7 +295,7 @@ Item {
                         model: [
                             { label: "ENGINE LOAD", value: S.UiState.engineLoad, text: S.UiState.fixed(S.UiState.engineLoad, 0, "0") + " %", color: T.StyleManager.accent },
                             { label: "POWER", value: 100 * S.UiState.power / Math.max(1, S.UiState.maxPowerKw), text: S.UiState.fixed(S.UiState.powerHp, 0, "0") + " / " + S.UiState.fixed(S.UiState.maxPowerHp, 0, "0") + " hp", color: "#6EE8FF" },
-                            { label: "LONG. ACCELERATION", value: Math.min(100, Math.abs(S.UiState.longitudinalG) * 100), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0,00") + " G", color: "#FFCA68" }
+                            { label: "LONG. ACCELERATION", value: Math.min(100, Math.abs(S.UiState.longitudinalG) * 100), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0.00") + " G", color: "#FFCA68" }
                         ]
                         delegate: ColumnLayout {
                             Layout.fillWidth: true
@@ -337,8 +337,8 @@ Item {
                         }
                         Column {
                             Layout.fillWidth: true
-                            Text { text: S.UiState.fixed(S.UiState.odometer, 0, "—"); color: "#FFFFFF"; font.pixelSize: 27; font.bold: true }
-                            Text { text: "ODOMETER KM"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
+                            Text { text: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "—"); color: "#FFFFFF"; font.pixelSize: 27; font.bold: true }
+                            Text { text: "ODOMETER " + S.UiState.distanceUnit.toUpperCase(); color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
                         }
                     }
 

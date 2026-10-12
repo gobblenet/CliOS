@@ -63,9 +63,9 @@ Item {
 
                 Repeater {
                     model: [
-                        { label: "Distance",  value: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0"),    unit: "km" },
-                        { label: "Fuel", value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"), unit: "L"  },
-                        { label: "Cost",      value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"),   unit: "€"  }
+                        { label: "Distance",  value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0"),    unit: S.UiState.distanceUnit },
+                        { label: "Fuel", value: S.UiState.fixed(S.UiState.toVolume(S.UiState.tripFuelLiters), 2, "0.00"), unit: S.UiState.volumeUnit  },
+                        { label: "Cost",      value: S.UiState.money(S.UiState.tripCost),   unit: ""  }
                     ]
                     delegate: Item {
                         Layout.fillWidth: true

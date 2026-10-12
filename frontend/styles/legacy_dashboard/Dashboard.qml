@@ -118,9 +118,9 @@ Item {
                 Row {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 55
-                    LegacyMetric { label: "Distance"; value: S.UiState.tripDistance.toFixed(1) + " km" }
-                    LegacyMetric { label: "Fuel"; value: S.UiState.tripFuelLiters.toFixed(2) + " L" }
-                    LegacyMetric { label: "Cost"; value: S.UiState.tripCost.toFixed(2) + " €" }
+                    LegacyMetric { label: "Distance"; value: S.UiState.toDistance(S.UiState.tripDistance).toFixed(1) + " " + S.UiState.distanceUnit }
+                    LegacyMetric { label: "Fuel"; value: S.UiState.toVolume(S.UiState.tripFuelLiters).toFixed(2) + " " + S.UiState.volumeUnit }
+                    LegacyMetric { label: "Cost"; value: S.UiState.money(S.UiState.tripCost) }
                 }
 
                 Row {
@@ -148,14 +148,14 @@ Item {
         Text {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            text: "Range  " + S.UiState.autonomy.toFixed(0) + " km"
+            text: "Range  " + S.UiState.toDistance(S.UiState.autonomy).toFixed(0) + " " + S.UiState.distanceUnit
             color: "white"
             font.family: "Arial"
             font.pixelSize: 22
         }
         Text {
             anchors.centerIn: parent
-            text: bottomBar.timeText + "     " + S.UiState.odometer.toFixed(0) + " km"
+            text: bottomBar.timeText + "     " + S.UiState.toDistance(S.UiState.odometer).toFixed(0) + " " + S.UiState.distanceUnit
             color: "white"
             font.family: "Arial"
             font.pixelSize: 22

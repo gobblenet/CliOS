@@ -31,6 +31,12 @@ Tile colours: **amber** means within 5 % of a limit, **red/blinking** means out 
 
 The default layout is OBD-II based: RPM, speed, coolant (alarm > 105 °C), battery voltage (alarm < 12.0 V or > 15.0 V), load, intake air (> 60 °C), oil (> 125 °C), fuel level (< 10 %), throttle, MAF, fuel rate and stored fault count (> 0). Only the PIDs your car supports will show values; you can remove the others.
 
+## Units
+
+CliOS shows US units by default: mph, miles, MPG, gallons, feet and $. Switch between **US** and **METRIC** (km/h, km, L/100 km, liters, meters, €) with the **UNITS** button on the **Driving** settings page. The choice is saved as `ui.units` (`imperial` or `metric`) in the vehicle configuration.
+
+Only the display changes: sensors, trip statistics and logs stay metric internally, so switching never alters recorded data. Alarm limits on the live data screen are entered in the units shown. Temperatures stay in °C.
+
 ## Connecting to the car
 
 The OBD-II service only sends **read-only** mode 01 requests. It never writes to the car or clears codes. It discovers the supported PIDs automatically, polls the fast ones (RPM, speed, load, throttle, MAF, fuel rate…) every cycle, and rotates through the slow ones (temperatures, levels, counters). It also pauses while a fault-code scan (Diagnostic page) runs.

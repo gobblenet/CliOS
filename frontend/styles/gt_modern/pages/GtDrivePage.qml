@@ -46,8 +46,8 @@ Item {
                 GtMetric {
                     Layout.preferredWidth: 230
                     label: "Odometer"
-                    value: S.UiState.fixed(S.UiState.odometer, 0, "0")
-                    unit: "km"
+                    value: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "0")
+                    unit: S.UiState.distanceUnit
                     alignment: Text.AlignRight
                 }
             }
@@ -63,14 +63,14 @@ Item {
                 GtMetric {
                     Layout.fillWidth: true
                     label: "Instant"
-                    value: S.UiState.fixed(S.UiState.instantCons, 1, "0,0")
-                    unit: "L/100"
+                    value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.instantCons), 1, "0.0")
+                    unit: S.UiState.consumptionUnit
                 }
                 GtMetric {
                     Layout.fillWidth: true
                     label: "Trip average"
-                    value: S.UiState.fixed(S.UiState.avgConsSession, 1, "0,0")
-                    unit: "L/100"
+                    value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsSession), 1, "0.0")
+                    unit: S.UiState.consumptionUnit
                     valueSize: 28
                 }
             }
@@ -83,9 +83,9 @@ Item {
             RowLayout {
                 anchors.fill: parent
                 spacing: 28
-                GtMetric { Layout.fillWidth: true; label: "Trip A"; value: S.UiState.fixed(S.UiState.tripA, 1, "0,0"); unit: "km" }
-                GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.tripB, 1, "0,0"); unit: "km" }
-                GtMetric { Layout.fillWidth: true; label: "Avg. B"; value: S.UiState.fixed(S.UiState.avgConsB, 1, "0,0"); unit: "L/100" }
+                GtMetric { Layout.fillWidth: true; label: "Trip A"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripA), 1, "0.0"); unit: S.UiState.distanceUnit }
+                GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0"); unit: S.UiState.distanceUnit }
+                GtMetric { Layout.fillWidth: true; label: "Avg. B"; value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "0.0"); unit: S.UiState.consumptionUnit }
             }
         }
 
@@ -98,8 +98,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width * 0.44
                 label: "Service"
-                value: S.UiState.fixed(S.UiState.kmBeforeService, 0, "—")
-                unit: "km"
+                value: S.UiState.fixed(S.UiState.toDistance(S.UiState.kmBeforeService), 0, "—")
+                unit: S.UiState.distanceUnit
                 valueColor: S.UiState.serviceWarning ? T.StyleManager.warning : T.StyleManager.text
             }
             GtProgress {

@@ -176,8 +176,8 @@ Item {
             Row {
                 spacing: 8
                 // CAN speed when available, otherwise GPS speed.
-                Text { id: speedValue; text: Math.round(S.UiState.speed > 0 ? S.UiState.speed : S.UiState.gpsSpeed); color: T.StyleManager.text; font.pixelSize: 54; font.bold: true }
-                Text { anchors.baseline: speedValue.baseline; text: "km/h"; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
+                Text { id: speedValue; text: Math.round(S.UiState.toSpeed(S.UiState.speed > 0 ? S.UiState.speed : S.UiState.gpsSpeed)); color: T.StyleManager.text; font.pixelSize: 54; font.bold: true }
+                Text { anchors.baseline: speedValue.baseline; text: S.UiState.speedUnit; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
             }
             Text {
                 text: root.cardinal(S.UiState.heading) + "  " + Math.round(S.UiState.heading) + "°" + (S.UiState.headingValid ? "" : "  (stopped)")
@@ -185,14 +185,14 @@ Item {
             }
             Text {
                 text: root.hasFix
-                      ? "GPS " + S.UiState.gpsMode + " · " + S.UiState.gpsSatellites + " sat" + (S.UiState.gpsAccuracy > 0 ? " · ±" + Math.round(S.UiState.gpsAccuracy) + " m" : "")
+                      ? "GPS " + S.UiState.gpsMode + " · " + S.UiState.gpsSatellites + " sat" + (S.UiState.gpsAccuracy > 0 ? " · ±" + Math.round(S.UiState.toAltitude(S.UiState.gpsAccuracy)) + " " + S.UiState.altitudeUnit : "")
                       : "Searching GPS… " + S.UiState.gpsSatellitesInView + " sats in view"
                 color: root.hasFix ? T.StyleManager.success : T.StyleManager.warning
                 font.pixelSize: 15; font.bold: true
             }
             Text {
                 visible: root.everHadFix
-                text: S.UiState.latitude.toFixed(5) + ", " + S.UiState.longitude.toFixed(5) + "  ·  " + Math.round(S.UiState.altitude) + " m"
+                text: S.UiState.latitude.toFixed(5) + ", " + S.UiState.longitude.toFixed(5) + "  ·  " + Math.round(S.UiState.toAltitude(S.UiState.altitude)) + " " + S.UiState.altitudeUnit
                 color: T.StyleManager.textSecondary; font.family: T.StyleManager.fontMono; font.pixelSize: 13
             }
         }

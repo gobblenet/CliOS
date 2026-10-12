@@ -9,8 +9,8 @@ Item {
     height: 550
 
     // Configuration dynamique issue du profil véhicule
-    property real configMaxSpeed: S.UiState.maxSpeed
-    property real currentSpeed: S.UiState.speed
+    property real configMaxSpeed: S.UiState.displayMaxSpeed
+    property real currentSpeed: S.UiState.displaySpeed
 
     // Calcul de l'échelle maximale arrondie par pas de 20 (ex: 200, 220, 240, 260)
     readonly property real dialMaxSpeed: Math.max(160, Math.ceil(configMaxSpeed / 20) * 20)
@@ -195,7 +195,7 @@ Item {
             // --- D. Inscription "km/h" sous le sommet ---
             ctx.font = "14px 'Arial', sans-serif"
             ctx.fillStyle = "#718096"
-            ctx.fillText("km/h", cx, cy - 80)
+            ctx.fillText(S.UiState.speedUnit, cx, cy - 80)
 
             // --- E. Logo MUGEN POWER et Calligraphie Kanji 無限 en bas du cadran ---
             const logoY = cy + 108
@@ -244,7 +244,7 @@ Item {
         anchors.fill: parent
         visible: S.UiState.cruiseTarget > 0 && S.UiState.cruiseMode !== "OFF"
 
-        readonly property real targetRatio: Math.max(0.0, Math.min(1.0, S.UiState.cruiseTarget / root.dialMaxSpeed))
+        readonly property real targetRatio: Math.max(0.0, Math.min(1.0, S.UiState.toSpeed(S.UiState.cruiseTarget) / root.dialMaxSpeed))
         readonly property real targetAngleDeg: root.startAngleDeg + root.spanAngleDeg * targetRatio
         readonly property real targetAngleRad: (targetAngleDeg - 90) * Math.PI / 180
 

@@ -309,9 +309,9 @@ Item {
                         else if (root.tripMode === 1) val = S.UiState.tripB
                         else val = S.UiState.odometer
 
-                        let str = Math.round(val).toString()
+                        let str = Math.round(S.UiState.toDistance(val)).toString()
                         while (str.length < 6) str = "0" + str
-                        return str + " km"
+                        return str + " " + S.UiState.distanceUnit
                     }
                     color: "#D8E4F0"
                     font.family: "Courier New, monospace"

@@ -114,29 +114,29 @@ Item {
             Text { text: "DRIVING"; color: T.StyleManager.textSecondary; font.pixelSize: 17; font.weight: Font.DemiBold; font.letterSpacing: 1.5 }
             Column {
                 Layout.fillWidth: true; Layout.preferredHeight: 160; spacing: -2
-                Text { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(S.UiState.speed); color: T.StyleManager.text; font.pixelSize: 112; font.weight: Font.DemiBold }
-                Text { anchors.horizontalCenter: parent.horizontalCenter; text: "km/h"; color: T.StyleManager.textSecondary; font.pixelSize: 21 }
+                Text { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(S.UiState.displaySpeed); color: T.StyleManager.text; font.pixelSize: 112; font.weight: Font.DemiBold }
+                Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.speedUnit; color: T.StyleManager.textSecondary; font.pixelSize: 21 }
             }
             GtCard {
                 Layout.fillWidth: true; Layout.preferredHeight: 96; title: "Cruise / limiter"
                 RowLayout {
                     anchors.fill: parent
                     Text { Layout.fillWidth: true; text: S.UiState.cruiseMode + " · " + S.UiState.cruiseStatus; color: T.StyleManager.textSecondary; font.pixelSize: 16; elide: Text.ElideRight }
-                    Text { text: S.UiState.cruiseTarget > 0 ? Math.round(S.UiState.cruiseTarget) : "—"; color: T.StyleManager.accent; font.pixelSize: 30; font.weight: Font.DemiBold }
+                    Text { text: S.UiState.cruiseTarget > 0 ? Math.round(S.UiState.toSpeed(S.UiState.cruiseTarget)) : "—"; color: T.StyleManager.accent; font.pixelSize: 30; font.weight: Font.DemiBold }
                 }
             }
             GtCard {
                 Layout.fillWidth: true; Layout.preferredHeight: 112; title: "Fuel"
                 ColumnLayout {
                     anchors.fill: parent; spacing: 8
-                    RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: S.UiState.fixed(S.UiState.fuelLevel, 1, "—") + " L"; color: S.UiState.lowFuel ? T.StyleManager.warning : T.StyleManager.text; font.pixelSize: 24; font.weight: Font.DemiBold } Text { text: S.UiState.fixed(S.UiState.autonomy, 0, "—") + " km"; color: T.StyleManager.textSecondary; font.pixelSize: 19 } }
+                    RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: S.UiState.fixed(S.UiState.toVolume(S.UiState.fuelLevel), 1, "—") + " " + S.UiState.volumeUnit; color: S.UiState.lowFuel ? T.StyleManager.warning : T.StyleManager.text; font.pixelSize: 24; font.weight: Font.DemiBold } Text { text: S.UiState.fixed(S.UiState.toDistance(S.UiState.autonomy), 0, "—") + " " + S.UiState.distanceUnit; color: T.StyleManager.textSecondary; font.pixelSize: 19 } }
                     GtProgress { Layout.fillWidth: true; height: 10; value: S.UiState.fuelLevel; to: S.UiState.maxFuel; fillColor: S.UiState.lowFuel ? T.StyleManager.warning : T.StyleManager.accent }
                 }
             }
             RowLayout {
                 Layout.fillWidth: true; Layout.fillHeight: true; spacing: 10
-                GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.tripB, 1, "0,0"); unit: "km"; valueSize: 27 }
-                GtMetric { Layout.fillWidth: true; label: "Avg. cons."; value: S.UiState.fixed(S.UiState.avgConsB, 1, "0,0"); unit: "L/100"; valueSize: 27 }
+                GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0"); unit: S.UiState.distanceUnit; valueSize: 27 }
+                GtMetric { Layout.fillWidth: true; label: "Avg. cons."; value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "0.0"); unit: S.UiState.consumptionUnit; valueSize: 27 }
             }
         }
     }
@@ -169,9 +169,9 @@ Item {
                     anchors.fill: parent; spacing: 18
                     RowLayout {
                         Layout.fillWidth: true; Layout.fillHeight: true; spacing: 36
-                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Distance"; value: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0"); unit: "km"; alignment: Text.AlignHCenter }
-                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Fuel"; value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"); unit: "L"; alignment: Text.AlignHCenter }
-                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Cost"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€"; alignment: Text.AlignHCenter }
+                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Distance"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0"); unit: S.UiState.distanceUnit; alignment: Text.AlignHCenter }
+                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Fuel"; value: S.UiState.fixed(S.UiState.toVolume(S.UiState.tripFuelLiters), 2, "0.00"); unit: S.UiState.volumeUnit; alignment: Text.AlignHCenter }
+                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Cost"; value: S.UiState.money(S.UiState.tripCost); unit: ""; alignment: Text.AlignHCenter }
                     }
                     Row {
                         visible: S.UiState.sessionState === "PAUSED"

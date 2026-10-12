@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../style" as T
+import "../../state" as S
 
 Rectangle {
     id: root
@@ -18,7 +19,7 @@ Rectangle {
 
     function fixed(value, decimals) {
         const numeric = Number(value)
-        return isNaN(numeric) ? "0" : numeric.toFixed(decimals).replace(".", ",")
+        return isNaN(numeric) ? "0" : numeric.toFixed(decimals)
     }
 
     function formattedDate(value) {
@@ -73,7 +74,7 @@ Rectangle {
                         anchors.centerIn: parent
                         spacing: 7
                         Text { anchors.horizontalCenter: parent.horizontalCenter; text: "DISTANCE"; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.bold: true }
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.fixed(root.tripSummary.distance_km, 1) + " km"; color: T.StyleManager.text; font.pixelSize: 30; font.bold: true }
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.fixed(S.UiState.toDistance(root.tripSummary.distance_km), 1) + " " + S.UiState.distanceUnit; color: T.StyleManager.text; font.pixelSize: 30; font.bold: true }
                     }
                 }
                 Rectangle { width: 1; Layout.fillHeight: true; color: T.StyleManager.outline }
@@ -84,7 +85,7 @@ Rectangle {
                         anchors.centerIn: parent
                         spacing: 7
                         Text { anchors.horizontalCenter: parent.horizontalCenter; text: "ESTIMATED COST"; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.bold: true }
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.fixed(root.tripSummary.cost_eur, 2) + " €"; color: T.StyleManager.text; font.pixelSize: 30; font.bold: true }
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.currency + root.fixed(root.tripSummary.cost_eur, 2); color: T.StyleManager.text; font.pixelSize: 30; font.bold: true }
                     }
                 }
             }

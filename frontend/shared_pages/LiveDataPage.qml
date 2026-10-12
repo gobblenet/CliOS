@@ -54,6 +54,10 @@ Item {
         next[index] = Object.assign({}, next[index], { low: parse(lowText), high: parse(highText) })
         save(next)
     }
+    function pickerValue(row) {
+        const shown = S.UiState.displayUnits(row.value, row.unit)
+        return Catalog.format(shown.value) + " " + Catalog.unit(shown.unit)
+    }
     function availableSignals() {
         const needle = filter.toLowerCase()
         return S.UiState.debugSignals.filter(function(row) {
@@ -181,7 +185,7 @@ Item {
                             anchors.fill: parent; anchors.leftMargin: 14; anchors.rightMargin: 14; spacing: 12
                             Text { Layout.fillWidth: true; text: Catalog.label(modelData.domain, modelData.key); color: T.StyleManager.text; font.pixelSize: 18; font.bold: true; elide: Text.ElideRight }
                             Text { text: modelData.domain + "." + modelData.key; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.family: T.StyleManager.fontMono }
-                            Text { Layout.preferredWidth: 160; horizontalAlignment: Text.AlignRight; text: Catalog.format(modelData.value) + " " + Catalog.unit(modelData.unit); color: T.StyleManager.accent; font.pixelSize: 16 }
+                            Text { Layout.preferredWidth: 160; horizontalAlignment: Text.AlignRight; text: root.pickerValue(modelData); color: T.StyleManager.accent; font.pixelSize: 16 }
                         }
                         MouseArea { id: pickTouch; anchors.fill: parent; onClicked: root.addTile(modelData.domain, modelData.key) }
                     }

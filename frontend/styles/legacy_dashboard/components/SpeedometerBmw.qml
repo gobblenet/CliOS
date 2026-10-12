@@ -8,10 +8,10 @@ Item {
     height: 400
 
     // --- Propriétés Publiques (Données Véhicule) ---
-    property real speed: S.UiState.speed
-    property int max_speed: S.UiState.maxSpeed
+    property real speed: S.UiState.displaySpeed
+    property int max_speed: S.UiState.displayMaxSpeed
 
-    property real targetSpeed: S.UiState.cruiseTarget
+    property real targetSpeed: S.UiState.toSpeed(S.UiState.cruiseTarget)
     property string regMode: S.UiState.cruiseMode
     property string regStatut: S.UiState.cruiseStatus
 

@@ -170,7 +170,7 @@ Item {
                     font.bold: true
                 }
                 Text {
-                    text: Math.round(S.UiState.cruiseTarget).toString()
+                    text: Math.round(S.UiState.toSpeed(S.UiState.cruiseTarget)).toString()
                     color: "#FFFFFF"
                     font.family: "Courier New, monospace"
                     font.pixelSize: 13

@@ -152,7 +152,7 @@ Item {
                     Repeater {
                         model: [
                             { label: "THROTTLE", value: Math.min(1, S.UiState.throttle / 100), text: S.UiState.fixed(S.UiState.throttle, 0, "0") + " %", color: T.StyleManager.accent },
-                            { label: "LONG. ACCELERATION", value: Math.min(1, Math.abs(S.UiState.longitudinalG)), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0,00") + " G", color: "#FFB84D" }
+                            { label: "LONG. ACCELERATION", value: Math.min(1, Math.abs(S.UiState.longitudinalG)), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0.00") + " G", color: "#FFB84D" }
                         ]
                         delegate: Rectangle {
                             Layout.fillWidth: true
@@ -189,13 +189,13 @@ Item {
                     Column {
                         Layout.fillWidth: true
                         spacing: -5
-                        Text { text: S.UiState.fixed(S.UiState.instantCons, 1, "—"); color: S.UiState.instantCons > 14 ? "#FFB84D" : "#54E3A5"; font.pixelSize: 72; font.weight: Font.Black; font.letterSpacing: -3 }
-                        Text { text: "L/100 KM INSTANT"; color: "#AABACA"; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.4 }
+                        Text { text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.instantCons), 1, "—"); color: S.UiState.instantCons > 14 ? "#FFB84D" : "#54E3A5"; font.pixelSize: 72; font.weight: Font.Black; font.letterSpacing: -3 }
+                        Text { text: S.UiState.imperial ? "MPG INSTANT" : "L/100 KM INSTANT"; color: "#AABACA"; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.4 }
                     }
                     Column {
                         Layout.alignment: Qt.AlignRight
                         spacing: 6
-                        Text { anchors.right: parent.right; text: S.UiState.fixed(S.UiState.avgConsB, 1, "—"); color: "#FFFFFF"; font.pixelSize: 32; font.bold: true }
+                        Text { anchors.right: parent.right; text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "—"); color: "#FFFFFF"; font.pixelSize: 32; font.bold: true }
                         Text { anchors.right: parent.right; text: "AVERAGE B"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.2 }
                     }
                 }
@@ -214,9 +214,9 @@ Item {
 
                     Repeater {
                         model: [
-                            { label: "DISTANCE", value: S.UiState.fixed(S.UiState.tripDistance, 1, "0"), unit: "km" },
+                            { label: "DISTANCE", value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0"), unit: S.UiState.distanceUnit },
                             { label: "AVG. RPM", value: Math.round(S.UiState.avgRpm), unit: "rpm" },
-                            { label: "COASTING DECEL.", value: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0"), unit: "km" },
+                            { label: "COASTING DECEL.", value: S.UiState.fixed(S.UiState.toDistance(S.UiState.decelerationWithoutThrottleKm), 1, "0"), unit: S.UiState.distanceUnit },
                             { label: "AGGRESSIVENESS", value: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0"), unit: "%" }
                         ]
                         delegate: Rectangle {

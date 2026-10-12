@@ -169,7 +169,7 @@ Item {
             }
 
             Text {
-                text: tickInstDelegate.tickVal
+                text: S.UiState.imperial ? Math.round(S.UiState.toConsumption(tickInstDelegate.tickVal)) : tickInstDelegate.tickVal
                 visible: tickInstDelegate.tickVal !== 0
                 color: Theme.textDimmed
                 font.pixelSize: 18
@@ -188,7 +188,7 @@ Item {
         spacing: 0
 
         Text {
-            text: Math.min(gaugeRoot.smoothInstCons, 99.9).toFixed(1)
+            text: Math.min(S.UiState.toConsumption(gaugeRoot.smoothInstCons), 99.9).toFixed(1)
             color: Theme.textMain
             font.pixelSize: 20
             font.bold: true
@@ -197,7 +197,7 @@ Item {
         }
 
         Text {
-            text: "L/100"
+            text: S.UiState.consumptionUnit
             color: Theme.textDimmed
             font.pixelSize: 10
             font.family: "Arial"
