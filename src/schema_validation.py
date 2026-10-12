@@ -53,7 +53,7 @@ def validate_theme_manifest(payload: object, folder_name: str | None = None,
     if not isinstance(payload, dict):
         return errors
     if folder_name and payload.get("id") != folder_name:
-        errors.append(f"id: doit correspondre au dossier '{folder_name}'")
+        errors.append(f"id: must match the folder '{folder_name}'")
     dashboard = payload.get("dashboard")
     if theme_dir is not None and isinstance(dashboard, str):
         root = Path(theme_dir).resolve()
@@ -61,10 +61,10 @@ def validate_theme_manifest(payload: object, folder_name: str | None = None,
         try:
             candidate.relative_to(root)
         except ValueError:
-            errors.append("dashboard: doit rester dans le dossier du thème")
+            errors.append("dashboard: must stay inside the theme folder")
         else:
             if not candidate.is_file():
-                errors.append(f"dashboard: fichier introuvable ({dashboard})")
+                errors.append(f"dashboard: file not found ({dashboard})")
     return errors
 
 
@@ -78,7 +78,7 @@ def validate_vehicle_config(payload: object, available_themes: set[str] | None =
         maximum = tachometer.get("max_rpm")
         redline = tachometer.get("redline_rpm")
         if _greater(redline, maximum):
-            errors.append("tachometer.redline_rpm: doit être inférieur ou égal à tachometer.max_rpm")
+            errors.append("tachometer.redline_rpm: must be less than or equal to tachometer.max_rpm")
 
     temperature = payload.get("engine_temp")
     if isinstance(temperature, dict):
@@ -86,24 +86,24 @@ def validate_vehicle_config(payload: object, available_themes: set[str] | None =
         present = [(name, value) for name, value in ordered if _numbers(value)]
         for (left_name, left), (right_name, right) in zip(present, present[1:]):
             if _greater(left, right):
-                errors.append(f"engine_temp.{right_name}: doit être supérieur ou égal à engine_temp.{left_name}")
+                errors.append(f"engine_temp.{right_name}: must be greater than or equal to engine_temp.{left_name}")
 
     revision = payload.get("maintenance", {}).get("revision") if isinstance(payload.get("maintenance"), dict) else None
     if isinstance(revision, dict):
         interval = revision.get("interval_km")
         warning = revision.get("warning_threshold_km")
         if _greater(warning, interval):
-            errors.append("maintenance.revision.warning_threshold_km: doit être inférieur ou égal à interval_km")
+            errors.append("maintenance.revision.warning_threshold_km: must be less than or equal to interval_km")
 
     consumption = payload.get("instant_fuel_consumption")
     if isinstance(consumption, dict):
         minimum, maximum = consumption.get("min_display"), consumption.get("max_display")
         if _greater(minimum, maximum):
-            errors.append("instant_fuel_consumption.max_display: doit être supérieur ou égal à min_display")
+            errors.append("instant_fuel_consumption.max_display: must be greater than or equal to min_display")
 
     style = payload.get("ui", {}).get("visual_style") if isinstance(payload.get("ui"), dict) else None
     if available_themes is not None and isinstance(style, str) and style not in available_themes:
-        errors.append(f"ui.visual_style: thème introuvable dans le catalogue ({style})")
+        errors.append(f"ui.visual_style: theme not found in the catalog ({style})")
     return errors
 
 
@@ -122,7 +122,7 @@ def validate_can_dictionary(payload: object) -> list[str]:
         except ValueError:
             continue
         if not 0 <= numeric_id <= 0x1FFFFFFF:
-            errors.append(f"{frame_id}: identifiant hors plage CAN (0x0–0x1FFFFFFF)")
+            errors.append(f"{frame_id}: identifier outside the CAN range (0x0–0x1FFFFFFF)")
         if not isinstance(frame, dict) or not isinstance(frame.get("signals"), dict):
             continue
         for signal_name, signal in frame["signals"].items():
@@ -132,28 +132,28 @@ def validate_can_dictionary(payload: object) -> list[str]:
             start, size = signal.get("start_byte"), signal.get("size", 1)
             if isinstance(start, int) and not isinstance(start, bool) and isinstance(size, int) and not isinstance(size, bool):
                 if start + size > 8:
-                    errors.append(f"{prefix}.size: le signal dépasse les 8 octets de la trame")
+                    errors.append(f"{prefix}.size: the signal exceeds the 8-byte frame")
                 width = size * 8
                 shift = signal.get("shift")
                 if isinstance(shift, int) and not isinstance(shift, bool) and shift >= width:
-                    errors.append(f"{prefix}.shift: doit être inférieur à la largeur du signal ({width})")
+                    errors.append(f"{prefix}.shift: must be less than the signal width ({width})")
                 mask = signal.get("mask")
                 try:
                     mask_value = int(mask, 16) if isinstance(mask, str) else mask
                     if isinstance(mask_value, int) and not isinstance(mask_value, bool) and mask_value >= (1 << width):
-                        errors.append(f"{prefix}.mask: dépasse la largeur du signal ({width} bits)")
+                        errors.append(f"{prefix}.mask: exceeds the signal width ({width} bits)")
                 except ValueError:
                     pass
                 bits = signal.get("bits")
                 if isinstance(bits, dict):
                     positions = [value for value in bits.values() if isinstance(value, int) and not isinstance(value, bool)]
                     if len(positions) != len(set(positions)):
-                        errors.append(f"{prefix}.bits: positions de bits dupliquées")
+                        errors.append(f"{prefix}.bits: duplicate bit positions")
                     for bit_name, position in bits.items():
                         if isinstance(position, int) and not isinstance(position, bool) and position >= width:
-                            errors.append(f"{prefix}.bits.{bit_name}: doit être inférieur à {width}")
+                            errors.append(f"{prefix}.bits.{bit_name}: must be less than {width}")
     if frame_count == 0:
-        errors.append("$: aucune trame CAN déclarée")
+        errors.append("$: no CAN frame declared")
     return errors
 
 
@@ -164,7 +164,7 @@ def validate_profile_catalog(payload: object) -> list[str]:
     profiles = payload.get("profiles")
     active = payload.get("active_profile")
     if isinstance(profiles, dict) and active not in profiles:
-        errors.append(f"active_profile: profil introuvable ({active})")
+        errors.append(f"active_profile: profile not found ({active})")
     return errors
 
 
@@ -184,7 +184,7 @@ def validate_profile_references(payload: object, config_dir: str | Path, can_dir
         for key, root in (("config_file", config_root), ("can_file", can_root)):
             filename = profile.get(key)
             if isinstance(filename, str) and JSON_NAME.fullmatch(filename) and not (root / filename).is_file():
-                errors.append(f"profiles.{profile_id}.{key}: fichier introuvable ({filename})")
+                errors.append(f"profiles.{profile_id}.{key}: file not found ({filename})")
         config_name = profile.get("config_file")
         if isinstance(config_name, str) and JSON_NAME.fullmatch(config_name) and (config_root / config_name).is_file():
             try:

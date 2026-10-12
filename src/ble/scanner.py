@@ -85,8 +85,8 @@ class BleScanner:
         """
         if not BLEAK_AVAILABLE or BleakScanner is None:
             raise RuntimeError(
-                "La bibliotheque 'bleak' n'est pas installee. "
-                "Installez-la avec : pip install bleak"
+                "The 'bleak' library is not installed. "
+                "Install it with: pip install bleak"
             )
 
         results: list[ScanResult] = []
@@ -120,7 +120,7 @@ class BleScanner:
         Retourne une liste vide si la connexion echoue.
         """
         if not BLEAK_AVAILABLE or BleakClient is None:
-            raise RuntimeError("La bibliotheque 'bleak' n'est pas installee.")
+            raise RuntimeError("The 'bleak' library is not installed.")
 
         chars: list[GattCharInfo] = []
         try:

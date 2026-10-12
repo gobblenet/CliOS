@@ -213,7 +213,7 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: "ATTENTION  ·  COMMANDES LIMITÉES EN CONDUITE"
+            text: "CAUTION  ·  CONTROLS LIMITED WHILE DRIVING"
             color: "#FFD17D"
             font.pixelSize: 13; font.weight: Font.Bold
             font.letterSpacing: 1.2

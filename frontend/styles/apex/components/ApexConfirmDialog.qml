@@ -9,9 +9,9 @@ Item {
     signal accepted()
     signal rejected()
 
-    property string title:      "Confirmer"
+    property string title:      "Confirm"
     property string message:    ""
-    property string acceptText: "CONFIRMER"
+    property string acceptText: "CONFIRM"
     property bool   dangerous:  false
 
     anchors.fill: parent
@@ -85,7 +85,7 @@ Item {
                     color: Qt.rgba(1, 1, 1, 0.06)
                     border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.12)
                     Text {
-                        anchors.centerIn: parent; text: "ANNULER"
+                        anchors.centerIn: parent; text: "CANCEL"
                         color: Qt.rgba(1, 1, 1, 0.5)
                         font.pixelSize: 14; font.weight: Font.Bold; font.letterSpacing: 2
                     }

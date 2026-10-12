@@ -34,7 +34,7 @@ def validate(path: Path, kind: str) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--all", action="store_true", help="valider toutes les données officielles")
+    parser.add_argument("--all", action="store_true", help="validate all official data")
     parser.add_argument("--theme", type=Path)
     parser.add_argument("--vehicle", type=Path)
     parser.add_argument("--can", dest="can_path", type=Path)
@@ -50,7 +50,7 @@ def main() -> int:
         if path:
             jobs.append((path, kind))
     if not jobs:
-        parser.error("utilisez --all ou indiquez un fichier")
+        parser.error("use --all or specify a file")
     failed = False
     for path, kind in jobs:
         errors = validate(path, kind)
@@ -64,7 +64,7 @@ def main() -> int:
             )
         if errors:
             failed = True
-            print(f"ERREUR {path}: " + " | ".join(errors))
+            print(f"ERROR {path}: " + " | ".join(errors))
         else:
             print(f"OK {path}")
     return 1 if failed else 0

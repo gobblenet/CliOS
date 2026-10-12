@@ -6,8 +6,8 @@ import "../style" as T
 import "../state" as S
 import "../state/SignalCatalog.js" as Catalog
 
-// Surveillance plein écran : n'importe quel signal runtime en tuiles,
-// avec seuils d'alarme. La sélection est enregistrée dans ui.live_tiles.
+// Full-screen monitoring: any runtime signal as tiles, with alarm
+// limits. The selection is saved in ui.live_tiles.
 Item {
     id: root
     objectName: "liveDataPage"
@@ -74,30 +74,30 @@ Item {
             Button { Layout.preferredWidth: 190; Layout.fillHeight: true; text: "‹ COCKPIT"; primary: true; onClicked: root.cockpitRequested() }
             ColumnLayout {
                 Layout.fillWidth: true; spacing: 2
-                Text { text: "DONNÉES VÉHICULE"; color: T.StyleManager.text; font.pixelSize: 24; font.bold: true; font.letterSpacing: 2 }
+                Text { text: "VEHICLE DATA"; color: T.StyleManager.text; font.pixelSize: 24; font.bold: true; font.letterSpacing: 2 }
                 Text {
                     objectName: "obdStatusText"
-                    text: S.UiState.obdConnected ? "OBD-II connecté · " + S.UiState.obdInterface
-                                                 : "OBD-II non connecté — signaux CAN, GPS et système seulement"
+                    text: S.UiState.obdConnected ? "OBD-II connected · " + S.UiState.obdInterface
+                                                 : "OBD-II not connected — CAN, GPS and system signals only"
                     color: S.UiState.obdConnected ? T.StyleManager.success : T.StyleManager.warning
                     font.pixelSize: 14; font.bold: true
                 }
             }
             Text {
                 visible: S.UiState.liveAlarms.length > 0
-                text: "⚠ " + S.UiState.liveAlarms.length + " ALARME" + (S.UiState.liveAlarms.length > 1 ? "S" : "")
+                text: "⚠ " + S.UiState.liveAlarms.length + " ALARM" + (S.UiState.liveAlarms.length > 1 ? "S" : "")
                 color: T.StyleManager.danger; font.pixelSize: 20; font.bold: true
             }
             Button {
                 Layout.preferredWidth: 220; Layout.fillHeight: true
-                text: "RÉINITIALISER"; subtext: "Tableau par défaut"
+                text: "RESET"; subtext: "Default layout"
                 visible: root.editing
                 onClicked: root.save(Catalog.defaultTiles)
             }
             Button {
                 objectName: "liveEditButton"
                 Layout.preferredWidth: 190; Layout.fillHeight: true
-                text: root.editing ? "TERMINÉ" : "MODIFIER"; primary: root.editing
+                text: root.editing ? "DONE" : "EDIT"; primary: root.editing
                 onClicked: root.editing = !root.editing
             }
         }
@@ -127,7 +127,7 @@ Item {
                     radius: T.StyleManager.radiusMedium
                     color: addTouch.pressed ? T.StyleManager.accentSoft : "transparent"
                     border.width: 2; border.color: T.StyleManager.accent
-                    Text { anchors.centerIn: parent; text: "+ AJOUTER UN SIGNAL"; color: T.StyleManager.accent; font.pixelSize: 20; font.bold: true }
+                    Text { anchors.centerIn: parent; text: "+ ADD A SIGNAL"; color: T.StyleManager.accent; font.pixelSize: 20; font.bold: true }
                     MouseArea { id: addTouch; anchors.fill: parent; onClicked: { root.filter = ""; root.pickerOpen = true } }
                 }
             }
@@ -135,13 +135,13 @@ Item {
 
         Text {
             Layout.fillWidth: true
-            text: root.editing ? "◀ ▶ déplacer · ✎ seuils d'alarme · ✕ retirer"
-                               : "Appui long : seuils · double-clic : remettre min/max à zéro · Ctrl+D : afficher/masquer"
+            text: root.editing ? "◀ ▶ move · ✎ alarm limits · ✕ remove"
+                               : "Long press: limits · double-click: reset min/max · Ctrl+D: show/hide"
             color: T.StyleManager.textSecondary; font.pixelSize: 13
         }
     }
 
-    // ── Sélecteur de signal ──────────────────────────────────────────────────
+    // ── Signal picker ──────────────────────────────────────────────────
     Rectangle {
         objectName: "signalPicker"
         visible: root.pickerOpen
@@ -158,16 +158,16 @@ Item {
                 anchors.fill: parent; anchors.margins: 18; spacing: 10
                 RowLayout {
                     Layout.fillWidth: true; spacing: 12
-                    Text { text: "AJOUTER UN SIGNAL"; color: T.StyleManager.text; font.pixelSize: 22; font.bold: true }
+                    Text { text: "ADD A SIGNAL"; color: T.StyleManager.text; font.pixelSize: 22; font.bold: true }
                     QC.TextField {
                         id: filterField
                         Layout.fillWidth: true
-                        placeholderText: "Filtrer (ex. température, rpm, obd)…"
+                        placeholderText: "Filter (e.g. temperature, rpm, obd)…"
                         text: root.filter
                         onTextChanged: root.filter = text
                         focus: root.pickerOpen
                     }
-                    Button { Layout.preferredWidth: 140; Layout.preferredHeight: 48; text: "FERMER"; onClicked: root.pickerOpen = false }
+                    Button { Layout.preferredWidth: 140; Layout.preferredHeight: 48; text: "CLOSE"; onClicked: root.pickerOpen = false }
                 }
                 ListView {
                     Layout.fillWidth: true; Layout.fillHeight: true
@@ -190,7 +190,7 @@ Item {
         }
     }
 
-    // ── Seuils d'alarme ──────────────────────────────────────────────────────
+    // ── Alarm limits ──────────────────────────────────────────────────────
     Rectangle {
         id: limitsEditor
         objectName: "limitsEditor"
@@ -212,24 +212,24 @@ Item {
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 22; spacing: 14
                 Text {
-                    text: "SEUILS — " + Catalog.label(limitsEditor.current.domain, limitsEditor.current.key).toUpperCase()
+                    text: "LIMITS — " + Catalog.label(limitsEditor.current.domain, limitsEditor.current.key).toUpperCase()
                     color: T.StyleManager.text; font.pixelSize: 21; font.bold: true
                     Layout.fillWidth: true; elide: Text.ElideRight
                 }
-                Text { text: "Laisser vide pour désactiver une borne. L'alarme s'affiche sur tous les écrans."; color: T.StyleManager.textSecondary; font.pixelSize: 14; Layout.fillWidth: true; wrapMode: Text.WordWrap }
+                Text { text: "Leave a field empty to disable that limit. The alarm shows on every screen."; color: T.StyleManager.textSecondary; font.pixelSize: 14; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                 GridLayout {
                     columns: 2; columnSpacing: 14; rowSpacing: 10; Layout.fillWidth: true
-                    Text { text: "Alarme si inférieur à"; color: T.StyleManager.text; font.pixelSize: 17 }
+                    Text { text: "Alarm if below"; color: T.StyleManager.text; font.pixelSize: 17 }
                     QC.TextField { id: lowField; objectName: "lowLimitField"; Layout.fillWidth: true; inputMethodHints: Qt.ImhFormattedNumbersOnly }
-                    Text { text: "Alarme si supérieur à"; color: T.StyleManager.text; font.pixelSize: 17 }
+                    Text { text: "Alarm if above"; color: T.StyleManager.text; font.pixelSize: 17 }
                     QC.TextField { id: highField; objectName: "highLimitField"; Layout.fillWidth: true; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                 }
                 Item { Layout.fillHeight: true }
                 RowLayout {
                     Layout.fillWidth: true; spacing: 12
-                    Button { Layout.fillWidth: true; Layout.preferredHeight: 56; text: "ANNULER"; onClicked: root.editIndex = -1 }
+                    Button { Layout.fillWidth: true; Layout.preferredHeight: 56; text: "CANCEL"; onClicked: root.editIndex = -1 }
                     Button {
-                        Layout.fillWidth: true; Layout.preferredHeight: 56; text: "ENREGISTRER"; primary: true
+                        Layout.fillWidth: true; Layout.preferredHeight: 56; text: "SAVE"; primary: true
                         onClicked: { root.setLimits(root.editIndex, lowField.text, highField.text); root.editIndex = -1 }
                     }
                 }

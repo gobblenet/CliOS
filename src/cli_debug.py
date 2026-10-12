@@ -14,7 +14,7 @@ def ui_loop(runtime, stop_event):
         populated_domains = {name: values for name, values in snapshot.domains.items() if values}
 
         if not populated_domains:
-            print("\nEn attente du flux de donnees...")
+            print("\nWaiting for the data stream...")
         else:
             for domain, values in populated_domains.items():
                 print(f"\n[{domain}]")
@@ -26,5 +26,5 @@ def ui_loop(runtime, stop_event):
                         val = f"{val:.3f}"
                     print(f" {key:<25} : {val}")
 
-        print("\n[Ctrl+C pour interrompre le processus]")
+        print("\n[Ctrl+C to stop the process]")
         stop_event.wait(0.1)

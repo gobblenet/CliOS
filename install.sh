@@ -80,9 +80,9 @@ print_banner() {
  | |___| | | |_| |___) |
   \____|_|_|\___/|____/ 
 EOF
-    echo -e "${C_RESET}${C_WHITE}${C_BOLD} Tableau de Bord Automobile Modulaire${C_RESET}"
-    echo -e "${C_DIM} Assistant d'installation & configuration système${C_RESET}"
-    echo -e "${C_DIM} Dossier cible : ${PROJECT_DIR}${C_RESET}"
+    echo -e "${C_RESET}${C_WHITE}${C_BOLD} Modular Automotive Dashboard${C_RESET}"
+    echo -e "${C_DIM} Installation & system setup assistant${C_RESET}"
+    echo -e "${C_DIM} Target folder: ${PROJECT_DIR}${C_RESET}"
     echo -e "${C_CYAN}══════════════════════════════════════════════════════════════════${C_RESET}\n"
 }
 
@@ -104,7 +104,7 @@ log_warn() {
 }
 
 log_error() {
-    echo -e " ${C_RED}✗ ERREUR :${C_RESET} $1" >&2
+    echo -e " ${C_RED}✗ ERROR:${C_RESET} $1" >&2
 }
 
 log_dry() {
@@ -118,7 +118,7 @@ run_cmd() {
     local cmd_desc="$1"
     shift
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_dry "Commande simulée : $*"
+        log_dry "Simulated command: $*"
         return 0
     fi
     log_info "$cmd_desc"
@@ -129,7 +129,7 @@ run_sudo_cmd() {
     local cmd_desc="$1"
     shift
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_dry "Commande sudo simulée : sudo $*"
+        log_dry "Simulated sudo command: sudo $*"
         return 0
     fi
     log_info "$cmd_desc"
@@ -144,7 +144,7 @@ run_target_cmd() {
     local cmd_desc="$1"
     shift
     if [[ $DRY_RUN -eq 1 ]]; then
-        log_dry "Commande utilisateur simulée : $*"
+        log_dry "Simulated user command: $*"
         return 0
     fi
     log_info "$cmd_desc"
@@ -161,7 +161,7 @@ safe_systemctl() {
     if command -v systemctl &>/dev/null; then
         run_sudo_cmd "$action_desc" systemctl "$@"
     else
-        log_info "systemctl non disponible dans cet environnement (${action_desc} ignoré)."
+        log_info "systemctl not available in this environment (${action_desc} skipped)."
     fi
 }
 
@@ -176,9 +176,9 @@ systemd_unit_exists() {
 disable_systemd_unit_if_present() {
     local unit="$1"
     if systemd_unit_exists "$unit"; then
-        safe_systemctl "Désactivation de ${unit}" disable "$unit" 2>/dev/null || true
+        safe_systemctl "Disabling ${unit}" disable "$unit" 2>/dev/null || true
     else
-        log_info "${unit} absent : aucune action nécessaire."
+        log_info "${unit} not present: nothing to do."
     fi
 }
 
@@ -188,7 +188,7 @@ safe_udevadm() {
     if command -v udevadm &>/dev/null; then
         run_sudo_cmd "$action_desc" udevadm "$@"
     else
-        log_info "udevadm non disponible dans cet environnement (${action_desc} ignoré)."
+        log_info "udevadm not available in this environment (${action_desc} skipped)."
     fi
 }
 
@@ -198,16 +198,16 @@ backup_system_file() {
         local timestamp
         timestamp=$(date +"%Y%m%d_%H%M%S")
         local backup_path="${file_path}.bak_${timestamp}"
-        log_warn "Fichier existant détecté : ${file_path}"
+        log_warn "Existing file detected: ${file_path}"
         if [[ $DRY_RUN -eq 1 ]]; then
-            log_dry "Sauvegarde simulée : ${file_path} -> ${backup_path}"
+            log_dry "Simulated backup: ${file_path} -> ${backup_path}"
         else
             if [[ $EUID -eq 0 ]]; then
                 cp "$file_path" "$backup_path"
             else
                 sudo cp "$file_path" "$backup_path"
             fi
-            log_success "Sauvegarde créée : ${backup_path}"
+            log_success "Backup created: ${backup_path}"
         fi
     fi
 }
@@ -224,8 +224,8 @@ install_release_tree() {
     source_device="$(stat -c %d "$VENV_DIR")"
     target_device="$(stat -c %d "$release_parent")"
     if [[ "$source_device" != "$target_device" ]]; then
-        log_error "Le projet et ${release_parent} doivent être sur le même système de fichiers pour transférer le .venv sans copie."
-        log_error "Copiez d'abord CliOS dans /home/${CURRENT_USER}, puis relancez install.sh."
+        log_error "The project and ${release_parent} must be on the same filesystem to move the .venv without copying."
+        log_error "First copy CliOS to /home/${CURRENT_USER}, then run install.sh again."
         return 1
     fi
 
@@ -243,66 +243,66 @@ install_release_tree() {
         --exclude='.DS_Store' \
         -C "$PROJECT_DIR" -cf "$source_archive" .; then
         rm -f "$source_archive"
-        log_error "Impossible de préparer les fichiers de la release."
+        log_error "Could not prepare the release files."
         return 1
     fi
 
-    run_sudo_cmd "Nettoyage du staging de release" rm -rf "$staging_dir" "$previous_dir"
-    run_sudo_cmd "Création du staging de release" mkdir -p "$staging_dir"
-    if ! run_sudo_cmd "Installation du code de la release" tar -C "$staging_dir" -xf "$source_archive"; then
+    run_sudo_cmd "Cleaning up release staging" rm -rf "$staging_dir" "$previous_dir"
+    run_sudo_cmd "Creating release staging" mkdir -p "$staging_dir"
+    if ! run_sudo_cmd "Installing the release code" tar -C "$staging_dir" -xf "$source_archive"; then
         rm -f "$source_archive"
-        run_sudo_cmd "Nettoyage du staging incomplet" rm -rf "$staging_dir"
+        run_sudo_cmd "Cleaning up incomplete staging" rm -rf "$staging_dir"
         return 1
     fi
     rm -f "$source_archive"
 
     # /home et /opt partagent normalement la partition racine. Un renommage ne
     # relit pas les gros fichiers Qt et conserve un environnement isolé par release.
-    if ! run_sudo_cmd "Transfert de l'environnement Python vers la release" mv "$VENV_DIR" "${staging_dir}/.venv"; then
-        run_sudo_cmd "Nettoyage du staging incomplet" rm -rf "$staging_dir"
+    if ! run_sudo_cmd "Moving the Python environment into the release" mv "$VENV_DIR" "${staging_dir}/.venv"; then
+        run_sudo_cmd "Cleaning up incomplete staging" rm -rf "$staging_dir"
         return 1
     fi
 
     # Actualise pyvenv.cfg et les lanceurs standards après le changement de chemin.
-    if ! run_sudo_cmd "Actualisation du chemin de l'environnement Python" \
+    if ! run_sudo_cmd "Updating the Python environment path" \
         "$PYTHON_BIN" -m venv --upgrade "${staging_dir}/.venv"; then
-        run_sudo_cmd "Restauration de l'environnement Python source" mv "${staging_dir}/.venv" "$VENV_DIR"
-        run_sudo_cmd "Nettoyage du staging incomplet" rm -rf "$staging_dir"
+        run_sudo_cmd "Restoring the source Python environment" mv "${staging_dir}/.venv" "$VENV_DIR"
+        run_sudo_cmd "Cleaning up incomplete staging" rm -rf "$staging_dir"
         return 1
     fi
 
-    if ! run_target_cmd "Self-check Python de la release" \
+    if ! run_target_cmd "Release Python self-check" \
         "${staging_dir}/.venv/bin/python3" -c "import PySide6, numpy, psutil, can, serial, pyudev"; then
-        run_sudo_cmd "Restauration de l'environnement Python source" mv "${staging_dir}/.venv" "$VENV_DIR"
-        run_sudo_cmd "Nettoyage du staging incomplet" rm -rf "$staging_dir"
+        run_sudo_cmd "Restoring the source Python environment" mv "${staging_dir}/.venv" "$VENV_DIR"
+        run_sudo_cmd "Cleaning up incomplete staging" rm -rf "$staging_dir"
         return 1
     fi
-    if ! run_sudo_cmd "Précompilation Python pour le premier démarrage" \
+    if ! run_sudo_cmd "Python precompilation for first start" \
         "${staging_dir}/.venv/bin/python3" -m compileall -q \
         "${staging_dir}/main.py" "${staging_dir}/src" "${staging_dir}/tools"; then
-        run_sudo_cmd "Restauration de l'environnement Python source" mv "${staging_dir}/.venv" "$VENV_DIR"
-        run_sudo_cmd "Nettoyage du staging incomplet" rm -rf "$staging_dir"
+        run_sudo_cmd "Restoring the source Python environment" mv "${staging_dir}/.venv" "$VENV_DIR"
+        run_sudo_cmd "Cleaning up incomplete staging" rm -rf "$staging_dir"
         return 1
     fi
-    if [[ -f "${staging_dir}/tools/qml_smoke.py" ]] && ! run_target_cmd "Self-check QML de la release" \
+    if [[ -f "${staging_dir}/tools/qml_smoke.py" ]] && ! run_target_cmd "Release QML self-check" \
         env QT_QPA_PLATFORM=minimal QT_QUICK_BACKEND=software QSG_RENDER_LOOP=basic \
         "${staging_dir}/.venv/bin/python3" "${staging_dir}/tools/qml_smoke.py" --validate-only; then
-        run_sudo_cmd "Restauration de l'environnement Python source" mv "${staging_dir}/.venv" "$VENV_DIR"
-        run_sudo_cmd "Nettoyage du staging incomplet" rm -rf "$staging_dir"
+        run_sudo_cmd "Restoring the source Python environment" mv "${staging_dir}/.venv" "$VENV_DIR"
+        run_sudo_cmd "Cleaning up incomplete staging" rm -rf "$staging_dir"
         return 1
     fi
 
     if [[ -e "$release_dir" || -L "$release_dir" ]]; then
-        run_sudo_cmd "Mise à l'écart de la release incomplète ou précédente" mv "$release_dir" "$previous_dir"
+        run_sudo_cmd "Setting aside the incomplete or previous release" mv "$release_dir" "$previous_dir"
     fi
-    if ! run_sudo_cmd "Validation atomique de la release" mv "$staging_dir" "$release_dir"; then
+    if ! run_sudo_cmd "Atomic release validation" mv "$staging_dir" "$release_dir"; then
         if [[ -e "$previous_dir" || -L "$previous_dir" ]]; then
-            run_sudo_cmd "Restauration de la release précédente" mv "$previous_dir" "$release_dir"
+            run_sudo_cmd "Restoring the previous release" mv "$previous_dir" "$release_dir"
         fi
         return 1
     fi
-    run_sudo_cmd "Nettoyage de l'installation précédente" rm -rf "$previous_dir" \
-        || log_warn "L'ancien staging ${previous_dir} devra être supprimé manuellement."
+    run_sudo_cmd "Cleaning up the previous installation" rm -rf "$previous_dir" \
+        || log_warn "The old staging ${previous_dir} must be removed manually."
 }
 
 prompt_confirm() {
@@ -314,9 +314,9 @@ prompt_confirm() {
 
     local prompt_text
     if [[ "$default" =~ ^[Yy]$ ]]; then
-        prompt_text="${C_BOLD}${message}${C_RESET} [O/n] : "
+        prompt_text="${C_BOLD}${message}${C_RESET} [Y/n]: "
     else
-        prompt_text="${C_BOLD}${message}${C_RESET} [o/N] : "
+        prompt_text="${C_BOLD}${message}${C_RESET} [y/N]: "
     fi
 
     while true; do
@@ -330,7 +330,7 @@ prompt_confirm() {
                 return 1
                 ;;
             *)
-                echo -e " ${C_YELLOW}Veuillez répondre par 'o' (oui) ou 'n' (non).${C_RESET}"
+                echo -e " ${C_YELLOW}Please answer 'y' (yes) or 'n' (no).${C_RESET}"
                 ;;
         esac
     done
@@ -341,57 +341,57 @@ prompt_confirm() {
 # ------------------------------------------------------------------------------
 do_uninstall() {
     print_banner
-    log_step "DÉSINSTALLATION" "Suppression des services et configurations système"
+    log_step "UNINSTALL" "Removing system services and configuration"
 
-    if prompt_confirm "Voulez-vous désactiver et supprimer les services CliOS de /etc/systemd et /etc/udev ?" "N"; then
-        safe_systemctl "Arrêt des montages USB CliOS" stop "clios-usb-mount@*.service" 2>/dev/null || true
+    if prompt_confirm "Disable and remove the CliOS services from /etc/systemd and /etc/udev?" "N"; then
+        safe_systemctl "Stopping CliOS USB mounts" stop "clios-usb-mount@*.service" 2>/dev/null || true
         local services=("clios.service" "clios-updater.service" "clios-updater.socket" "clios-usb-mount@.service" "can-usb.service" "can-wake.service" "slcan.service")
         for srv in "${services[@]}"; do
             if [[ -f "${SYSTEMD_DIR}/${srv}" ]]; then
-                log_info "Désactivation du service ${srv}..."
-                safe_systemctl "Arrêt et désactivation de ${srv}" disable --now "${srv}" 2>/dev/null || true
-                run_sudo_cmd "Suppression de ${SYSTEMD_DIR}/${srv}" rm -f "${SYSTEMD_DIR}/${srv}"
-                log_success "Service ${srv} supprimé."
+                log_info "Disabling service ${srv}..."
+                safe_systemctl "Stopping and disabling ${srv}" disable --now "${srv}" 2>/dev/null || true
+                run_sudo_cmd "Removing ${SYSTEMD_DIR}/${srv}" rm -f "${SYSTEMD_DIR}/${srv}"
+                log_success "Service ${srv} removed."
             fi
         done
 
         if [[ -f "${UDEV_RULES_DIR}/99-slcan.rules" ]]; then
-            run_sudo_cmd "Suppression de ${UDEV_RULES_DIR}/99-slcan.rules" rm -f "${UDEV_RULES_DIR}/99-slcan.rules"
-            log_success "Règles udev supprimées."
+            run_sudo_cmd "Removing ${UDEV_RULES_DIR}/99-slcan.rules" rm -f "${UDEV_RULES_DIR}/99-slcan.rules"
+            log_success "udev rules removed."
         fi
 
         if [[ -f "${UDEV_RULES_DIR}/90-clios-usb-storage.rules" ]]; then
-            run_sudo_cmd "Suppression de ${UDEV_RULES_DIR}/90-clios-usb-storage.rules" rm -f "${UDEV_RULES_DIR}/90-clios-usb-storage.rules"
-            log_success "Règle de stockage USB supprimée."
+            run_sudo_cmd "Removing ${UDEV_RULES_DIR}/90-clios-usb-storage.rules" rm -f "${UDEV_RULES_DIR}/90-clios-usb-storage.rules"
+            log_success "USB storage rule removed."
         fi
 
         if [[ -f "${LOCAL_LIBEXEC_DIR}/clios-usb-mount" ]]; then
-            run_sudo_cmd "Suppression du helper de montage USB" rm -f "${LOCAL_LIBEXEC_DIR}/clios-usb-mount"
+            run_sudo_cmd "Removing the USB mount helper" rm -f "${LOCAL_LIBEXEC_DIR}/clios-usb-mount"
         fi
 
         if [[ -f "${SUDOERS_DIR}/clios-overlayfs" ]]; then
-            run_sudo_cmd "Suppression de l'autorisation OverlayFS" rm -f "${SUDOERS_DIR}/clios-overlayfs"
+            run_sudo_cmd "Removing the OverlayFS permission" rm -f "${SUDOERS_DIR}/clios-overlayfs"
         fi
 
         if [[ -f "${POLKIT_RULES_DIR}/49-clios-power.rules" ]]; then
-            run_sudo_cmd "Suppression de la règle Polkit CliOS" rm -f "${POLKIT_RULES_DIR}/49-clios-power.rules"
+            run_sudo_cmd "Removing the CliOS Polkit rule" rm -f "${POLKIT_RULES_DIR}/49-clios-power.rules"
         fi
 
-        safe_systemctl "Rechargement de systemd et udev" daemon-reload
-        safe_udevadm "Rechargement des règles udev" control --reload-rules 2>/dev/null || true
-        log_success "Services système nettoyés."
+        safe_systemctl "Reloading systemd and udev" daemon-reload
+        safe_udevadm "Reloading udev rules" control --reload-rules 2>/dev/null || true
+        log_success "System services cleaned up."
     else
-        log_info "Suppression des services système ignorée."
+        log_info "Skipped removing system services."
     fi
 
-    if prompt_confirm "Voulez-vous également supprimer l'environnement Python .venv ?" "N"; then
+    if prompt_confirm "Also remove the Python .venv environment?" "N"; then
         if [[ -d "$VENV_DIR" ]]; then
-            run_cmd "Suppression du dossier .venv" rm -rf "$VENV_DIR"
-            log_success "Dossier .venv supprimé."
+            run_cmd "Removing the .venv folder" rm -rf "$VENV_DIR"
+            log_success "The .venv folder was removed."
         fi
     fi
 
-    echo -e "\n${C_GREEN}${C_BOLD}✓ Désinstallation terminée.${C_RESET}\n"
+    echo -e "\n${C_GREEN}${C_BOLD}✓ Uninstall complete.${C_RESET}\n"
     exit 0
 }
 
@@ -399,19 +399,19 @@ do_uninstall() {
 # 5. Parsing des Arguments
 # ------------------------------------------------------------------------------
 usage() {
-    echo -e "${C_BOLD}Utilisation :${C_RESET} $0 [options]"
+    echo -e "${C_BOLD}Usage:${C_RESET} $0 [options]"
     echo ""
-    echo -e "${C_BOLD}Options :${C_RESET}"
-    echo -e "  ${C_CYAN}-d, --dry-run${C_RESET}         Mode simulation : affiche les actions sans modifier le système"
-    echo -e "  ${C_CYAN}-v, --venv-only${C_RESET}       Configure uniquement le .venv Python (pas d'apt, pas de sudo, pas de systemd)"
-    echo -e "  ${C_CYAN}-y, --yes${C_RESET}             Mode non-interactif : valide automatiquement les choix recommandés"
-    echo -e "  ${C_CYAN}-u, --uninstall${C_RESET}       Désinstalle les services systemd et règles udev de CliOS"
-    echo -e "  ${C_CYAN}-h, --help${C_RESET}            Affiche ce message d'aide"
+    echo -e "${C_BOLD}Options:${C_RESET}"
+    echo -e "  ${C_CYAN}-d, --dry-run${C_RESET}         Dry run: shows the actions without changing the system"
+    echo -e "  ${C_CYAN}-v, --venv-only${C_RESET}       Only set up the Python .venv (no apt, no sudo, no systemd)"
+    echo -e "  ${C_CYAN}-y, --yes${C_RESET}             Non-interactive: accept the recommended choices automatically"
+    echo -e "  ${C_CYAN}-u, --uninstall${C_RESET}       Uninstall the CliOS systemd services and udev rules"
+    echo -e "  ${C_CYAN}-h, --help${C_RESET}            Show this help message"
     echo ""
-    echo -e "${C_BOLD}Exemples :${C_RESET}"
-    echo -e "  $0                  # Installation interactive complète"
-    echo -e "  $0 --dry-run        # Prévisualiser sans rien modifier"
-    echo -e "  $0 --venv-only      # Préparer uniquement Python / développement"
+    echo -e "${C_BOLD}Examples:${C_RESET}"
+    echo -e "  $0                  # Full interactive installation"
+    echo -e "  $0 --dry-run        # Preview without changing anything"
+    echo -e "  $0 --venv-only      # Prepare Python / development only"
     exit 0
 }
 
@@ -437,7 +437,7 @@ while [[ $# -gt 0 ]]; do
             usage
             ;;
         *)
-            log_error "Option inconnue : $1"
+            log_error "Unknown option: $1"
             usage
             ;;
     esac
@@ -453,13 +453,13 @@ fi
 print_banner
 
 if [[ $DRY_RUN -eq 1 ]]; then
-    echo -e "${C_MAGENTA}${C_BOLD}▶ MODE SIMULATION ACTIF (--dry-run) : Aucune modification ne sera écrite.${C_RESET}\n"
+    echo -e "${C_MAGENTA}${C_BOLD}▶ DRY RUN ACTIVE (--dry-run): no changes will be written.${C_RESET}\n"
 fi
 
 # ------------------------------------------------------------------------------
 # ÉTAPE 1 : Détection de l'Environnement
 # ------------------------------------------------------------------------------
-log_step "1/6" "Analyse de l'environnement système"
+log_step "1/6" "Analyzing the system environment"
 
 OS_NAME="$(uname -s)"
 ARCH_NAME="$(uname -m)"
@@ -488,15 +488,15 @@ if [[ "$OS_NAME" == "Linux" && "$ARCH_NAME" == "aarch64" && -f /etc/debian_versi
             EXPECTED_PYTHON_MINOR="3.13"
             ;;
         *)
-            log_error "Version Debian ARM64 non prise en charge : ${VERSION_CODENAME:-inconnue}. Utilisez Bookworm ou Trixie."
+            log_error "Unsupported Debian ARM64 version: ${VERSION_CODENAME:-unknown}. Use Bookworm or Trixie."
             exit 1
             ;;
     esac
 fi
 
-log_info "Système d'exploitation : ${C_BOLD}${DISTRO}${C_RESET} (${OS_NAME} ${ARCH_NAME})"
-log_info "Utilisateur cible     : ${C_BOLD}${CURRENT_USER}${C_RESET}"
-log_info "Répertoire du projet  : ${C_BOLD}${PROJECT_DIR}${C_RESET}"
+log_info "Operating system     : ${C_BOLD}${DISTRO}${C_RESET} (${OS_NAME} ${ARCH_NAME})"
+log_info "Target user          : ${C_BOLD}${CURRENT_USER}${C_RESET}"
+log_info "Project directory    : ${C_BOLD}${PROJECT_DIR}${C_RESET}"
 
 # Détection de Python 3
 find_python_bin() {
@@ -544,19 +544,19 @@ if [[ -n "$PYTHON_BIN" ]]; then
     PY_VER="$($PYTHON_BIN --version 2>&1 | awk '{print $2}')"
     PY_MINOR="$($PYTHON_BIN -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
     if [[ -n "$EXPECTED_PYTHON_MINOR" && "$PY_MINOR" != "$EXPECTED_PYTHON_MINOR" ]]; then
-        log_error "${RELEASE_TARGET} exige Python ${EXPECTED_PYTHON_MINOR}, mais ${PYTHON_BIN} fournit ${PY_MINOR}."
+        log_error "${RELEASE_TARGET} requires Python ${EXPECTED_PYTHON_MINOR}, but ${PYTHON_BIN} provides ${PY_MINOR}."
         exit 1
     fi
-    log_info "Binaire Python détecté : ${C_BOLD}${PYTHON_BIN}${C_RESET} (version ${PY_VER})"
+    log_info "Python binary found  : ${C_BOLD}${PYTHON_BIN}${C_RESET} (version ${PY_VER})"
     if [[ -n "$RELEASE_TARGET" ]]; then
-        log_info "Cible de release      : ${C_BOLD}${RELEASE_TARGET}${C_RESET}"
+        log_info "Release target       : ${C_BOLD}${RELEASE_TARGET}${C_RESET}"
     fi
-    log_success "Environnement identifié avec succès."
+    log_success "Environment identified successfully."
 else
     if [[ "$OS_NAME" == "Linux" && -f /etc/debian_version && $VENV_ONLY -eq 0 ]]; then
-        log_warn "Python 3 n'est pas encore installé. Il sera installé à l'étape 2 (APT)."
+        log_warn "Python 3 is not installed yet. It will be installed in step 2 (APT)."
     else
-        log_error "Python 3 est introuvable. Veuillez installer Python 3.11+."
+        log_error "Python 3 was not found. Please install Python 3.11+."
         exit 1
     fi
 fi
@@ -564,12 +564,12 @@ fi
 # ------------------------------------------------------------------------------
 # ÉTAPE 2 : Dépendances Système (APT)
 # ------------------------------------------------------------------------------
-log_step "2/6" "Dépendances système C, Audio, Affichage Kiosk & CAN"
+log_step "2/6" "System dependencies: C, audio, kiosk display & CAN"
 
 if [[ $VENV_ONLY -eq 1 ]]; then
-    log_info "Option --venv-only active : passage de l'étape des paquets système."
+    log_info "--venv-only active: skipping the system packages step."
 elif [[ "$OS_NAME" == "Linux" && -f /etc/debian_version ]]; then
-    log_info "Distribution Debian / Ubuntu / Raspberry Pi OS détectée."
+    log_info "Debian / Ubuntu / Raspberry Pi OS distribution detected."
     
     APT_PACKAGES=(
         build-essential
@@ -596,15 +596,15 @@ elif [[ "$OS_NAME" == "Linux" && -f /etc/debian_version ]]; then
         ntfs-3g
     )
 
-    echo -e "\n Paquets système requis pour l'audio (pyo), le bus CAN et le rendu graphique Qt / Cage (OpenGL/Wayland) :"
+    echo -e "\n System packages required for audio (pyo), the CAN bus and Qt / Cage graphics (OpenGL/Wayland):"
     echo -e " ${C_DIM}${APT_PACKAGES[*]}${C_RESET}\n"
 
-    if prompt_confirm "Voulez-vous installer / mettre à jour ces paquets système via apt ?" "Y"; then
-        run_sudo_cmd "Mise à jour du catalogue apt" apt-get update -y
-        run_sudo_cmd "Installation des paquets système" apt-get install -y "${APT_PACKAGES[@]}"
-        log_success "Paquets système installés."
+    if prompt_confirm "Install / update these system packages with apt?" "Y"; then
+        run_sudo_cmd "Updating the apt catalog" apt-get update -y
+        run_sudo_cmd "Installing system packages" apt-get install -y "${APT_PACKAGES[@]}"
+        log_success "System packages installed."
     else
-        log_warn "Installation des paquets apt ignorée par l'utilisateur."
+        log_warn "apt package installation skipped by the user."
     fi
 
     # Re-détection de Python si absent au départ
@@ -614,36 +614,36 @@ elif [[ "$OS_NAME" == "Linux" && -f /etc/debian_version ]]; then
             if [[ $DRY_RUN -eq 1 ]]; then
                 PYTHON_BIN="/usr/bin/python3"
             else
-                log_error "Python 3 n'a pas pu être trouvé après l'installation apt."
+                log_error "Python 3 could not be found after the apt installation."
                 exit 1
             fi
         fi
-        log_success "Python 3 (${PYTHON_BIN}) opérationnel."
+        log_success "Python 3 (${PYTHON_BIN}) working."
     fi
 elif [[ "$OS_NAME" == "Darwin" ]]; then
-    log_info "macOS détecté : les paquets apt et services systemd ne s'appliquent pas."
-    log_info "Les dépendances Python seront installées pour le mode simulation/développement."
+    log_info "macOS detected: apt packages and systemd services do not apply."
+    log_info "Python dependencies will be installed for simulation/development mode."
 else
-    log_warn "Système non-Debian. Assurez-vous d'avoir les headers C pour portaudio, liblo, can-utils et cage."
+    log_warn "Non-Debian system. Make sure you have the C headers for portaudio, liblo, can-utils and cage."
 fi
 
 # ------------------------------------------------------------------------------
 # ÉTAPE 3 : Environnement Virtuel Python (.venv) & Compilation Pyo
 # ------------------------------------------------------------------------------
-log_step "3/6" "Environnement Virtuel Python (.venv) & Dépendances"
+log_step "3/6" "Python virtual environment (.venv) & dependencies"
 
 if [[ -d "$VENV_DIR" ]]; then
-    log_info "Un environnement virtuel existe déjà dans : ${VENV_DIR}"
-    if prompt_confirm "Souhaitez-vous le recréer à neuf (recommandé en cas de problème) ?" "N"; then
-        run_cmd "Suppression de l'ancien .venv" rm -rf "$VENV_DIR"
-        run_cmd "Création d'un nouvel environnement .venv" "$PYTHON_BIN" -m venv "$VENV_DIR"
-        log_success "Nouvel environnement virtuel créé."
+    log_info "A virtual environment already exists in: ${VENV_DIR}"
+    if prompt_confirm "Recreate it from scratch (recommended if something is wrong)?" "N"; then
+        run_cmd "Removing the old .venv" rm -rf "$VENV_DIR"
+        run_cmd "Creating a new .venv environment" "$PYTHON_BIN" -m venv "$VENV_DIR"
+        log_success "New virtual environment created."
     else
-        log_info "Conservation du .venv existant."
+        log_info "Keeping the existing .venv."
     fi
 else
-    run_cmd "Création de l'environnement virtuel .venv" "$PYTHON_BIN" -m venv "$VENV_DIR"
-    log_success "Environnement virtuel créé dans ${VENV_DIR}."
+    run_cmd "Creating the .venv virtual environment" "$PYTHON_BIN" -m venv "$VENV_DIR"
+    log_success "Virtual environment created in ${VENV_DIR}."
 fi
 
 VENV_PYTHON="${VENV_DIR}/bin/python3"
@@ -651,7 +651,7 @@ BUNDLED_LOCK="${PROJECT_DIR}/requirements-${RELEASE_TARGET}.lock"
 BUNDLED_WHEELS="${PROJECT_DIR}/wheels"
 
 if [[ -n "$RELEASE_TARGET" && -f "$BUNDLED_LOCK" && -d "$BUNDLED_WHEELS" ]] && compgen -G "${BUNDLED_WHEELS}/*.whl" >/dev/null; then
-    log_info "Installation hors ligne depuis le wheelhouse ${RELEASE_TARGET}."
+    log_info "Offline installation from the ${RELEASE_TARGET} wheelhouse."
     if [[ $DRY_RUN -eq 1 ]]; then
         log_dry "$VENV_PYTHON -m pip install --no-index --no-deps ${BUNDLED_WHEELS}/*.whl"
         log_dry "$VENV_PYTHON -m pip install --no-index --require-hashes -r $BUNDLED_LOCK"
@@ -659,13 +659,13 @@ if [[ -n "$RELEASE_TARGET" && -f "$BUNDLED_LOCK" && -d "$BUNDLED_WHEELS" ]] && c
         "$VENV_PYTHON" -m pip install --no-index --no-deps "${BUNDLED_WHEELS}"/*.whl
         "$VENV_PYTHON" -m pip install --no-index --require-hashes -r "$BUNDLED_LOCK"
         "$VENV_PYTHON" -m pip check
-        log_success "Wheelhouse ${RELEASE_TARGET} installé et vérifié."
+        log_success "${RELEASE_TARGET} wheelhouse installed and verified."
     fi
 else
     # Le checkout de développement conserve le chemin PyPI historique. Les
     # archives publiées passent toujours par le wheelhouse ci-dessus.
-    run_cmd "Mise à jour de pip, setuptools et wheel" "$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel
-    echo -e "\n${C_BOLD}Installation de la bibliothèque DSP Audio (pyo)...${C_RESET}"
+    run_cmd "Updating pip, setuptools and wheel" "$VENV_PYTHON" -m pip install --upgrade pip setuptools wheel
+    echo -e "\n${C_BOLD}Installing the audio DSP library (pyo)...${C_RESET}"
     BREW_CFLAGS=""
     if [[ "$OS_NAME" == "Darwin" ]]; then
         if [[ -d "/opt/homebrew/include" ]]; then
@@ -682,107 +682,107 @@ else
     else
         PYO_INSTALLED=0
         if CFLAGS="${PYO_CFLAGS}" "$VENV_PYTHON" -m pip install --no-build-isolation "pyo~=1.0.5" 2>/dev/null; then
-            log_success "Compilation et installation de pyo réussies."
+            log_success "pyo built and installed successfully."
             PYO_INSTALLED=1
         else
-            log_warn "Échec de la compilation standard de pyo. Tentative sans OSC..."
+            log_warn "Standard pyo build failed. Retrying without OSC..."
             if CFLAGS="${PYO_CFLAGS}" "$VENV_PYTHON" -m pip install --no-binary :all: --config-settings="--build-option=--no-osc" "pyo~=1.0.5" 2>/dev/null; then
-                log_success "Installation de pyo réussie (mode fallback sans OSC)."
+                log_success "pyo installed successfully (fallback mode without OSC)."
                 PYO_INSTALLED=1
             else
-                log_warn "pyo n'a pas pu être compilé (en-têtes C audio absents). Les fonctionnalités de son moteur seront inactives."
+                log_warn "pyo could not be built (audio C headers missing). Engine sound features will be disabled."
             fi
         fi
-        log_info "Installation des dépendances depuis requirements.txt..."
+        log_info "Installing dependencies from requirements.txt..."
         if [[ $PYO_INSTALLED -eq 1 ]]; then
             "$VENV_PYTHON" -m pip install -r "${PROJECT_DIR}/requirements.txt"
         else
             grep -v '^pyo' "${PROJECT_DIR}/requirements.txt" | "$VENV_PYTHON" -m pip install -r /dev/stdin
         fi
-        log_success "Dépendances Python installées."
+        log_success "Python dependencies installed."
     fi
 fi
 
 if [[ $DRY_RUN -eq 0 ]]; then
-    log_info "Validation des modules Python critiques..."
+    log_info "Validating critical Python modules..."
     if "$VENV_PYTHON" -c "import PySide6; print(f'PySide6 version: {PySide6.__version__}')" &>/dev/null; then
-        log_success "PySide6 opérationnel."
+        log_success "PySide6 working."
     else
-        log_warn "PySide6 n'a pas pu être validé lors du test rapide."
+        log_warn "PySide6 could not be validated in the quick test."
     fi
 
     if "$VENV_PYTHON" -c "import pyo; print(f'pyo version: {pyo.PYO_VERSION}')" &>/dev/null; then
-        log_success "pyo audio opérationnel."
+        log_success "pyo audio working."
     else
-        log_info "pyo audio désactivé (normal en simulation sur Mac sans headers portaudio)."
+        log_info "pyo audio disabled (normal in simulation on a Mac without portaudio headers)."
     fi
 fi
 
 # ------------------------------------------------------------------------------
 # ÉTAPE 4 : Configuration Matérielle CAN & Udev
 # ------------------------------------------------------------------------------
-log_step "4/6" "Configuration du Matériel CAN & Règles Udev"
+log_step "4/6" "CAN hardware & udev rules"
 
 if [[ $VENV_ONLY -eq 1 || "$OS_NAME" != "Linux" ]]; then
-    log_info "Étape CAN ignorée (mode venv-only ou système non-Linux)."
+    log_info "CAN step skipped (venv-only mode or non-Linux system)."
 else
-    echo -e "Sélectionnez votre type de modem CAN pour configurer les services système :"
-    echo -e "  ${C_CYAN}1)${C_RESET} ${C_BOLD}Modem natif Candlelight / CAN-USB${C_RESET} (Active can-usb.service)"
-    echo -e "  ${C_CYAN}2)${C_RESET} ${C_BOLD}Modem SLCAN USB (/dev/ttyACM0)${C_RESET}   (Active slcan.service + règle udev)"
-    echo -e "  ${C_CYAN}3)${C_RESET} ${C_BOLD}Réveil DFU STM32 seul${C_RESET}            (Active can-wake.service)"
-    echo -e "  ${C_CYAN}4)${C_RESET} ${C_BOLD}Natif + Réveil DFU STM32${C_RESET}         (can-usb.service + can-wake.service)"
-    echo -e "  ${C_CYAN}5)${C_RESET} ${C_BOLD}Ne rien modifier / Mode Simulation${C_RESET} [Recommandé si déjà configuré]"
+    echo -e "Select your CAN adapter type to configure the system services:"
+    echo -e "  ${C_CYAN}1)${C_RESET} ${C_BOLD}Native Candlelight / CAN-USB adapter${C_RESET} (enables can-usb.service)"
+    echo -e "  ${C_CYAN}2)${C_RESET} ${C_BOLD}SLCAN USB adapter (/dev/ttyACM0)${C_RESET}   (enables slcan.service + udev rule)"
+    echo -e "  ${C_CYAN}3)${C_RESET} ${C_BOLD}STM32 DFU wake-up only${C_RESET}           (enables can-wake.service)"
+    echo -e "  ${C_CYAN}4)${C_RESET} ${C_BOLD}Native + STM32 DFU wake-up${C_RESET}       (can-usb.service + can-wake.service)"
+    echo -e "  ${C_CYAN}5)${C_RESET} ${C_BOLD}Change nothing / Simulation mode${C_RESET} [Recommended if already configured]"
 
     CHOICE="5"
     if [[ $NON_INTERACTIVE -eq 0 ]]; then
-        read -r -p "$(echo -e "\n${C_BOLD}Votre choix [1-5] (défaut: 5) : ${C_RESET}")" input_choice
+        read -r -p "$(echo -e "\n${C_BOLD}Your choice [1-5] (default: 5): ${C_RESET}")" input_choice
         CHOICE="${input_choice:-5}"
     fi
 
-    run_sudo_cmd "Création des répertoires système" mkdir -p "${SYSTEMD_DIR}" "${UDEV_RULES_DIR}"
+    run_sudo_cmd "Creating system directories" mkdir -p "${SYSTEMD_DIR}" "${UDEV_RULES_DIR}"
 
     case "$CHOICE" in
         1)
-            log_info "Configuration du modem natif Candlelight (can-usb.service)..."
+            log_info "Configuring the native Candlelight adapter (can-usb.service)..."
             backup_system_file "${SYSTEMD_DIR}/can-usb.service"
-            run_sudo_cmd "Copie de can-usb.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-usb.service" "${SYSTEMD_DIR}/"
-            safe_systemctl "Rechargement daemon systemd" daemon-reload
-            safe_systemctl "Activation de can-usb.service" enable can-usb.service
-            log_success "Service can-usb configuré et activé."
+            run_sudo_cmd "Copying can-usb.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-usb.service" "${SYSTEMD_DIR}/"
+            safe_systemctl "Reloading the systemd daemon" daemon-reload
+            safe_systemctl "Enabling can-usb.service" enable can-usb.service
+            log_success "can-usb service configured and enabled."
             ;;
         2)
-            log_info "Configuration du modem SLCAN (/dev/ttyACM0)..."
+            log_info "Configuring the SLCAN adapter (/dev/ttyACM0)..."
             backup_system_file "${SYSTEMD_DIR}/slcan.service"
             backup_system_file "${UDEV_RULES_DIR}/99-slcan.rules"
-            run_sudo_cmd "Copie de slcan.service" cp "${INSTALL_ETC_DIR}/systemd/system/slcan.service" "${SYSTEMD_DIR}/"
-            run_sudo_cmd "Copie de 99-slcan.rules" cp "${INSTALL_ETC_DIR}/udev/rules.d/99-slcan.rules" "${UDEV_RULES_DIR}/"
-            safe_systemctl "Rechargement de systemd" daemon-reload
-            safe_udevadm "Rechargement des règles udev" control --reload-rules
-            safe_udevadm "Application des règles udev" trigger
-            safe_systemctl "Activation de slcan.service" enable slcan.service
-            log_success "Service SLCAN et règles udev configurés."
+            run_sudo_cmd "Copying slcan.service" cp "${INSTALL_ETC_DIR}/systemd/system/slcan.service" "${SYSTEMD_DIR}/"
+            run_sudo_cmd "Copying 99-slcan.rules" cp "${INSTALL_ETC_DIR}/udev/rules.d/99-slcan.rules" "${UDEV_RULES_DIR}/"
+            safe_systemctl "Reloading systemd" daemon-reload
+            safe_udevadm "Reloading udev rules" control --reload-rules
+            safe_udevadm "Applying udev rules" trigger
+            safe_systemctl "Enabling slcan.service" enable slcan.service
+            log_success "SLCAN service and udev rules configured."
             ;;
         3)
-            log_info "Configuration du réveil DFU STM32..."
+            log_info "Configuring STM32 DFU wake-up..."
             backup_system_file "${SYSTEMD_DIR}/can-wake.service"
-            run_sudo_cmd "Copie de can-wake.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-wake.service" "${SYSTEMD_DIR}/"
-            safe_systemctl "Rechargement de systemd" daemon-reload
-            safe_systemctl "Activation de can-wake.service" enable can-wake.service
-            log_success "Service can-wake configuré."
+            run_sudo_cmd "Copying can-wake.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-wake.service" "${SYSTEMD_DIR}/"
+            safe_systemctl "Reloading systemd" daemon-reload
+            safe_systemctl "Enabling can-wake.service" enable can-wake.service
+            log_success "can-wake service configured."
             ;;
         4)
-            log_info "Configuration Natif + Réveil DFU..."
+            log_info "Configuring native + DFU wake-up..."
             backup_system_file "${SYSTEMD_DIR}/can-usb.service"
             backup_system_file "${SYSTEMD_DIR}/can-wake.service"
-            run_sudo_cmd "Copie de can-usb.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-usb.service" "${SYSTEMD_DIR}/"
-            run_sudo_cmd "Copie de can-wake.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-wake.service" "${SYSTEMD_DIR}/"
-            safe_systemctl "Rechargement de systemd" daemon-reload
-            safe_systemctl "Activation de can-usb.service" enable can-usb.service
-            safe_systemctl "Activation de can-wake.service" enable can-wake.service
-            log_success "Services can-usb et can-wake configurés."
+            run_sudo_cmd "Copying can-usb.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-usb.service" "${SYSTEMD_DIR}/"
+            run_sudo_cmd "Copying can-wake.service" cp "${INSTALL_ETC_DIR}/systemd/system/can-wake.service" "${SYSTEMD_DIR}/"
+            safe_systemctl "Reloading systemd" daemon-reload
+            safe_systemctl "Enabling can-usb.service" enable can-usb.service
+            safe_systemctl "Enabling can-wake.service" enable can-wake.service
+            log_success "can-usb and can-wake services configured."
             ;;
         *)
-            log_info "Aucune modification apportée aux services CAN matériels."
+            log_info "No changes made to the CAN hardware services."
             ;;
     esac
 fi
@@ -790,34 +790,34 @@ fi
 # ------------------------------------------------------------------------------
 # ÉTAPE 5 : Démarrage Automatique Kiosk (Wayland / Cage clios.service)
 # ------------------------------------------------------------------------------
-log_step "5/6" "Démarrage Automatique au Boot (Kiosk Standalone via Cage)"
+log_step "5/6" "Automatic start at boot (standalone kiosk via Cage)"
 
 if [[ $VENV_ONLY -eq 1 || "$OS_NAME" != "Linux" ]]; then
-    log_info "Étape Autostart Kiosk ignorée (mode venv-only ou système non-Linux)."
+    log_info "Kiosk autostart step skipped (venv-only mode or non-Linux system)."
 else
-    echo -e "CliOS peut se lancer automatiquement en plein écran au démarrage via le compositeur Wayland ${C_BOLD}Cage${C_RESET} (sans nécessiter de bureau)."
-    if prompt_confirm "Voulez-vous installer le service de démarrage Kiosk (clios.service) ?" "N"; then
+    echo -e "CliOS can start automatically in full screen at boot using the ${C_BOLD}Cage${C_RESET} Wayland compositor (no desktop needed)."
+    if prompt_confirm "Install the kiosk startup service (clios.service)?" "N"; then
         KIOSK_INSTALLED=1
         if ! getent group clios >/dev/null 2>&1; then
-            run_sudo_cmd "Création du groupe système clios" groupadd --system clios
+            run_sudo_cmd "Creating the clios system group" groupadd --system clios
         fi
         if ! id clios >/dev/null 2>&1; then
-            run_sudo_cmd "Création de l'utilisateur de self-check clios" useradd --system --gid clios --home-dir /var/lib/clios --shell /usr/sbin/nologin clios
+            run_sudo_cmd "Creating the clios self-check user" useradd --system --gid clios --home-dir /var/lib/clios --shell /usr/sbin/nologin clios
         fi
-        run_sudo_cmd "Accès de ${CURRENT_USER} au socket updater" usermod -a -G clios "${CURRENT_USER}"
+        run_sudo_cmd "Giving ${CURRENT_USER} access to the updater socket" usermod -a -G clios "${CURRENT_USER}"
         RELEASE_VERSION="$(tr -d '[:space:]' < "${PROJECT_DIR}/VERSION")"
         RELEASE_DIR="/opt/clios/releases/${RELEASE_VERSION}"
-        run_sudo_cmd "Création des répertoires de release" mkdir -p "$(dirname "$RELEASE_DIR")" /var/lib/clios /run/clios
+        run_sudo_cmd "Creating release directories" mkdir -p "$(dirname "$RELEASE_DIR")" /var/lib/clios /run/clios
         if [[ $DRY_RUN -eq 1 ]]; then
-            log_dry "Staging de ${PROJECT_DIR} sans .venv, transfert du .venv, puis lien /opt/clios/current"
+            log_dry "Staging ${PROJECT_DIR} without .venv, moving the .venv, then linking /opt/clios/current"
         else
-            safe_systemctl "Arrêt de CliOS avant remplacement de la release" stop clios.service 2>/dev/null || true
+            safe_systemctl "Stopping CliOS before replacing the release" stop clios.service 2>/dev/null || true
             install_release_tree "$RELEASE_DIR"
-            run_sudo_cmd "Activation initiale de la release" ln -sfn "${RELEASE_DIR}" /opt/clios/current
+            run_sudo_cmd "Initial release activation" ln -sfn "${RELEASE_DIR}" /opt/clios/current
             for legacy_dir in dash_save trips trips_mock logs; do
                 if [[ -d "${PROJECT_DIR}/data/${legacy_dir}" ]]; then
-                    run_sudo_cmd "Préparation du stockage ${legacy_dir}" mkdir -p "/var/lib/clios/${legacy_dir}"
-                    run_sudo_cmd "Migration non destructive de ${legacy_dir}" cp -an "${PROJECT_DIR}/data/${legacy_dir}/." "/var/lib/clios/${legacy_dir}/"
+                    run_sudo_cmd "Preparing storage ${legacy_dir}" mkdir -p "/var/lib/clios/${legacy_dir}"
+                    run_sudo_cmd "Non-destructive migration of ${legacy_dir}" cp -an "${PROJECT_DIR}/data/${legacy_dir}/." "/var/lib/clios/${legacy_dir}/"
                 fi
             done
         fi
@@ -827,10 +827,10 @@ else
         python3 "${PROJECT_DIR}/tools/generate_systemd.py" \
             --user "${CURRENT_USER}" --uid "${USER_UID}" --output "${TMP_SERVICE_FILE}"
 
-        run_sudo_cmd "Création des répertoires système" mkdir -p "${SYSTEMD_DIR}" "${UDEV_RULES_DIR}" "${LOCAL_LIBEXEC_DIR}" "${SUDOERS_DIR}" /etc/clios /var/lib/clios /run/clios /media/clios
-        run_sudo_cmd "Création du répertoire Polkit" mkdir -p "${POLKIT_RULES_DIR}"
-        run_sudo_cmd "Droits des données updater" chown root:clios /var/lib/clios /run/clios
-        run_sudo_cmd "Permissions des données updater" chmod 0770 /var/lib/clios /run/clios
+        run_sudo_cmd "Creating system directories" mkdir -p "${SYSTEMD_DIR}" "${UDEV_RULES_DIR}" "${LOCAL_LIBEXEC_DIR}" "${SUDOERS_DIR}" /etc/clios /var/lib/clios /run/clios /media/clios
+        run_sudo_cmd "Creating the Polkit directory" mkdir -p "${POLKIT_RULES_DIR}"
+        run_sudo_cmd "Updater data ownership" chown root:clios /var/lib/clios /run/clios
+        run_sudo_cmd "Updater data permissions" chmod 0770 /var/lib/clios /run/clios
         backup_system_file "${SYSTEMD_DIR}/clios.service"
         backup_system_file "${SYSTEMD_DIR}/clios-updater.service"
         backup_system_file "${SYSTEMD_DIR}/clios-updater.socket"
@@ -843,65 +843,65 @@ else
         backup_system_file "${SUDOERS_DIR}/clios-overlayfs"
 
         if [[ $DRY_RUN -eq 1 ]]; then
-            log_dry "Contenu du service généré (${TMP_SERVICE_FILE}) :"
+            log_dry "Generated service content (${TMP_SERVICE_FILE}):"
             cat "$TMP_SERVICE_FILE"
         else
-            run_sudo_cmd "Installation de clios.service" cp "$TMP_SERVICE_FILE" "${SYSTEMD_DIR}/clios.service"
-            run_sudo_cmd "Permission sur clios.service" chmod 644 "${SYSTEMD_DIR}/clios.service"
-            run_sudo_cmd "Installation de clios-updater.service" cp "${INSTALL_ETC_DIR}/systemd/system/clios-updater.service" "${SYSTEMD_DIR}/clios-updater.service"
-            run_sudo_cmd "Installation de clios-updater.socket" cp "${INSTALL_ETC_DIR}/systemd/system/clios-updater.socket" "${SYSTEMD_DIR}/clios-updater.socket"
-            run_sudo_cmd "Installation du service de montage USB" cp "${INSTALL_ETC_DIR}/systemd/system/clios-usb-mount@.service" "${SYSTEMD_DIR}/clios-usb-mount@.service"
-            run_sudo_cmd "Installation de la règle de stockage USB" cp "${INSTALL_ETC_DIR}/udev/rules.d/90-clios-usb-storage.rules" "${UDEV_RULES_DIR}/90-clios-usb-storage.rules"
-            run_sudo_cmd "Installation du helper de montage USB" cp "${PROJECT_DIR}/installation/usr/local/libexec/clios-usb-mount" "${LOCAL_LIBEXEC_DIR}/clios-usb-mount"
-            run_sudo_cmd "Permissions du helper de montage USB" chmod 0755 "${LOCAL_LIBEXEC_DIR}/clios-usb-mount"
-            run_sudo_cmd "Installation de la source de confiance updater" cp "${INSTALL_ETC_DIR}/clios/updater.json" /etc/clios/updater.json
-            run_sudo_cmd "Droits de la source de confiance updater" chown root:root /etc/clios/updater.json
-            run_sudo_cmd "Permissions de la source de confiance updater" chmod 0644 /etc/clios/updater.json
-            run_sudo_cmd "Installation du trousseau de publication" cp "${INSTALL_ETC_DIR}/clios/release-keys.json" /etc/clios/release-keys.json
-            run_sudo_cmd "Droits du trousseau de publication" chown root:root /etc/clios/release-keys.json
-            run_sudo_cmd "Permissions du trousseau de publication" chmod 0644 /etc/clios/release-keys.json
+            run_sudo_cmd "Installing clios.service" cp "$TMP_SERVICE_FILE" "${SYSTEMD_DIR}/clios.service"
+            run_sudo_cmd "Setting permissions on clios.service" chmod 644 "${SYSTEMD_DIR}/clios.service"
+            run_sudo_cmd "Installing clios-updater.service" cp "${INSTALL_ETC_DIR}/systemd/system/clios-updater.service" "${SYSTEMD_DIR}/clios-updater.service"
+            run_sudo_cmd "Installing clios-updater.socket" cp "${INSTALL_ETC_DIR}/systemd/system/clios-updater.socket" "${SYSTEMD_DIR}/clios-updater.socket"
+            run_sudo_cmd "Installing the USB mount service" cp "${INSTALL_ETC_DIR}/systemd/system/clios-usb-mount@.service" "${SYSTEMD_DIR}/clios-usb-mount@.service"
+            run_sudo_cmd "Installing the USB storage rule" cp "${INSTALL_ETC_DIR}/udev/rules.d/90-clios-usb-storage.rules" "${UDEV_RULES_DIR}/90-clios-usb-storage.rules"
+            run_sudo_cmd "Installing the USB mount helper" cp "${PROJECT_DIR}/installation/usr/local/libexec/clios-usb-mount" "${LOCAL_LIBEXEC_DIR}/clios-usb-mount"
+            run_sudo_cmd "USB mount helper permissions" chmod 0755 "${LOCAL_LIBEXEC_DIR}/clios-usb-mount"
+            run_sudo_cmd "Installing the updater trust source" cp "${INSTALL_ETC_DIR}/clios/updater.json" /etc/clios/updater.json
+            run_sudo_cmd "Updater trust source ownership" chown root:root /etc/clios/updater.json
+            run_sudo_cmd "Updater trust source permissions" chmod 0644 /etc/clios/updater.json
+            run_sudo_cmd "Installing the publishing keyring" cp "${INSTALL_ETC_DIR}/clios/release-keys.json" /etc/clios/release-keys.json
+            run_sudo_cmd "Publishing keyring ownership" chown root:root /etc/clios/release-keys.json
+            run_sudo_cmd "Publishing keyring permissions" chmod 0644 /etc/clios/release-keys.json
             sed "s/@CLIOS_USER@/${CURRENT_USER}/g" \
                 "${INSTALL_ETC_DIR}/polkit-1/rules.d/49-clios-power.rules.in" > /tmp/49-clios-power.rules
-            run_sudo_cmd "Installation de la règle Polkit CliOS" cp /tmp/49-clios-power.rules "${POLKIT_RULES_DIR}/49-clios-power.rules"
-            run_sudo_cmd "Permissions de la règle Polkit CliOS" chmod 0644 "${POLKIT_RULES_DIR}/49-clios-power.rules"
+            run_sudo_cmd "Installing the CliOS Polkit rule" cp /tmp/49-clios-power.rules "${POLKIT_RULES_DIR}/49-clios-power.rules"
+            run_sudo_cmd "CliOS Polkit rule permissions" chmod 0644 "${POLKIT_RULES_DIR}/49-clios-power.rules"
             rm -f /tmp/49-clios-power.rules
             sed "s/@CLIOS_USER@/${CURRENT_USER}/g" \
                 "${INSTALL_ETC_DIR}/sudoers.d/clios-overlayfs.in" > /tmp/clios-overlayfs.sudoers
-            run_sudo_cmd "Validation de l'autorisation OverlayFS" visudo -cf /tmp/clios-overlayfs.sudoers
-            run_sudo_cmd "Installation de l'autorisation OverlayFS" cp /tmp/clios-overlayfs.sudoers "${SUDOERS_DIR}/clios-overlayfs"
-            run_sudo_cmd "Permissions de l'autorisation OverlayFS" chmod 0440 "${SUDOERS_DIR}/clios-overlayfs"
+            run_sudo_cmd "Validating the OverlayFS permission" visudo -cf /tmp/clios-overlayfs.sudoers
+            run_sudo_cmd "Installing the OverlayFS permission" cp /tmp/clios-overlayfs.sudoers "${SUDOERS_DIR}/clios-overlayfs"
+            run_sudo_cmd "OverlayFS permission file mode" chmod 0440 "${SUDOERS_DIR}/clios-overlayfs"
             rm -f /tmp/clios-overlayfs.sudoers
-            safe_systemctl "Rechargement daemon systemd" daemon-reload
-            safe_udevadm "Rechargement des règles de stockage USB" control --reload-rules
-            safe_udevadm "Détection des stockages USB déjà branchés" trigger --subsystem-match=block --action=add
-            safe_systemctl "Activation du socket updater" enable --now clios-updater.socket
+            safe_systemctl "Reloading the systemd daemon" daemon-reload
+            safe_udevadm "Reloading USB storage rules" control --reload-rules
+            safe_udevadm "Detecting USB storage already plugged in" trigger --subsystem-match=block --action=add
+            safe_systemctl "Enabling the updater socket" enable --now clios-updater.socket
             rm -f "$TMP_SERVICE_FILE"
 
-            if prompt_confirm "Activer le lancement automatique de CliOS à chaque démarrage maintenant ?" "Y"; then
-                safe_systemctl "Activation de clios.service" enable clios.service
+            if prompt_confirm "Enable CliOS to start automatically at every boot now?" "Y"; then
+                safe_systemctl "Enabling clios.service" enable clios.service
                 KIOSK_AUTOSTART_ENABLED=1
-                log_success "clios.service configuré pour le démarrage du système."
+                log_success "clios.service configured to start with the system."
             else
-                log_info "clios.service installé mais non activé (utilisez 'sudo systemctl enable clios.service' plus tard)."
+                log_info "clios.service installed but not enabled (use 'sudo systemctl enable clios.service' later)."
             fi
         fi
-        log_success "Configuration du service Kiosk terminée."
+        log_success "Kiosk service configuration complete."
     else
-        log_info "Installation du service Kiosk ignorée."
+        log_info "Kiosk service installation skipped."
     fi
 fi
 
 # ------------------------------------------------------------------------------
 # ÉTAPE 6 : Optimisations Fast-Boot pour Raspberry Pi
 # ------------------------------------------------------------------------------
-log_step "6/6" "Optimisations Fast-Boot (Démarrage Rapide)"
+log_step "6/6" "Fast-boot optimizations"
 
 if [[ $VENV_ONLY -eq 1 || "$OS_NAME" != "Linux" ]]; then
-    log_info "Étape Fast-Boot ignorée (mode venv-only ou système non-Linux)."
+    log_info "Fast-boot step skipped (venv-only mode or non-Linux system)."
 else
-    echo -e "Accélération prudente du démarrage, sans désactiver le réseau, le BLE, l'USB, le CAN ni l'updater."
-    echo -e "Chaque groupe sensible est confirmé séparément et reste réversible."
-    if prompt_confirm "Souhaitez-vous désactiver ces services lents au démarrage ?" "N"; then
+    echo -e "Careful boot speed-up that keeps networking, BLE, USB, CAN and the updater enabled."
+    echo -e "Each sensitive group is confirmed separately and stays reversible."
+    if prompt_confirm "Disable these slow services at boot?" "N"; then
         SLOW_SERVICES=(
             NetworkManager-wait-online.service
             apt-daily.timer
@@ -913,11 +913,11 @@ else
         for srv in "${SLOW_SERVICES[@]}"; do
             disable_systemd_unit_if_present "${srv}"
         done
-        FAST_BOOT_APPLIED+=("services de fond non essentiels")
-        log_success "Services lents désactivés avec succès."
+        FAST_BOOT_APPLIED+=("non-essential background services")
+        log_success "Slow services disabled successfully."
     else
-        FAST_BOOT_SKIPPED+=("services de fond non essentiels")
-        log_info "Désactivation des services de fond ignorée."
+        FAST_BOOT_SKIPPED+=("non-essential background services")
+        log_info "Skipped disabling background services."
     fi
 
     KIOSK_UNIT_AVAILABLE=0
@@ -925,73 +925,73 @@ else
         KIOSK_UNIT_AVAILABLE=1
     fi
     if [[ $KIOSK_UNIT_AVAILABLE -eq 1 ]]; then
-        echo -e "\nLe mode kiosque CliOS n'a pas besoin de LightDM. Le changement prendra effet au prochain démarrage."
-        if prompt_confirm "Désactiver LightDM et démarrer par défaut sur multi-user.target ?" "N"; then
+        echo -e "\nThe CliOS kiosk mode does not need LightDM. The change takes effect at the next boot."
+        if prompt_confirm "Disable LightDM and boot to multi-user.target by default?" "N"; then
             disable_systemd_unit_if_present lightdm.service
-            safe_systemctl "Sélection du démarrage kiosque sans bureau" set-default multi-user.target
-            FAST_BOOT_APPLIED+=("mode kiosque sans LightDM")
-            log_success "Mode kiosque configuré sans arrêter la session graphique actuelle."
+            safe_systemctl "Selecting desktop-free kiosk boot" set-default multi-user.target
+            FAST_BOOT_APPLIED+=("kiosk mode without LightDM")
+            log_success "Kiosk mode configured without stopping the current graphical session."
         else
-            FAST_BOOT_SKIPPED+=("mode kiosque sans LightDM")
-            log_info "LightDM et la cible par défaut sont inchangés."
+            FAST_BOOT_SKIPPED+=("kiosk mode without LightDM")
+            log_info "LightDM and the default target are unchanged."
         fi
     else
-        FAST_BOOT_SKIPPED+=("mode kiosque sans LightDM (CliOS non installé)")
-        log_info "Optimisation LightDM non proposée : clios.service n'est pas installé."
+        FAST_BOOT_SKIPPED+=("kiosk mode without LightDM (CliOS not installed)")
+        log_info "LightDM optimization not offered: clios.service is not installed."
     fi
 
-    echo -e "\n${C_YELLOW}${C_BOLD}Cloud-init ne doit être désactivé qu'après le provisioning initial.${C_RESET}"
-    echo -e "Cette action conserve sa configuration mais empêche ses unités de ralentir les prochains boots."
-    if prompt_confirm "Cette machine est-elle provisionnée et peut-on désactiver cloud-init ?" "N"; then
+    echo -e "\n${C_YELLOW}${C_BOLD}Only disable cloud-init after initial provisioning.${C_RESET}"
+    echo -e "This keeps its configuration but stops its units from slowing down future boots."
+    if prompt_confirm "Is this machine provisioned, and can cloud-init be disabled?" "N"; then
         if [[ -e /etc/cloud/cloud-init.disabled ]]; then
-            log_info "cloud-init est déjà désactivé."
+            log_info "cloud-init is already disabled."
         else
-            run_sudo_cmd "Désactivation réversible de cloud-init" mkdir -p /etc/cloud
-            run_sudo_cmd "Création du marqueur cloud-init.disabled" touch /etc/cloud/cloud-init.disabled
+            run_sudo_cmd "Reversibly disabling cloud-init" mkdir -p /etc/cloud
+            run_sudo_cmd "Creating the cloud-init.disabled marker" touch /etc/cloud/cloud-init.disabled
         fi
-        FAST_BOOT_APPLIED+=("cloud-init désactivé")
-        log_success "Cloud-init sera ignoré aux prochains démarrages."
+        FAST_BOOT_APPLIED+=("cloud-init disabled")
+        log_success "cloud-init will be skipped at the next boots."
     else
-        FAST_BOOT_SKIPPED+=("cloud-init conservé")
-        log_info "Cloud-init reste actif."
+        FAST_BOOT_SKIPPED+=("cloud-init kept")
+        log_info "cloud-init stays enabled."
     fi
 
-    echo -e "\n ${C_CYAN}ℹ${C_RESET} ${C_BOLD}Astuce matérielle :${C_RESET} contrôlez l'EEPROM et config.txt avec"
-    echo -e "   ${C_CYAN}installation/guide_optimisation_boot_rpi5.md${C_RESET}, sans ajouter d'overclocking non validé."
+    echo -e "\n ${C_CYAN}ℹ${C_RESET} ${C_BOLD}Hardware tip:${C_RESET} check the EEPROM and config.txt with"
+    echo -e "   ${C_CYAN}installation/guide_optimisation_boot_rpi5.md${C_RESET}, without adding untested overclocking."
 fi
 
 # ------------------------------------------------------------------------------
 # Rendu Final & Instructions d'utilisation
 # ------------------------------------------------------------------------------
 echo -e "\n${C_GREEN}${C_BOLD}══════════════════════════════════════════════════════════════════${C_RESET}"
-echo -e "${C_GREEN}${C_BOLD}  ✓ INSTALLATION DE CliOS TERMINÉE AVEC SUCCÈS !${C_RESET}"
+echo -e "${C_GREEN}${C_BOLD}  ✓ CliOS INSTALLATION COMPLETED SUCCESSFULLY!${C_RESET}"
 echo -e "${C_GREEN}${C_BOLD}══════════════════════════════════════════════════════════════════${C_RESET}\n"
 
 if [[ $KIOSK_INSTALLED -eq 1 ]]; then
-    echo -e "${C_BOLD}CliOS est installé dans /opt/clios/current.${C_RESET}\n"
-    echo -e "  ${C_CYAN}sudo systemctl start clios.service${C_RESET}    # Démarrer le cockpit maintenant"
-    echo -e "  ${C_CYAN}sudo systemctl status clios.service${C_RESET}   # Vérifier son état"
-    echo -e "  ${C_CYAN}journalctl -u clios.service -f${C_RESET}        # Suivre les logs"
-    echo -e "  ${C_DIM}./clios --help redirige automatiquement vers /opt/clios/current.${C_RESET}\n"
-    if [[ $KIOSK_AUTOSTART_ENABLED -eq 1 ]] && prompt_confirm "Voulez-vous démarrer CliOS maintenant ?" "Y"; then
-        safe_systemctl "Démarrage immédiat de CliOS" start clios.service
+    echo -e "${C_BOLD}CliOS is installed in /opt/clios/current.${C_RESET}\n"
+    echo -e "  ${C_CYAN}sudo systemctl start clios.service${C_RESET}    # Start the cockpit now"
+    echo -e "  ${C_CYAN}sudo systemctl status clios.service${C_RESET}   # Check its status"
+    echo -e "  ${C_CYAN}journalctl -u clios.service -f${C_RESET}        # Follow the logs"
+    echo -e "  ${C_DIM}./clios --help automatically redirects to /opt/clios/current.${C_RESET}\n"
+    if [[ $KIOSK_AUTOSTART_ENABLED -eq 1 ]] && prompt_confirm "Start CliOS now?" "Y"; then
+        safe_systemctl "Starting CliOS now" start clios.service
     fi
 else
-    echo -e "${C_BOLD}Vous pouvez maintenant démarrer CliOS depuis ce dossier :${C_RESET}\n"
-    echo -e "  ${C_CYAN}./clios${C_RESET}                 # Lancement standard"
-    echo -e "  ${C_CYAN}./clios --mock${C_RESET}          # Simulation sans matériel"
-    echo -e "  ${C_CYAN}./clios --ui cli --mock${C_RESET} # Terminal interactif"
-    echo -e "  ${C_CYAN}./clios --help${C_RESET}          # Options disponibles\n"
+    echo -e "${C_BOLD}You can now start CliOS from this folder:${C_RESET}\n"
+    echo -e "  ${C_CYAN}./clios${C_RESET}                 # Standard launch"
+    echo -e "  ${C_CYAN}./clios --mock${C_RESET}          # Simulation without hardware"
+    echo -e "  ${C_CYAN}./clios --ui cli --mock${C_RESET} # Interactive terminal"
+    echo -e "  ${C_CYAN}./clios --help${C_RESET}          # Available options\n"
 fi
 
 if [[ ${#FAST_BOOT_APPLIED[@]} -gt 0 ]]; then
-    log_success "Fast-Boot appliqué : ${FAST_BOOT_APPLIED[*]}"
+    log_success "Fast-boot applied: ${FAST_BOOT_APPLIED[*]}"
 fi
 if [[ ${#FAST_BOOT_SKIPPED[@]} -gt 0 ]]; then
-    log_info "Fast-Boot non appliqué : ${FAST_BOOT_SKIPPED[*]}"
+    log_info "Fast-boot not applied: ${FAST_BOOT_SKIPPED[*]}"
 fi
 if [[ ${#FAST_BOOT_APPLIED[@]} -gt 0 ]]; then
-    echo -e "\n${C_BOLD}Restauration des optimisations Fast-Boot :${C_RESET}"
+    echo -e "\n${C_BOLD}Reverting the fast-boot optimizations:${C_RESET}"
     echo -e "  ${C_CYAN}sudo systemctl set-default graphical.target${C_RESET}"
     echo -e "  ${C_CYAN}sudo systemctl enable lightdm.service NetworkManager-wait-online.service${C_RESET}"
     echo -e "  ${C_CYAN}sudo rm -f /etc/cloud/cloud-init.disabled${C_RESET}"

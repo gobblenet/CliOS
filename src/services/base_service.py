@@ -31,7 +31,7 @@ class BaseService:
         self.service_name = service_name
         self.service_id = service_id or service_name
         if not self.service_id or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for char in self.service_id):
-            raise ValueError("service_id doit être stable et ne contenir que lettres, chiffres, _, . ou -")
+            raise ValueError("service_id must be stable and contain only letters, digits, _, . or -")
         self.metadata = {
             "api_version": self.API_VERSION,
             "id": self.service_id,
@@ -54,7 +54,7 @@ class BaseService:
         self.logger.info("Demarrage du service", extra={"error_code": "SERVICE_START"})
 
         if not implemented:
-            raise NotImplementedError("La méthode start() doit être redéfinie !")
+            raise NotImplementedError("The start() method must be overridden!")
         self._stop_event = stop_event
         self.lifecycle_state = "RUNNING"
 

@@ -5,7 +5,7 @@
     "capabilities": ["settings", "commands", "vehicle-state"],
     "id": "jdm_mugen",
     "label": "Mugen Power JDM",
-    "description": "Combiné d'instruments blanc sport Mugen Power avec triple compteur analogique",
+    "description": "Mugen Power white sport instrument cluster with triple analog gauges",
     "order": 2,
     "dashboard": "Dashboard.qml",
     "palette": {

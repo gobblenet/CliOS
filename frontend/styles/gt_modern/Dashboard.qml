@@ -17,8 +17,8 @@ Item {
     property string timeText: Qt.formatTime(new Date(), "hh:mm")
 
     readonly property var destinations: [
-        { id: "drive", label: "CONDUITE", source: "pages/GtDrivePage.qml", complex: false },
-        { id: "trip", label: "TRAJET", source: "pages/GtTripPage.qml", complex: true },
+        { id: "drive", label: "DRIVE", source: "pages/GtDrivePage.qml", complex: false },
+        { id: "trip", label: "TRIP", source: "pages/GtTripPage.qml", complex: true },
         { id: "performance", label: "PERFORMANCE", source: "pages/GtPerformancePage.qml", complex: true },
         { id: "diagnostic", label: "DIAGNOSTIC", source: "pages/GtDiagnosticPage.qml", complex: true },
         { id: "menu", label: "MENU", complex: true }
@@ -90,14 +90,14 @@ Item {
                 Layout.preferredWidth: 190; height: 38; radius: T.StyleManager.radiusSmall
                 color: S.UiState.ramMode ? Qt.rgba(T.StyleManager.danger.r, T.StyleManager.danger.g, T.StyleManager.danger.b, 0.14) : Qt.rgba(T.StyleManager.success.r, T.StyleManager.success.g, T.StyleManager.success.b, 0.12)
                 border.width: 1; border.color: S.UiState.ramMode ? T.StyleManager.danger : T.StyleManager.success
-                Text { anchors.centerIn: parent; text: S.UiState.usbConnected ? "USB · " + S.UiState.fixed(S.UiState.storageFreeMb, 0, "0") + " MB" : (S.UiState.internalStorage ? "SD · " + S.UiState.fixed(S.UiState.storageFreeMb, 0, "0") + " MB" : "STOCKAGE · MODE RAM"); color: parent.border.color; font.pixelSize: 14; font.bold: true }
+                Text { anchors.centerIn: parent; text: S.UiState.usbConnected ? "USB · " + S.UiState.fixed(S.UiState.storageFreeMb, 0, "0") + " MB" : (S.UiState.internalStorage ? "SD · " + S.UiState.fixed(S.UiState.storageFreeMb, 0, "0") + " MB" : "STORAGE · RAM MODE"); color: parent.border.color; font.pixelSize: 14; font.bold: true }
             }
             Rectangle {
                 visible: S.UiState.serviceErrorKeys.length + S.UiState.serviceWarningKeys.length > 0
                 Layout.preferredWidth: visible ? 170 : 0; height: 38; radius: T.StyleManager.radiusSmall
                 color: Qt.rgba(T.StyleManager.warning.r, T.StyleManager.warning.g, T.StyleManager.warning.b, 0.13)
                 border.width: 1; border.color: S.UiState.serviceErrorKeys.length ? T.StyleManager.danger : T.StyleManager.warning
-                Text { anchors.centerIn: parent; text: S.UiState.serviceErrorKeys.length + " ERR · " + S.UiState.serviceWarningKeys.length + " AVIS"; color: parent.border.color; font.pixelSize: 14; font.bold: true }
+                Text { anchors.centerIn: parent; text: S.UiState.serviceErrorKeys.length + " ERR · " + S.UiState.serviceWarningKeys.length + " NOTICES"; color: parent.border.color; font.pixelSize: 14; font.bold: true }
             }
             Text { text: "CliOS GT"; color: T.StyleManager.accent; font.pixelSize: 20; font.weight: Font.Bold; Layout.preferredWidth: 95; horizontalAlignment: Text.AlignRight }
         }
@@ -111,14 +111,14 @@ Item {
         border.width: 1; border.color: T.StyleManager.outline
         ColumnLayout {
             anchors.fill: parent; anchors.margins: 18; spacing: 12
-            Text { text: "CONDUITE"; color: T.StyleManager.textSecondary; font.pixelSize: 17; font.weight: Font.DemiBold; font.letterSpacing: 1.5 }
+            Text { text: "DRIVING"; color: T.StyleManager.textSecondary; font.pixelSize: 17; font.weight: Font.DemiBold; font.letterSpacing: 1.5 }
             Column {
                 Layout.fillWidth: true; Layout.preferredHeight: 160; spacing: -2
                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(S.UiState.speed); color: T.StyleManager.text; font.pixelSize: 112; font.weight: Font.DemiBold }
                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: "km/h"; color: T.StyleManager.textSecondary; font.pixelSize: 21 }
             }
             GtCard {
-                Layout.fillWidth: true; Layout.preferredHeight: 96; title: "Régulateur / limiteur"
+                Layout.fillWidth: true; Layout.preferredHeight: 96; title: "Cruise / limiter"
                 RowLayout {
                     anchors.fill: parent
                     Text { Layout.fillWidth: true; text: S.UiState.cruiseMode + " · " + S.UiState.cruiseStatus; color: T.StyleManager.textSecondary; font.pixelSize: 16; elide: Text.ElideRight }
@@ -126,7 +126,7 @@ Item {
                 }
             }
             GtCard {
-                Layout.fillWidth: true; Layout.preferredHeight: 112; title: "Carburant"
+                Layout.fillWidth: true; Layout.preferredHeight: 112; title: "Fuel"
                 ColumnLayout {
                     anchors.fill: parent; spacing: 8
                     RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: S.UiState.fixed(S.UiState.fuelLevel, 1, "—") + " L"; color: S.UiState.lowFuel ? T.StyleManager.warning : T.StyleManager.text; font.pixelSize: 24; font.weight: Font.DemiBold } Text { text: S.UiState.fixed(S.UiState.autonomy, 0, "—") + " km"; color: T.StyleManager.textSecondary; font.pixelSize: 19 } }
@@ -136,7 +136,7 @@ Item {
             RowLayout {
                 Layout.fillWidth: true; Layout.fillHeight: true; spacing: 10
                 GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.tripB, 1, "0,0"); unit: "km"; valueSize: 27 }
-                GtMetric { Layout.fillWidth: true; label: "Conso moy."; value: S.UiState.fixed(S.UiState.avgConsB, 1, "0,0"); unit: "L/100"; valueSize: 27 }
+                GtMetric { Layout.fillWidth: true; label: "Avg. cons."; value: S.UiState.fixed(S.UiState.avgConsB, 1, "0,0"); unit: "L/100"; valueSize: 27 }
             }
         }
     }
@@ -163,23 +163,23 @@ Item {
             color: Qt.rgba(T.StyleManager.background.r, T.StyleManager.background.g, T.StyleManager.background.b, 0.91)
             GtCard {
                 width: 900; height: 390; anchors.centerIn: parent
-                title: S.UiState.sessionState === "ENDED" ? "Trajet terminé" : "Session en pause"
+                title: S.UiState.sessionState === "ENDED" ? "Trip ended" : "Session paused"
                 highlighted: true
                 ColumnLayout {
                     anchors.fill: parent; spacing: 18
                     RowLayout {
                         Layout.fillWidth: true; Layout.fillHeight: true; spacing: 36
                         GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Distance"; value: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0"); unit: "km"; alignment: Text.AlignHCenter }
-                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Carburant"; value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"); unit: "L"; alignment: Text.AlignHCenter }
-                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Coût"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€"; alignment: Text.AlignHCenter }
+                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Fuel"; value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"); unit: "L"; alignment: Text.AlignHCenter }
+                        GtMetric { Layout.fillWidth: true; Layout.minimumWidth: 230; label: "Cost"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€"; alignment: Text.AlignHCenter }
                     }
                     Row {
                         visible: S.UiState.sessionState === "PAUSED"
                         Layout.alignment: Qt.AlignHCenter; spacing: 18
-                        GtButton { width: 280; text: "CONTINUER"; primary: true; onClicked: root.commandRequested("resume_trip") }
-                        GtButton { width: 320; text: "TERMINER LE TRAJET"; destructive: true; onClicked: root.askConfirmation("end_trip") }
+                        GtButton { width: 280; text: "CONTINUE"; primary: true; onClicked: root.commandRequested("resume_trip") }
+                        GtButton { width: 320; text: "END TRIP"; destructive: true; onClicked: root.askConfirmation("end_trip") }
                     }
-                    Text { visible: S.UiState.sessionState === "ENDED"; Layout.alignment: Qt.AlignHCenter; text: "Données sauvegardées"; color: T.StyleManager.success; font.pixelSize: 24; font.weight: Font.DemiBold }
+                    Text { visible: S.UiState.sessionState === "ENDED"; Layout.alignment: Qt.AlignHCenter; text: "Data saved"; color: T.StyleManager.success; font.pixelSize: 24; font.weight: Font.DemiBold }
                 }
             }
         }
@@ -192,30 +192,30 @@ Item {
         border.width: 1; border.color: T.StyleManager.outline
         ColumnLayout {
             anchors.fill: parent; anchors.margins: 18; spacing: 12
-            Text { text: "MOTEUR"; color: T.StyleManager.textSecondary; font.pixelSize: 17; font.weight: Font.DemiBold; font.letterSpacing: 1.5 }
+            Text { text: "ENGINE"; color: T.StyleManager.textSecondary; font.pixelSize: 17; font.weight: Font.DemiBold; font.letterSpacing: 1.5 }
             Column {
                 Layout.fillWidth: true; Layout.preferredHeight: 150; spacing: -4
                 Text { anchors.horizontalCenter: parent.horizontalCenter; text: S.UiState.gear; color: S.UiState.redline ? T.StyleManager.danger : T.StyleManager.text; font.pixelSize: 72; font.weight: Font.Bold }
-                Text { anchors.horizontalCenter: parent.horizontalCenter; text: "RAPPORT"; color: T.StyleManager.textSecondary; font.pixelSize: 17 }
+                Text { anchors.horizontalCenter: parent.horizontalCenter; text: "GEAR"; color: T.StyleManager.textSecondary; font.pixelSize: 17 }
             }
             GtCard {
-                Layout.fillWidth: true; Layout.preferredHeight: 150; title: "Régime moteur"; highlighted: S.UiState.redline
+                Layout.fillWidth: true; Layout.preferredHeight: 150; title: "Engine speed"; highlighted: S.UiState.redline
                 ColumnLayout {
                     anchors.fill: parent; spacing: 10
-                    RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: Math.round(S.UiState.rpm); color: S.UiState.redline ? T.StyleManager.danger : T.StyleManager.text; font.pixelSize: 36; font.weight: Font.DemiBold } Text { text: "tr/min"; color: T.StyleManager.textSecondary; font.pixelSize: 17 } }
+                    RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: Math.round(S.UiState.rpm); color: S.UiState.redline ? T.StyleManager.danger : T.StyleManager.text; font.pixelSize: 36; font.weight: Font.DemiBold } Text { text: "rpm"; color: T.StyleManager.textSecondary; font.pixelSize: 17 } }
                     GtProgress { Layout.fillWidth: true; height: 14; value: S.UiState.rpm; to: S.UiState.maxRpm; fillColor: S.UiState.redline ? T.StyleManager.danger : T.StyleManager.accent }
-                    Text { text: "ZONE ROUGE  " + Math.round(S.UiState.redlineRpm); color: T.StyleManager.textSecondary; font.pixelSize: 14 }
+                    Text { text: "REDLINE  " + Math.round(S.UiState.redlineRpm); color: T.StyleManager.textSecondary; font.pixelSize: 14 }
                 }
             }
             GtCard {
-                Layout.fillWidth: true; Layout.preferredHeight: 134; title: "Température moteur"; highlighted: S.UiState.hotEngine
+                Layout.fillWidth: true; Layout.preferredHeight: 134; title: "Engine temperature"; highlighted: S.UiState.hotEngine
                 ColumnLayout {
                     anchors.fill: parent; spacing: 10
                     RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: S.UiState.fixed(S.UiState.engineTemp, 0, "—"); color: S.UiState.hotEngine ? T.StyleManager.danger : T.StyleManager.text; font.pixelSize: 36; font.weight: Font.DemiBold } Text { text: "°C"; color: T.StyleManager.textSecondary; font.pixelSize: 18 } }
                     GtProgress { Layout.fillWidth: true; height: 12; value: S.UiState.engineTemp; from: 40; to: S.UiState.tempMax; fillColor: S.UiState.hotEngine ? T.StyleManager.danger : T.StyleManager.success }
                 }
             }
-            Text { Layout.fillWidth: true; Layout.fillHeight: true; text: S.UiState.hotEngine ? "TEMPÉRATURE CRITIQUE" : (S.UiState.redline ? "RÉGIME ÉLEVÉ" : "SYSTÈME MOTEUR NORMAL"); color: S.UiState.hotEngine || S.UiState.redline ? T.StyleManager.danger : T.StyleManager.success; font.pixelSize: 17; font.weight: Font.DemiBold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+            Text { Layout.fillWidth: true; Layout.fillHeight: true; text: S.UiState.hotEngine ? "CRITICAL TEMPERATURE" : (S.UiState.redline ? "HIGH RPM" : "ENGINE SYSTEMS NORMAL"); color: S.UiState.hotEngine || S.UiState.redline ? T.StyleManager.danger : T.StyleManager.success; font.pixelSize: 17; font.weight: Font.DemiBold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
         }
     }
 
@@ -243,7 +243,7 @@ Item {
         objectName: "attentionBanner"
         anchors.horizontalCenter: parent.horizontalCenter
         z: 800
-        message: "Interaction complexe — restez attentif"
+        message: "Complex interaction — stay focused on the road"
     }
     Timer { id: attentionTimer; interval: 3000; onTriggered: attentionBanner.shown = false }
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.timeText = Qt.formatTime(new Date(), "hh:mm") }

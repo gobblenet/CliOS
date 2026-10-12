@@ -66,7 +66,7 @@ class ObdLiveServiceTest(unittest.TestCase):
         self.provider = PhysicsMockProvider(self.runtime)
         self.transport = CanObdTransport(self.provider, timeout_s=0.05)
         self.provider.register_obd_callback(ObdFrameRouter(self.transport.receive_frame))
-        self.provider.is_connected = True  # Bus virtuel sans boucle physique.
+        self.provider.is_connected = True  # Virtual bus without the physics loop.
         self.service = ObdLiveService(self.runtime, MemoryStorage(), can_transport=self.transport)
 
     def obd(self):

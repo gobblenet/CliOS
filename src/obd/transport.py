@@ -1,4 +1,4 @@
-"""Transports OBD-II mode 01 : bus CAN direct (ISO 15765-4) ou adaptateur ELM327."""
+"""OBD-II mode 01 transports: direct CAN bus (ISO 15765-4) or ELM327 adapter."""
 
 from __future__ import annotations
 
@@ -11,10 +11,10 @@ OBD_RESPONSE_IDS = range(0x7E8, 0x7F0)
 
 
 class ObdFrameRouter:
-    """Distribue les réponses ECU 0x7E8-0x7EF à plusieurs consommateurs.
+    """Fan ECU responses 0x7E8-0x7EF out to several consumers.
 
-    CanService ne connaît qu'un seul callback OBD ; le diagnostic (mode 03)
-    et les données temps réel (mode 01) écoutent tous deux ces trames.
+    CanService only knows a single OBD callback; diagnostics (mode 03) and
+    live data (mode 01) both listen to these frames.
     """
 
     def __init__(self, *listeners):
@@ -29,7 +29,7 @@ class ObdFrameRouter:
 
 
 class CanObdTransport:
-    """Requêtes mode 01 en trame unique sur le bus CAN partagé par CanService."""
+    """Single-frame mode 01 requests on the CAN bus shared with CanService."""
 
     def __init__(self, provider, timeout_s: float = 0.15):
         self.provider = provider
@@ -44,14 +44,14 @@ class CanObdTransport:
 
     def open(self):
         if not self.connected:
-            raise OSError("bus CAN non connecté")
+            raise OSError("CAN bus not connected")
 
     def close(self):
         pass
 
     def receive_frame(self, frame):
         data = bytes(frame.data)
-        # Seules les réponses mode 01 (0x41) en trame unique nous concernent.
+        # Only single-frame mode 01 responses (0x41) matter here.
         if len(data) >= 3 and data[0] >> 4 == 0 and data[1] == 0x41:
             self._frames.append(data)
             self._event.set()
@@ -60,7 +60,7 @@ class CanObdTransport:
         self._frames.clear()
         self._event.clear()
         if not self.provider.send_frame(OBD_BROADCAST_ID, [0x02, 0x01, pid, 0x55, 0x55, 0x55, 0x55, 0x55]):
-            raise OSError("écriture CAN impossible")
+            raise OSError("CAN write failed")
         deadline = time.monotonic() + self.timeout_s
         while True:
             while self._frames:
@@ -76,7 +76,7 @@ class CanObdTransport:
 
 
 class Elm327Transport:
-    """Adaptateur ELM327 série (USB, Bluetooth rfcomm ou PiCCANTE en mode ELM)."""
+    """Serial ELM327 adapter (USB, Bluetooth rfcomm or PiCCANTE in ELM mode)."""
 
     BAUD_CANDIDATES = (38400, 115200, 9600, 500000)
 
@@ -97,7 +97,7 @@ class Elm327Transport:
         except ImportError as exc:
             raise OSError("pyserial absent") from exc
         rates = self.BAUD_CANDIDATES if self.baud == "auto" else (int(self.baud),)
-        last_error = "aucune réponse ELM327"
+        last_error = "no ELM327 response"
         for rate in rates:
             try:
                 link = serial.Serial(self.port, rate, timeout=self.timeout_s)
@@ -125,7 +125,7 @@ class Elm327Transport:
 
     def command(self, text: str, wait_s: float | None = None) -> str:
         if self._link is None:
-            raise OSError("ELM327 non connecté")
+            raise OSError("ELM327 not connected")
         try:
             self._link.reset_input_buffer()
             self._link.write((text + "\r").encode("ascii"))
@@ -136,9 +136,9 @@ class Elm327Transport:
                 buffer += chunk
                 if b">" in buffer:
                     break
-        except Exception as exc:  # SerialException à la déconnexion USB/BT
+        except Exception as exc:  # SerialException on USB/BT disconnect
             self.close()
-            raise OSError(f"liaison ELM327 perdue : {exc}") from exc
+            raise OSError(f"ELM327 link lost: {exc}") from exc
         return buffer.decode("ascii", errors="replace").replace(">", "").strip()
 
     def query(self, pid: int) -> bytes | None:
@@ -146,7 +146,7 @@ class Elm327Transport:
 
 
 def parse_elm_response(response: str, pid: int) -> bytes | None:
-    """Extrait les octets de données d'une réponse ELM327 « 41 0C 1A F8 »."""
+    """Extract the data bytes from an ELM327 response like "41 0C 1A F8"."""
     marker = f"41{pid:02X}"
     for line in response.replace(" ", "").upper().splitlines():
         line = line.strip()

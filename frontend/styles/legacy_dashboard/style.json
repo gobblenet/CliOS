@@ -5,7 +5,7 @@
     "capabilities": ["settings", "commands", "vehicle-state"],
     "id": "legacy_dashboard",
     "label": "Legacy",
-    "description": "Ancien cockpit et ses compteurs circulaires",
+    "description": "Classic cockpit with round gauges",
     "order": 20,
     "dashboard": "Dashboard.qml",
     "palette": {

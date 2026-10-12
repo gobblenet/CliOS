@@ -56,40 +56,40 @@ class EngineSoundService(BaseService):
         self.audio_devices = self._get_available_audio_devices()
         default_dev = self.audio_devices[0] if self.audio_devices else "Default"
 
-        self.register_param("audio_device", "Sortie Audio", ServiceParamType.LIST, default_dev, persistent=True,
+        self.register_param("audio_device", "Audio output", ServiceParamType.LIST, default_dev, persistent=True,
                             options=self.audio_devices)
-        self.register_param("sound_model", "Modele de Son", ServiceParamType.LIST, available_models[0], persistent=True,
+        self.register_param("sound_model", "Sound model", ServiceParamType.LIST, available_models[0], persistent=True,
                             options=available_models)
 
-        self.register_param("max_vol", "Volume Maximum (%)", ServiceParamType.SLIDER, 80.0, min_val=0.0, max_val=100.0)
-        self.register_param("idle_vol", "Volume au Ralenti (%)", ServiceParamType.SLIDER, 10.0, min_val=0.0,
+        self.register_param("max_vol", "Maximum volume (%)", ServiceParamType.SLIDER, 80.0, min_val=0.0, max_val=100.0)
+        self.register_param("idle_vol", "Idle volume (%)", ServiceParamType.SLIDER, 10.0, min_val=0.0,
                             max_val=100.0)
-        self.register_param("master_gain", "Amplificateur Global (x)", ServiceParamType.SLIDER, 2.5, min_val=1.0,
+        self.register_param("master_gain", "Master gain (x)", ServiceParamType.SLIDER, 2.5, min_val=1.0,
                             max_val=5.0)
-        self.register_param("bass_boost", "Boost Basses Naturelles (%)", ServiceParamType.SLIDER, 40.0, min_val=0.0,
+        self.register_param("bass_boost", "Natural bass boost (%)", ServiceParamType.SLIDER, 40.0, min_val=0.0,
                             max_val=100.0)
 
-        self.register_param("cabin_freq", "Filtre Habitacle (Hz)", ServiceParamType.SLIDER, 1500.0, min_val=300.0,
+        self.register_param("cabin_freq", "Cabin filter (Hz)", ServiceParamType.SLIDER, 1500.0, min_val=300.0,
                             max_val=8000.0)
-        self.register_param("rasp_vol", "Raclement V8 (Rasp) (%)", ServiceParamType.SLIDER, 50.0, min_val=0.0,
+        self.register_param("rasp_vol", "V8 rasp (%)", ServiceParamType.SLIDER, 50.0, min_val=0.0,
                             max_val=100.0)
-        self.register_param("rasp_freq", "Frequence Rasp (Hz)", ServiceParamType.SLIDER, 400.0, min_val=100.0,
+        self.register_param("rasp_freq", "Rasp frequency (Hz)", ServiceParamType.SLIDER, 400.0, min_val=100.0,
                             max_val=1500.0)
 
-        self.register_param("turbo_on", "Activer Turbo", ServiceParamType.TOGGLE, True)
-        self.register_param("turbo_vol", "Sifflement (Whine) (%)", ServiceParamType.SLIDER, 10.0, min_val=0.0,
+        self.register_param("turbo_on", "Enable turbo", ServiceParamType.TOGGLE, True)
+        self.register_param("turbo_vol", "Turbo whine (%)", ServiceParamType.SLIDER, 10.0, min_val=0.0,
                             max_val=100.0)
-        self.register_param("wind_vol", "Aspiration (Whoosh) (%)", ServiceParamType.SLIDER, 70.0, min_val=0.0,
+        self.register_param("wind_vol", "Intake whoosh (%)", ServiceParamType.SLIDER, 70.0, min_val=0.0,
                             max_val=100.0)
-        self.register_param("turbo_charge", "Temps Charge (s)", ServiceParamType.SLIDER, 0.6, min_val=0.1, max_val=2.0)
+        self.register_param("turbo_charge", "Spool time (s)", ServiceParamType.SLIDER, 0.6, min_val=0.1, max_val=2.0)
 
-        self.register_param("wg_active", "Activer Wastegate", ServiceParamType.TOGGLE, True)
-        self.register_param("wg_vol", "Volume Wastegate (%)", ServiceParamType.SLIDER, 40.0, min_val=0.0, max_val=100.0)
-        self.register_param("wg_duration", "Duree Pschhht (s)", ServiceParamType.SLIDER, 0.4, min_val=0.1, max_val=1.5)
+        self.register_param("wg_active", "Enable wastegate", ServiceParamType.TOGGLE, True)
+        self.register_param("wg_vol", "Wastegate volume (%)", ServiceParamType.SLIDER, 40.0, min_val=0.0, max_val=100.0)
+        self.register_param("wg_duration", "Blow-off duration (s)", ServiceParamType.SLIDER, 0.4, min_val=0.1, max_val=1.5)
 
-        self.register_param("turbo_decay_wg", "Decharge avec WG (s)", ServiceParamType.SLIDER, 0.08, min_val=0.01,
+        self.register_param("turbo_decay_wg", "Spool-down with WG (s)", ServiceParamType.SLIDER, 0.08, min_val=0.01,
                             max_val=0.3)
-        self.register_param("turbo_decay_slow", "Decharge sans WG (s)", ServiceParamType.SLIDER, 0.8, min_val=0.3,
+        self.register_param("turbo_decay_slow", "Spool-down without WG (s)", ServiceParamType.SLIDER, 0.8, min_val=0.3,
                             max_val=3.0)
 
         self.player_idle = None
@@ -113,14 +113,14 @@ class EngineSoundService(BaseService):
                     valid_devices.append(f"[{i}] {dev.get('name')}")
             return valid_devices if valid_devices else ["Default"]
         except Exception as e:
-            self.print_message(f"Erreur scan peripheriques audio : {e}")
+            self.print_message(f"Audio device scan error: {e}")
             return ["Default"]
 
     def on_param_changed(self, key: str, value):
         if key == "sound_model" and self.server:
             self._load_sound_model()
         elif key == "audio_device":
-            self.set_warning("Redémarrez le service pour appliquer la nouvelle sortie audio.")
+            self.set_warning("Restart the service to apply the new audio output.")
 
     def _load_sound_model(self):
         _ensure_pyo()
@@ -163,7 +163,7 @@ class EngineSoundService(BaseService):
 
             self.set_ok(f"Modele '{model_name}' charge.")
         else:
-            self.set_error(f"Fichiers manquants dans {model_name}/")
+            self.set_error(f"Missing files in {model_name}/")
 
     def start(self, stop_event: threading.Event):
         super().start(stop_event, implemented=True)
@@ -226,7 +226,7 @@ class EngineSoundService(BaseService):
             self._load_sound_model()
 
         except Exception as e:
-            self.set_error(f"Echec du backend audio: {e}")
+            self.set_error(f"Audio backend failed: {e}")
             self.print_message(f"Audio backend init failed: {e}")
             self.server = None
             return

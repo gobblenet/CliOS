@@ -4,8 +4,8 @@
     "supportedResolutions": ["1920x720"],
     "capabilities": ["settings", "commands", "vehicle-state"],
     "id": "gt_modern",
-    "label": "GT moderne",
-    "description": "Graphite mat, blanc franc et détails lumineux",
+    "label": "Modern GT",
+    "description": "Matte graphite, pure white and luminous details",
     "order": 10,
     "dashboard": "Dashboard.qml",
     "palette": {

@@ -1,1 +1,1 @@
-"""Acquisition GPS (NMEA 0183, gpsd)."""
+"""GPS acquisition (NMEA 0183, gpsd)."""

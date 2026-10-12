@@ -215,7 +215,7 @@ Item {
 
         onClicked: {
             gaugeRoot.referenceMode = gaugeRoot.referenceMode === "trip_b" ? "session" : "trip_b"
-            console.log("Mode changé vers : " + gaugeRoot.referenceMode)
+            console.log("Mode changed to: " + gaugeRoot.referenceMode)
         }
     }
 }

@@ -1,9 +1,9 @@
-"""Service GPS : position, cap et qualité de fix publiés dans le domaine navigation.
+"""GPS service: position, heading and fix quality published to the navigation domain.
 
-Sources prises en charge :
-- serial : récepteur NMEA 0183 direct (Garmin GPS 17x HVS via adaptateur USB-RS232) ;
-- gpsd   : démon gpsd local (JSON sur TCP 2947), utile si le port est partagé ;
-- mock   : trajet simulé à partir de la vitesse runtime (mode --mock).
+Supported sources:
+- serial: direct NMEA 0183 receiver (Garmin GPS 17x HVS via a USB-RS232 adapter);
+- gpsd:   local gpsd daemon (JSON over TCP 2947), useful when the port is shared;
+- mock:   simulated drive based on the runtime speed (--mock mode).
 """
 
 import glob
@@ -26,7 +26,7 @@ BAUD_PROBE_S = 2.5
 
 
 def default_serial_port() -> str:
-    """Premier adaptateur USB-série détecté, sinon le port USB par défaut."""
+    """First USB-serial adapter found, otherwise the default USB port."""
     for pattern in ("/dev/serial/by-id/*", "/dev/ttyUSB*", "/dev/ttyACM*"):
         matches = sorted(glob.glob(pattern))
         if matches:
@@ -35,7 +35,7 @@ def default_serial_port() -> str:
 
 
 def destination_point(lat: float, lon: float, bearing_deg: float, distance_m: float) -> tuple[float, float]:
-    """Point atteint depuis (lat, lon) après distance_m au cap bearing_deg."""
+    """Point reached from (lat, lon) after distance_m along bearing_deg."""
     delta = distance_m / EARTH_RADIUS_M
     theta = math.radians(bearing_deg)
     phi1 = math.radians(lat)
@@ -54,7 +54,7 @@ class GpsService(BaseService):
             "GPS",
             storage,
             service_id="clios.gps",
-            description="Position et cap GPS temps réel (NMEA série ou gpsd)",
+            description="Real-time GPS position and heading (serial NMEA or gpsd)",
         )
         self.runtime = runtime
         self.mock = mock
@@ -68,15 +68,15 @@ class GpsService(BaseService):
 
         self.register_param("source", "Source", ServiceParamType.LIST, "auto",
                             options=["auto", "serial", "gpsd"])
-        self.register_param("port", "Port série", ServiceParamType.TEXT, "")
-        self.register_param("baud", "Débit série", ServiceParamType.LIST, "auto",
+        self.register_param("port", "Serial port", ServiceParamType.TEXT, "")
+        self.register_param("baud", "Serial baud rate", ServiceParamType.LIST, "auto",
                             options=["auto"] + [str(rate) for rate in BAUD_CANDIDATES])
-        self.register_param("gpsd_host", "Hôte gpsd", ServiceParamType.TEXT, "127.0.0.1:2947")
-        self.register_param("heading_min_speed", "Vitesse mini cap (km/h)", ServiceParamType.SLIDER, 3.0,
+        self.register_param("gpsd_host", "gpsd host", ServiceParamType.TEXT, "127.0.0.1:2947")
+        self.register_param("heading_min_speed", "Minimum speed for heading (km/h)", ServiceParamType.SLIDER, 3.0,
                             min_val=0.0, max_val=20.0)
-        self.register_param("tile_url", "Serveur de tuiles (%z/%x/%y)", ServiceParamType.TEXT,
+        self.register_param("tile_url", "Tile server (%z/%x/%y)", ServiceParamType.TEXT,
                             "https://tile.openstreetmap.org/%z/%x/%y.png")
-        self.register_param("mock_origin", "Origine simulation (lat,lon)", ServiceParamType.TEXT,
+        self.register_param("mock_origin", "Simulation origin (lat,lon)", ServiceParamType.TEXT,
                             "48.8584,2.2945")
 
     # ------------------------------------------------------------------ cycle
@@ -115,10 +115,10 @@ class GpsService(BaseService):
                             try:
                                 self._run_gpsd(stop_event)
                             except OSError as gpsd_error:
-                                raise OSError(f"série : {serial_error} ; gpsd : {gpsd_error}") from gpsd_error
+                                raise OSError(f"serial: {serial_error}; gpsd: {gpsd_error}") from gpsd_error
             except (OSError, ValueError) as exc:
                 self._publish_lost()
-                self.set_error(f"GPS indisponible : {exc}")
+                self.set_error(f"GPS unavailable: {exc}")
             if not self._reconnect.is_set():
                 stop_event.wait(RETRY_DELAY_S)
 
@@ -145,10 +145,10 @@ class GpsService(BaseService):
                 if not self._probe(link, stop_event):
                     continue
                 self._source_label = f"serial:{port}@{rate}"
-                self.set_ok(f"Récepteur NMEA sur {port} ({rate} bauds)")
+                self.set_ok(f"NMEA receiver on {port} ({rate} baud)")
                 self._read_serial(link, stop_event)
                 return
-        raise OSError(f"aucune trame NMEA valide sur {port}")
+        raise OSError(f"no valid NMEA sentence on {port}")
 
     def _probe(self, link, stop_event) -> bool:
         deadline = time.monotonic() + BAUD_PROBE_S
@@ -163,17 +163,17 @@ class GpsService(BaseService):
         while not self._should_stop(stop_event):
             try:
                 raw = link.readline()
-            except Exception as exc:  # pyserial lève SerialException à la déconnexion
-                raise OSError(f"lecture série : {exc}") from exc
+            except Exception as exc:  # pyserial raises SerialException on disconnect
+                raise OSError(f"serial read: {exc}") from exc
             if raw:
                 silent_since = time.monotonic()
                 self.ingest_nmea(raw.decode("ascii", errors="replace"))
             elif time.monotonic() - silent_since > POSITION_TTL_S:
                 self._publish_lost()
-                self.set_warning("Récepteur GPS muet")
+                self.set_warning("GPS receiver silent")
 
     def ingest_nmea(self, line: str):
-        """Traite une ligne NMEA et publie à chaque fin d'époque (RMC/GGA)."""
+        """Process one NMEA line and publish at the end of each epoch (RMC/GGA)."""
         kind = self._parser.feed(line)
         if kind in ("RMC", "GGA"):
             self._publish_fix(self._parser.fix)
@@ -185,7 +185,7 @@ class GpsService(BaseService):
             conn.sendall(b'?WATCH={"enable":true,"json":true};\n')
             conn.settimeout(1.0)
             self._source_label = f"gpsd:{host}"
-            self.set_ok(f"Connecté à gpsd ({self._param('gpsd_host')})")
+            self.set_ok(f"Connected to gpsd ({self._param('gpsd_host')})")
             buffer = b""
             silent_since = time.monotonic()
             while not self._should_stop(stop_event):
@@ -194,7 +194,7 @@ class GpsService(BaseService):
                 except socket.timeout:
                     chunk = None
                 if chunk == b"":
-                    raise OSError("gpsd a fermé la connexion")
+                    raise OSError("gpsd closed the connection")
                 if chunk:
                     silent_since = time.monotonic()
                     buffer += chunk
@@ -245,7 +245,7 @@ class GpsService(BaseService):
         heading = 90.0
         radius_m = 350.0
         self._source_label = "mock"
-        self.set_ok("GPS simulé")
+        self.set_ok("Simulated GPS")
         last = time.monotonic()
         while not self._should_stop(stop_event):
             stop_event.wait(0.2)
@@ -265,8 +265,8 @@ class GpsService(BaseService):
     def _publish_fix(self, fix: GpsFix):
         has_position = fix.valid and fix.latitude is not None and fix.longitude is not None
         speed = fix.speed_kmh or 0.0
-        # Le cap GPS (route fond) n'a de sens qu'en mouvement : on garde le
-        # dernier cap connu à l'arrêt pour éviter une flèche qui tourne.
+        # GPS course over ground only makes sense while moving: keep the last
+        # known heading when stopped so the arrow doesn't spin.
         if has_position and fix.course_deg is not None and speed >= self._param("heading_min_speed"):
             self._heading = fix.course_deg
             self._heading_valid = True
@@ -302,7 +302,7 @@ class GpsService(BaseService):
         )
         self._last_publish = time.monotonic()
         if not has_position and self.status.value == "OK":
-            self.set_warning(f"Recherche satellites ({fix.satellites_in_view} visibles)")
+            self.set_warning(f"Searching for satellites ({fix.satellites_in_view} in view)")
         elif has_position and self.status.value != "OK":
             self.set_ok(f"Fix {fix.mode} — {fix.satellites_used} satellites")
 

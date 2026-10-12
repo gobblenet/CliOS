@@ -82,7 +82,7 @@ Item {
                 ctx.font = "bold 16px Arial"
                 ctx.textAlign = "center"
                 ctx.textBaseline = "middle"
-                ctx.fillText("RÉSERVOIR VIDE", w / 2, h / 2)
+                ctx.fillText("TANK EMPTY", w / 2, h / 2)
                 return
             }
 
@@ -164,7 +164,7 @@ Item {
             var autoVal = Math.round(S.UiState.autonomy)
             ctx.fillStyle = Qt.rgba(1.0, 1.0, 1.0, 0.65)
             ctx.font = "bold 13px Arial"
-            ctx.fillText("AUTONOMIE " + autoVal + " KM", w / 2, h * 0.78)
+            ctx.fillText("RANGE " + autoVal + " KM", w / 2, h * 0.78)
         }
     }
 

@@ -55,7 +55,7 @@ class PhysicsMockProvider:
                 name="PhysicsMockThread"
             )
             self._thread.start()
-            print(f"[INFO] Simulateur Physique & Bus CAN Virtuel ({self.params.label}) démarré.")
+            print(f"[INFO] Physics simulator & virtual CAN bus ({self.params.label}) started.")
             return True
 
     def close(self):

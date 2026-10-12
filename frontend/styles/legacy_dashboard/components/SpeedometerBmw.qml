@@ -141,12 +141,12 @@ Item {
 
                 // Coloration selon l'état du régulateur
                 color: {
-                    if (safeMode === "REG" && safeStatut === "ACTIF") return Theme.redLine; // Régulateur Actif
-                    if (safeMode === "LIM" && safeStatut === "ACTIF") return "#ffa500"; // Limiteur Actif
+                    if (safeMode === "CRUISE" && safeStatut === "ACTIVE") return Theme.redLine; // Régulateur Actif
+                    if (safeMode === "LIM" && safeStatut === "ACTIVE") return "#ffa500"; // Limiteur Actif
                     return Theme.unselected; // En attente
                 }
                 border.color: "white"
-                border.width: (safeMode !== "OFF" && safeStatut === "ACTIF") ? 1 : 0
+                border.width: (safeMode !== "OFF" && safeStatut === "ACTIVE") ? 1 : 0
             }
         }
 

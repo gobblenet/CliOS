@@ -59,7 +59,7 @@ class StorageManager:
 
         self._mode = StorageMode.VOLATILE
         self._usb_root: str | None = None
-        self._usb_diagnostic = "Aucun stockage USB CliOS détecté"
+        self._usb_diagnostic = "No CliOS USB storage detected"
         self._last_logged_usb_diagnostic = ""
         self._lock = threading.RLock()
         self._callbacks: list[Callable[[StorageMode], None]] = []
@@ -297,7 +297,7 @@ class StorageManager:
         try:
             mountpoints = list(self._mount_provider())
         except (OSError, RuntimeError, TypeError) as exc:
-            self._set_usb_diagnostic(f"Énumération des montages impossible: {exc}", "USB_MOUNT_SCAN_FAILED")
+            self._set_usb_diagnostic(f"Cannot enumerate mounts: {exc}", "USB_MOUNT_SCAN_FAILED")
             mountpoints = []
 
         # Le montage systemd peut précéder Cage et ne pas être remonté par
@@ -334,28 +334,28 @@ class StorageManager:
             try:
                 real_candidate = os.path.realpath(candidate)
                 if os.path.islink(candidate):
-                    self._set_usb_diagnostic(f"Lien symbolique USB refusé: {candidate}", "USB_ROOT_SYMLINK")
+                    self._set_usb_diagnostic(f"USB symlink refused: {candidate}", "USB_ROOT_SYMLINK")
                     continue
                 if not real_candidate.startswith(os.path.realpath(mount_abs) + os.sep):
-                    self._set_usb_diagnostic(f"Racine USB hors du montage: {candidate}", "USB_ROOT_ESCAPE")
+                    self._set_usb_diagnostic(f"USB root outside the mount: {candidate}", "USB_ROOT_ESCAPE")
                     continue
                 if not os.path.isdir(real_candidate):
-                    self._set_usb_diagnostic(f"Dossier CliOS absent: {candidate}", "USB_ROOT_MISSING")
+                    self._set_usb_diagnostic(f"CliOS folder missing: {candidate}", "USB_ROOT_MISSING")
                     continue
                 if not os.access(real_candidate, os.W_OK):
-                    self._set_usb_diagnostic(f"Dossier CliOS non inscriptible: {candidate}", "USB_ROOT_NOT_WRITABLE")
+                    self._set_usb_diagnostic(f"CliOS folder not writable: {candidate}", "USB_ROOT_NOT_WRITABLE")
                     continue
                 candidates.append(real_candidate)
             except OSError as exc:
-                self._set_usb_diagnostic(f"Inspection USB impossible pour {candidate}: {exc}", "USB_ROOT_SCAN_FAILED")
+                self._set_usb_diagnostic(f"Cannot inspect USB {candidate}: {exc}", "USB_ROOT_SCAN_FAILED")
                 continue
 
         if not candidates:
             if not managed_mounts:
-                self._set_usb_diagnostic("Aucun montage sous /media/clios", "USB_MOUNT_NOT_FOUND", warning=False)
+                self._set_usb_diagnostic("No mount under /media/clios", "USB_MOUNT_NOT_FOUND", warning=False)
             return None
         selected = sorted(candidates)[0]
-        self._usb_diagnostic = f"Stockage USB actif: {selected}"
+        self._usb_diagnostic = f"USB storage active: {selected}"
         self._last_logged_usb_diagnostic = ""
         return selected
 
@@ -376,7 +376,7 @@ class StorageManager:
             self._verify_usb_tree_writable(usb_root)
         except OSError as exc:
             self._set_usb_diagnostic(
-                f"Dossier CliOS inutilisable: {usb_root}: {exc}",
+                f"CliOS folder unusable: {usb_root}: {exc}",
                 "USB_ROOT_PREPARE_FAILED",
             )
             return
@@ -400,9 +400,9 @@ class StorageManager:
             self._usb_root = usb_root
             self._mode = StorageMode.USB
             if migration_error is None:
-                self._usb_diagnostic = f"Stockage USB actif: {usb_root}"
+                self._usb_diagnostic = f"USB storage active: {usb_root}"
             else:
-                self._usb_diagnostic = f"Stockage USB actif; migration partielle: {migration_error}"
+                self._usb_diagnostic = f"USB storage active; partial migration: {migration_error}"
         self._notify_callbacks(StorageMode.USB)
 
     @classmethod
@@ -573,5 +573,5 @@ class StorageManager:
         candidate = os.path.normpath(raw)
         parts = Path(candidate).parts
         if not raw or os.path.isabs(raw) or candidate == ".." or ".." in parts:
-            raise ValueError("Le chemin de stockage doit rester relatif à la racine CliOS")
+            raise ValueError("The storage path must stay relative to the CliOS root")
         return candidate

@@ -12,17 +12,17 @@ log() {
 }
 
 fail() {
-    log "ERREUR: $*"
+    log "ERROR: $*"
     echo "clios-usb-mount: $*" >&2
     exit 1
 }
 
 if [[ "$ACTION" != "mount" && "$ACTION" != "unmount" ]]; then
-    fail "action refusée (mount ou unmount attendu)"
+    fail "action refused (expected mount or unmount)"
 fi
 
 if [[ ! "$BLOCK_NAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-    fail "nom de périphérique invalide"
+    fail "invalid device name"
 fi
 
 DEVICE="/dev/${BLOCK_NAME}"
@@ -48,20 +48,20 @@ mount_device() {
         [[ -b "$DEVICE" ]] && break
         sleep 0.1
     done
-    [[ -b "$DEVICE" ]] || fail "${DEVICE} n'est pas un périphérique bloc"
-    device_is_usb || fail "${DEVICE} n'est pas un stockage USB autorisé"
+    [[ -b "$DEVICE" ]] || fail "${DEVICE} is not a block device"
+    device_is_usb || fail "${DEVICE} is not an allowed USB storage device"
 
     filesystem="$(lsblk --noheadings --nodeps --output FSTYPE "$DEVICE" | xargs)"
-    [[ -n "$filesystem" ]] || fail "aucun système de fichiers détecté sur ${DEVICE}"
+    [[ -n "$filesystem" ]] || fail "no filesystem detected on ${DEVICE}"
 
     source="$(mounted_source)"
     if [[ -n "$source" ]]; then
         [[ "$(readlink -f "$source" 2>/dev/null || true)" == "$(readlink -f "$DEVICE")" ]] \
-            || fail "${MOUNT_POINT} est déjà utilisé par ${source}"
+            || fail "${MOUNT_POINT} is already used by ${source}"
     else
         mkdir -p "$MOUNT_POINT"
         group_id="$(getent group clios | cut -d: -f3)"
-        [[ -n "$group_id" ]] || fail "le groupe clios est introuvable"
+        [[ -n "$group_id" ]] || fail "the clios group was not found"
 
         case "$filesystem" in
             vfat|msdos|exfat|ntfs|ntfs3)
@@ -86,7 +86,7 @@ mount_device() {
         chown root:clios "${clios_root}/${managed_dir}" 2>/dev/null || true
         chmod 2775 "${clios_root}/${managed_dir}" 2>/dev/null || true
     done
-    log "${DEVICE} (${filesystem}) monté sur ${MOUNT_POINT}"
+    log "${DEVICE} (${filesystem}) mounted on ${MOUNT_POINT}"
 }
 
 unmount_device() {
@@ -99,7 +99,7 @@ unmount_device() {
 
     umount "$MOUNT_POINT" 2>/dev/null || umount --lazy "$MOUNT_POINT"
     rmdir "$MOUNT_POINT" 2>/dev/null || true
-    log "${source} démonté de ${MOUNT_POINT}"
+    log "${source} unmounted from ${MOUNT_POINT}"
 }
 
 case "$ACTION" in

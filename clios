@@ -15,14 +15,14 @@ SYSTEM_MAIN="${SYSTEM_ROOT}/main.py"
 
 if [[ ! -f "$VENV_PYTHON" ]]; then
     if [[ -f "$SYSTEM_PYTHON" && -f "$SYSTEM_MAIN" ]]; then
-        echo -e "\033[1;36m[INFO] Lancement de l'installation système depuis ${SYSTEM_ROOT}.\033[0m"
+        echo -e "\033[1;36m[INFO] Launching the system installation from ${SYSTEM_ROOT}.\033[0m"
         exec "$SYSTEM_PYTHON" -u "$SYSTEM_MAIN" "$@"
     fi
-    echo -e "\033[1;31m[ERREUR] L'environnement virtuel Python est introuvable (.venv).\033[0m"
-    echo -e "\033[1;33mPour installer et configurer CliOS automatiquement, lancez :\033[0m"
+    echo -e "\033[1;31m[ERROR] The Python virtual environment (.venv) was not found.\033[0m"
+    echo -e "\033[1;33mTo install and configure CliOS automatically, run:\033[0m"
     echo -e "  \033[1;36m./install.sh\033[0m"
     echo ""
-    read -r -p "Souhaitez-vous lancer ./install.sh maintenant ? [O/n] : " answer
+    read -r -p "Run ./install.sh now? [Y/n]: " answer
     answer="${answer:-Y}"
     if [[ "$answer" =~ ^[oOyY] ]]; then
         exec "${SCRIPT_DIR}/install.sh"

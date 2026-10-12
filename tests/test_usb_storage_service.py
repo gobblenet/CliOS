@@ -27,7 +27,7 @@ class UsbStorageServiceTest(unittest.TestCase):
 
         health = service.get_health()
         self.assertEqual(health["status"], "OK")
-        self.assertIn("développement", health["message"])
+        self.assertIn("development", health["message"])
 
 
 if __name__ == "__main__":

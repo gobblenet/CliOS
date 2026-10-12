@@ -27,7 +27,7 @@ Item {
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "km/h · " + Math.round(S.UiState.rpm) + " tr/min"
+            text: "km/h · " + Math.round(S.UiState.rpm) + " rpm"
             color: T.StyleManager.textSecondary; font.pixelSize: 24
         }
         RowLayout {

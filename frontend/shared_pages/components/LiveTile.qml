@@ -3,7 +3,7 @@ import "../../style" as T
 import "../../state" as S
 import "../../state/SignalCatalog.js" as Catalog
 
-// Tuile de surveillance : valeur, unité, min/max, tendance 60 s et alarme.
+// Monitoring tile: value, unit, min/max, 60 s trend and alarm.
 Rectangle {
     id: root
     property var tile: ({})
@@ -107,7 +107,7 @@ Rectangle {
         anchors.right: parent.right; anchors.top: title.bottom; anchors.rightMargin: 14; anchors.topMargin: 6
         horizontalAlignment: Text.AlignRight
         visible: !root.editing
-        text: root.level === "stale" ? (root.info.present ? "PÉRIMÉ" : "ABSENT")
+        text: root.level === "stale" ? (root.info.present ? "STALE" : "NO DATA")
               : (isNaN(root.minSeen) ? "" : "max " + Catalog.format(root.maxSeen) + "\nmin " + Catalog.format(root.minSeen))
         color: T.StyleManager.textSecondary
         font.pixelSize: 13; font.family: T.StyleManager.fontMono

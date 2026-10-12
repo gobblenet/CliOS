@@ -60,22 +60,22 @@ class DiagnosticService(BaseService):
             is_connected = self.provider.is_connected
             self.runtime.publish("diagnostics", {"ignition_on": ignition_on}, source="diagnostics")
             if not is_connected:
-                self.set_error("Adaptateur CAN non détecté")
+                self.set_error("CAN adapter not detected")
             elif not diagnostics.get("scanning", False):
-                self.set_ok("Prêt pour scan")
+                self.set_ok("Ready to scan")
 
             if self._scan_requested.wait(timeout=0.5):
                 if is_connected:
                     try:
                         self._perform_scan()
                     except (OSError, RuntimeError, ValueError) as exc:
-                        self.set_error(f"Erreur pendant le scan : {exc}")
+                        self.set_error(f"Error during scan: {exc}")
                         self.logger.exception("Échec du scan OBD", extra={"error_code": "OBD_SCAN_FAILED"})
                 self._scan_requested.clear()
 
     def _perform_scan(self):
         self.runtime.publish("diagnostics", {"scanning": True, "codes": []}, source="diagnostics")
-        self.set_ok("Initialisation de la communication...")
+        self.set_ok("Initializing communication...")
         self._clear_frames()
 
         try:
@@ -83,7 +83,7 @@ class DiagnosticService(BaseService):
             time.sleep(0.15)
             self._clear_frames()
             if not self.provider.send_frame(0x7DF, [0x01, 0x03, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55]):
-                raise RuntimeError("Impossible d'écrire sur le bus CAN")
+                raise RuntimeError("Cannot write to the CAN bus")
 
             transport = IsoTpReassembler(flow_timeout_s=self.FLOW_TIMEOUT_S)
             deadline = self.clock() + self.GLOBAL_TIMEOUT_S
@@ -140,9 +140,9 @@ class DiagnosticService(BaseService):
                 "diagnostics", {"codes": codes, "has_scanned": True}, source="diagnostics",
             )
             if responses:
-                self.set_ok(f"Terminé. {len(codes)} défaut(s) lu(s) sur {len(responses)} ECU.")
+                self.set_ok(f"Done. {len(codes)} fault(s) read from {len(responses)} ECU(s).")
             else:
-                self.set_warning("Aucune réponse valide des calculateurs")
+                self.set_warning("No valid response from the ECUs")
         finally:
             self.runtime.publish("diagnostics", {"scanning": False}, source="diagnostics")
 
@@ -177,4 +177,4 @@ class DiagnosticService(BaseService):
         self.runtime.publish(
             "diagnostics", {"codes": codes, "has_scanned": True}, source="diagnostics",
         )
-        self.set_ok(f"Terminé. {len(codes)} défaut(s) lu(s).")
+        self.set_ok(f"Done. {len(codes)} fault(s) read.")

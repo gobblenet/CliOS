@@ -1,5 +1,5 @@
 [Unit]
-Description=Montage du stockage USB CliOS (%I)
+Description=Mount CliOS USB storage (%I)
 BindsTo=dev-%i.device
 After=dev-%i.device local-fs.target
 

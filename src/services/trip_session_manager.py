@@ -55,19 +55,19 @@ class TripSessionManager(BaseService):
                     self.trip_start_odo = float(checkpoint["metadata"]["start_odo_km"])
                     self.trip_trace = list(checkpoint.get("trace", []))
                 except (KeyError, RuntimeError, TypeError, ValueError) as exc:
-                    self.set_error(f"Reprise du trajet impossible : {exc}")
+                    self.set_error(f"Cannot resume trip: {exc}")
                     return False
 
                 self._recovery_deadline = None
                 ignition = bool(snapshot.domain("powertrain").get("key_run", False))
                 self._publish_session("RUNNING" if ignition else "WAITING_IGNITION")
                 self.last_checkpoint_time = time.monotonic()
-                self.set_ok("Trajet précédent repris")
+                self.set_ok("Previous trip resumed")
                 return True
 
             if state == "PAUSED":
                 self._publish_session("WAITING_IGNITION")
-                self.set_ok("Trajet repris, en attente de contact...")
+                self.set_ok("Trip resumed, waiting for ignition...")
                 return True
         return False
 
@@ -79,7 +79,7 @@ class TripSessionManager(BaseService):
                 return False
             if not self._archive_recovery_checkpoint():
                 self._publish_session("RECOVERY_PENDING", 0)
-                self.set_warning("Impossible d'archiver l'ancien trajet; nouvelle tentative en cours")
+                self.set_warning("Cannot archive the previous trip; retrying")
                 return False
 
             self._recovery_deadline = None
@@ -106,9 +106,9 @@ class TripSessionManager(BaseService):
             if saved:
                 self._remove_checkpoint()
                 self._recovery_checkpoint = None
-                self.set_ok("Trajet sauvegardé")
+                self.set_ok("Trip saved")
             else:
-                self.set_warning("Trajet conservé en mémoire, écriture en attente")
+                self.set_warning("Trip kept in memory, write pending")
             return saved
 
     def _publish_session(self, state, recovery_seconds=None):
@@ -143,7 +143,7 @@ class TripSessionManager(BaseService):
         self._publish_session("RUNNING")
         self._write_checkpoint(current_odo)
         self.last_checkpoint_time = time.monotonic()
-        self.set_ok("Enregistrement en cours")
+        self.set_ok("Recording")
 
     def _build_trip_summary(self, stats, end_odo, *, ended_at=None):
         end_time = time.time() if ended_at is None else float(ended_at)
@@ -184,10 +184,10 @@ class TripSessionManager(BaseService):
             filepath = os.path.join(self.trips_dir, filename)
         try:
             self._write_json_atomic(filepath, trip_summary)
-            self.print_message(f"Trajet exporté : {filename}")
+            self.print_message(f"Trip exported: {filename}")
             return True
         except (OSError, TypeError, ValueError) as exc:
-            self.set_warning(f"Écriture du trajet différée : {exc}")
+            self.set_warning(f"Trip write deferred: {exc}")
             return False
 
     @staticmethod
@@ -234,7 +234,7 @@ class TripSessionManager(BaseService):
             self._recovery_checkpoint = checkpoint
             return True
         except (OSError, RuntimeError, TypeError, ValueError) as exc:
-            self.set_warning(f"Checkpoint du trajet impossible : {exc}")
+            self.set_warning(f"Trip checkpoint failed: {exc}")
             return False
 
     def _load_checkpoint(self):
@@ -267,7 +267,7 @@ class TripSessionManager(BaseService):
                 os.replace(filepath, invalid_path)
             except OSError:
                 pass
-            self.set_warning(f"Checkpoint de trajet isolé : {exc}")
+            self.set_warning(f"Trip checkpoint quarantined: {exc}")
             return None
 
     def _archive_recovery_checkpoint(self):
@@ -299,14 +299,14 @@ class TripSessionManager(BaseService):
         except FileNotFoundError:
             pass
         except OSError as exc:
-            self.set_warning(f"Nettoyage du checkpoint impossible : {exc}")
+            self.set_warning(f"Checkpoint cleanup failed: {exc}")
 
     def _ensure_trips_dir(self):
         try:
             os.makedirs(self.trips_dir, exist_ok=True)
             return True
         except OSError as exc:
-            self.set_warning(f"Répertoire trips inaccessible : {exc}")
+            self.set_warning(f"Trips directory inaccessible: {exc}")
             return False
 
     def update_trips_dir(self, new_dir: str):
@@ -323,7 +323,7 @@ class TripSessionManager(BaseService):
                 if os.path.abspath(old_dir) != os.path.abspath(new_dir):
                     self._remove_checkpoint(old_dir)
             except (OSError, TypeError, ValueError) as exc:
-                self.set_warning(f"Déplacement du checkpoint impossible : {exc}")
+                self.set_warning(f"Cannot move checkpoint: {exc}")
                 return False
 
         with self._dir_lock:
@@ -345,7 +345,7 @@ class TripSessionManager(BaseService):
         current_odo = snapshot.domain("motion").get("odometer", 0.0)
         saved = self._write_checkpoint(current_odo)
         if saved:
-            self.set_warning("Trajet conservé; reprise proposée au prochain démarrage")
+            self.set_warning("Trip kept; resume offered at next start")
         return saved
 
     def stop(self):
@@ -354,7 +354,7 @@ class TripSessionManager(BaseService):
             snapshot = self.runtime.snapshot()
             state = snapshot.domain("session").get("state")
             if state in ["RUNNING", "PAUSED", "WAITING_IGNITION", "SUSPENDED"]:
-                self.print_message("Arrêt système détecté : checkpoint du trajet en cours.")
+                self.print_message("System shutdown detected: checkpointing the current trip.")
                 self._suspend_trip(snapshot)
 
     def start(self, stop_event: threading.Event):
@@ -391,7 +391,7 @@ class TripSessionManager(BaseService):
                 self.set_ok("Reprise de l'enregistrement")
             elif state == "PAUSED" and current_speed > 3.0:
                 self._publish_session("RUNNING")
-                self.set_ok("Reprise automatique (mouvement détecté)")
+                self.set_ok("Automatic resume (movement detected)")
             elif not ignition and state == "RUNNING":
                 with self._session_lock:
                     self._suspend_trip(snapshot)

@@ -1,8 +1,8 @@
-"""Données moteur temps réel OBD-II (mode 01), valables sur tout véhicule compatible.
+"""Real-time OBD-II engine data (mode 01) for any compatible vehicle.
 
-Complète le décodage CAN propre au profil véhicule : les PID standard sont
-découverts automatiquement puis interrogés en boucle et publiés dans le
-domaine runtime ``obd``.
+Complements the vehicle-specific CAN decoding: standard PIDs are discovered
+automatically, then polled in a loop and published to the ``obd`` runtime
+domain.
 """
 
 import threading
@@ -30,7 +30,7 @@ class ObdLiveService(BaseService):
             "OBD",
             storage,
             service_id="clios.obd_live",
-            description="Données temps réel OBD-II standard (CAN ou ELM327)",
+            description="Standard OBD-II live data (CAN or ELM327)",
         )
         self.runtime = runtime
         self.can_transport = can_transport
@@ -40,10 +40,10 @@ class ObdLiveService(BaseService):
 
         self.register_param("transport", "Interface", ServiceParamType.LIST, "auto",
                             options=["auto", "can", "elm327"])
-        self.register_param("elm_port", "Port ELM327", ServiceParamType.TEXT, "/dev/rfcomm0")
-        self.register_param("elm_baud", "Débit ELM327", ServiceParamType.LIST, "auto",
+        self.register_param("elm_port", "ELM327 port", ServiceParamType.TEXT, "/dev/rfcomm0")
+        self.register_param("elm_baud", "ELM327 baud rate", ServiceParamType.LIST, "auto",
                             options=["auto"] + [str(rate) for rate in Elm327Transport.BAUD_CANDIDATES])
-        self.register_param("poll_delay_ms", "Pause entre cycles (ms)", ServiceParamType.SLIDER, 0.0,
+        self.register_param("poll_delay_ms", "Pause between cycles (ms)", ServiceParamType.SLIDER, 0.0,
                             min_val=0.0, max_val=1000.0)
 
     def start(self, stop_event: threading.Event):
@@ -66,7 +66,7 @@ class ObdLiveService(BaseService):
         choice = self._param("transport")
         if choice == "can" or (choice == "auto" and self.can_transport is not None and self.can_transport.connected):
             if self.can_transport is None:
-                raise OSError("aucun bus CAN configuré")
+                raise OSError("no CAN bus configured")
             return self.can_transport
         return Elm327Transport(self._param("elm_port"), self._param("elm_baud"))
 
@@ -80,10 +80,10 @@ class ObdLiveService(BaseService):
                 self.poll(transport, stop_event)
             except NoEcuResponse:
                 self._publish_status(False, transport)
-                self.set_warning("Aucun calculateur ne répond (contact coupé ?)")
+                self.set_warning("No ECU is responding (ignition off?)")
             except (OSError, ValueError) as exc:
                 self._publish_status(False, transport)
-                self.set_error(f"OBD indisponible : {exc}")
+                self.set_error(f"OBD unavailable: {exc}")
             finally:
                 if transport is not None:
                     transport.close()
@@ -104,22 +104,22 @@ class ObdLiveService(BaseService):
         return supported
 
     def poll(self, transport, stop_event):
-        """Découvre les PID puis interroge en boucle jusqu'à arrêt ou perte de l'ECU."""
+        """Discover PIDs, then poll in a loop until stopped or the ECU is lost."""
         self.supported = self.discover(transport)
         fast = [pid for pid in sorted(self.supported) if pid in PIDS and PIDS[pid].fast]
         slow = [pid for pid in sorted(self.supported) if pid in PIDS and not PIDS[pid].fast]
         if MONITOR_STATUS_PID in self.supported:
             slow.insert(0, MONITOR_STATUS_PID)
         self._publish_status(True, transport)
-        self.set_ok(f"{len(fast) + len(slow)} PID sur {transport.label}")
+        self.set_ok(f"{len(fast) + len(slow)} PIDs on {transport.label}")
 
         cycle = 0
         empty_cycles = 0
         while not self._should_stop(stop_event):
             if self.runtime.snapshot().domain("diagnostics").get("scanning"):
-                stop_event.wait(0.2)  # Le scan DTC est prioritaire sur le bus.
+                stop_event.wait(0.2)  # The DTC scan has priority on the bus.
                 continue
-            # Tous les PID rapides à chaque cycle, un seul PID lent en rotation.
+            # Every fast PID each cycle, plus one slow PID in rotation.
             batch = fast + ([slow[cycle % len(slow)]] if slow else [])
             cycle += 1
             if self.poll_once(transport, batch):

@@ -27,7 +27,7 @@ class Slcan:
         except Exception as e:
             self.is_connected = False
             self.bus = None
-            raise RuntimeError(f"Impossible de se connecter au réseau {self.channel}. L'interface est-elle UP sous Linux ? : {e}")
+            raise RuntimeError(f"Cannot connect to network {self.channel}. Is the interface UP in Linux? : {e}")
 
     def read_frame(self, timeout: float = 0.1) -> can.Message | None:
         """Extrait une trame matérielle du noyau Linux."""
@@ -41,7 +41,7 @@ class Slcan:
             return msg
         except Exception:
             self.close()
-            raise RuntimeError("Perte de communication avec la carte réseau CAN.")
+            raise RuntimeError("Lost communication with the CAN interface.")
 
     def close(self) -> None:
         """Ferme la socket réseau."""
@@ -69,4 +69,4 @@ class Slcan:
             return True
         except Exception as e:
             self.close()
-            raise RuntimeError(f"Échec de l'envoi CAN : {e}")
+            raise RuntimeError(f"CAN send failed: {e}")

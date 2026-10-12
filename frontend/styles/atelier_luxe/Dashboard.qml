@@ -157,14 +157,14 @@ Item {
                         Layout.fillWidth: true; height: 50; radius: 12
                         color: "#182436"
                         border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.15)
-                        Text { anchors.centerIn: parent; text: "ANNULER"; color: "#BAC8D9"; font.pixelSize: 14; font.bold: true }
+                        Text { anchors.centerIn: parent; text: "CANCEL"; color: "#BAC8D9"; font.pixelSize: 14; font.bold: true }
                         MouseArea { anchors.fill: parent; onClicked: confirmDialog.close() }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true; height: 50; radius: 12
                         color: T.StyleManager.accent
-                        Text { anchors.centerIn: parent; text: "CONFIRMER"; color: "#000000"; font.pixelSize: 14; font.bold: true }
+                        Text { anchors.centerIn: parent; text: "CONFIRM"; color: "#000000"; font.pixelSize: 14; font.bold: true }
                         MouseArea { anchors.fill: parent; onClicked: root.executePendingAction() }
                     }
                 }

@@ -25,24 +25,24 @@ Item {
             Layout.maximumHeight: 170
             spacing: 14
             GtCard {
-                Layout.fillWidth: true; Layout.fillHeight: true; title: "Bilan du trajet"
+                Layout.fillWidth: true; Layout.fillHeight: true; title: "Trip summary"
                 RowLayout {
                     anchors.fill: parent; spacing: 30
                     GtMetric { Layout.preferredWidth: 190; Layout.minimumWidth: 190; label: "Distance"; value: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0"); unit: "km" }
-                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Carburant"; value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"); unit: "L" }
-                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Coût estimé"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€" }
+                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Fuel"; value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"); unit: "L" }
+                    GtMetric { Layout.preferredWidth: 220; Layout.minimumWidth: 220; label: "Estimated cost"; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€" }
                     Item { Layout.fillWidth: true }
                 }
             }
             GtCard {
                 Layout.preferredWidth: 360; Layout.minimumWidth: 360; Layout.maximumWidth: 360
-                Layout.fillHeight: true; title: "État · prix carburant"
+                Layout.fillHeight: true; title: "Status · fuel price"
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
                     Text {
                         Layout.fillWidth: true
-                        text: S.UiState.tripActive ? "ENREGISTREMENT ACTIF" : S.UiState.sessionState
+                        text: S.UiState.tripActive ? "RECORDING" : S.UiState.sessionState
                         color: S.UiState.tripActive ? T.StyleManager.danger : T.StyleManager.textSecondary
                         font.family: T.StyleManager.fontFamily
                         font.pixelSize: 16
@@ -74,11 +74,11 @@ Item {
             Layout.minimumHeight: 340
             spacing: 14
             GtCard {
-                Layout.fillWidth: true; Layout.fillHeight: true; title: "Éco-conduite"
+                Layout.fillWidth: true; Layout.fillHeight: true; title: "Eco-driving"
                 ColumnLayout {
                     anchors.fill: parent; spacing: 18
-                    GtMetric { Layout.fillWidth: true; label: "Agressivité moyenne"; value: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0"); unit: "%" }
-                    GtMetric { Layout.fillWidth: true; label: "Décél. sans accélérateur"; value: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0,0"); unit: "km" }
+                    GtMetric { Layout.fillWidth: true; label: "Average aggressiveness"; value: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0"); unit: "%" }
+                    GtMetric { Layout.fillWidth: true; label: "Coasting decel."; value: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0,0"); unit: "km" }
                     GtProgress {
                         Layout.fillWidth: true; height: 12
                         value: S.UiState.decelerationWithoutThrottleKm
@@ -88,22 +88,22 @@ Item {
                 }
             }
             GtCard {
-                Layout.fillWidth: true; Layout.fillHeight: true; title: "Mécanique"
+                Layout.fillWidth: true; Layout.fillHeight: true; title: "Mechanics"
                 ColumnLayout {
                     anchors.fill: parent; spacing: 18
-                    GtMetric { Layout.fillWidth: true; label: "Régime moyen"; value: S.UiState.fixed(S.UiState.avgRpm, 0, "0"); unit: "tr/min" }
-                    GtMetric { Layout.fillWidth: true; label: "Passage de rapport"; value: S.UiState.fixed(S.UiState.shiftTimeSec, 2, "0,00"); unit: "s" }
+                    GtMetric { Layout.fillWidth: true; label: "Average rpm"; value: S.UiState.fixed(S.UiState.avgRpm, 0, "0"); unit: "rpm" }
+                    GtMetric { Layout.fillWidth: true; label: "Gear shift"; value: S.UiState.fixed(S.UiState.shiftTimeSec, 2, "0,00"); unit: "s" }
                 }
             }
             GtCard {
                 Layout.preferredWidth: 340; Layout.fillHeight: true; title: "Actions"
                 ColumnLayout {
                     anchors.fill: parent; spacing: 10
-                    GtButton { Layout.fillWidth: true; text: "REMETTRE TRIP A À ZÉRO"; onClicked: root.actionRequested("reset_a") }
-                    GtButton { Layout.fillWidth: true; text: "REMETTRE TRIP B À ZÉRO"; onClicked: root.actionRequested("reset_b") }
+                    GtButton { Layout.fillWidth: true; text: "RESET TRIP A"; onClicked: root.actionRequested("reset_a") }
+                    GtButton { Layout.fillWidth: true; text: "RESET TRIP B"; onClicked: root.actionRequested("reset_b") }
                     GtButton {
                         Layout.fillWidth: true
-                        text: S.UiState.sessionState === "PAUSED" ? "REPRENDRE LE TRAJET" : "TERMINER LE TRAJET"
+                        text: S.UiState.sessionState === "PAUSED" ? "RESUME TRIP" : "END TRIP"
                         destructive: S.UiState.sessionState !== "PAUSED"
                         enabled: S.UiState.sessionState === "PAUSED" || S.UiState.tripActive
                         onClicked: root.actionRequested(S.UiState.sessionState === "PAUSED" ? "resume_trip" : "end_trip")

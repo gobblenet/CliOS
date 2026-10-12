@@ -196,10 +196,10 @@ class DeviceCatalog:
             existing.ble_address.casefold() == device.ble_address.casefold()
             for existing in self._devices.values()
         ):
-            raise ValueError("Cet appareil est deja configure.")
+            raise ValueError("This device is already configured.")
         if len(self._devices) >= MAX_DEVICES:
             raise ValueError(
-                f"Limite de {MAX_DEVICES} appareils atteinte. Supprimez un appareil avant d'en ajouter un nouveau."
+                f"Limit of {MAX_DEVICES} devices reached. Remove a device before adding a new one."
             )
         if not device.id:
             device = BleDevice(

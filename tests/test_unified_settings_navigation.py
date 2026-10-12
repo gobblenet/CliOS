@@ -126,10 +126,10 @@ class UnifiedSettingsNavigationTest(unittest.TestCase):
         self.assertIsNotNone(page)
         self.assertTrue(page.property("embedded"))
 
-        self.assertFalse(page.serviceExpanded("CAN_Moteur"))
-        self.assertTrue(page.toggleServiceDetails("CAN_Moteur"))
+        self.assertFalse(page.serviceExpanded("CAN_Engine"))
+        self.assertTrue(page.toggleServiceDetails("CAN_Engine"))
         self.app.processEvents()
-        self.assertTrue(page.serviceExpanded("CAN_Moteur"))
+        self.assertTrue(page.serviceExpanded("CAN_Engine"))
 
 
 if __name__ == "__main__":

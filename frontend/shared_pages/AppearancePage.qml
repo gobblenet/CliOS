@@ -10,7 +10,7 @@ Item {
     property int tab: initialRoute === "leds" ? 2 : (initialRoute === "accent" ? 1 : 0)
     property real currentHue: Math.max(0, T.StyleManager.rawAccent.hsvHue)
     readonly property color selectedColor: Qt.hsva(currentHue, 0.82, 0.96, 1)
-    readonly property var tabs: ["STYLES", "COULEUR D’ACCENT", "ÉCLAIRAGES BLE"]
+    readonly property var tabs: ["STYLES", "ACCENT COLOR", "BLE LIGHTING"]
     readonly property var presets: ["#48B8FF", "#4DDB8A", "#FFB33B", "#FF4D5A", "#AF7CFF", "#F4F7FA"]
     signal styleRequested(string styleId)
     signal backRequested()
@@ -18,7 +18,7 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent; anchors.margins: 20; spacing: 12
-        PageHeader { Layout.fillWidth: true; title: "Apparence"; subtitle: "Identité visuelle du cockpit et éclairages"; showBack: false }
+        PageHeader { Layout.fillWidth: true; title: "Appearance"; subtitle: "Cockpit look and lighting"; showBack: false }
         RowLayout {
             Layout.fillWidth: true; Layout.minimumHeight: 64; Layout.preferredHeight: 64; Layout.maximumHeight: 64; spacing: 10
             Repeater { model: root.tabs
@@ -45,16 +45,16 @@ Item {
                                 }
                             }
                             Text { Layout.fillWidth: true; text: modelData.description; color: T.StyleManager.textSecondary; font.pixelSize: 12; elide: Text.ElideRight }
-                            Button { Layout.fillWidth: true; Layout.preferredHeight: 58; text: T.StyleManager.styleId === modelData.id ? "STYLE ACTIF" : "APPLIQUER"; primary: T.StyleManager.styleId === modelData.id; enabled: T.StyleManager.styleId !== modelData.id; onClicked: root.styleRequested(modelData.id) }
+                            Button { Layout.fillWidth: true; Layout.preferredHeight: 58; text: T.StyleManager.styleId === modelData.id ? "ACTIVE STYLE" : "APPLY"; primary: T.StyleManager.styleId === modelData.id; enabled: T.StyleManager.styleId !== modelData.id; onClicked: root.styleRequested(modelData.id) }
                         }
                     }
                 }
             }
             RowLayout {
                 anchors.fill: parent; visible: root.tab === 1; spacing: 18
-                Card { Layout.fillWidth: true; Layout.fillHeight: true; title: "Couleur du cockpit"
+                Card { Layout.fillWidth: true; Layout.fillHeight: true; title: "Cockpit color"
                     ColumnLayout { anchors.fill: parent; spacing: 14
-                        Text { Layout.fillWidth: true; text: "Touchez l’anneau pour modifier l’accent. La page reste ouverte pour comparer le résultat."; color: T.StyleManager.textSecondary; font.pixelSize: 16; wrapMode: Text.WordWrap }
+                        Text { Layout.fillWidth: true; text: "Touch the ring to change the accent. The page stays open so you can compare the result."; color: T.StyleManager.textSecondary; font.pixelSize: 16; wrapMode: Text.WordWrap }
                         Item { id: wheel; Layout.alignment: Qt.AlignHCenter; width: 300; height: 300
                             Canvas { anchors.fill: parent; onPaint: { const c = getContext("2d"); c.clearRect(0,0,width,height); for (let i=0;i<360;i+=2) { c.beginPath(); c.lineWidth=34; c.arc(width/2,height/2,112,(i-1)*Math.PI/180,(i+2)*Math.PI/180); c.strokeStyle=Qt.hsva(i/360,0.95,1,1); c.stroke() } } }
                             Rectangle { anchors.centerIn: parent; width: 150; height: 150; radius: 75; color: root.selectedColor; border.width: 4; border.color: T.StyleManager.surfaceRaised
@@ -67,7 +67,7 @@ Item {
                         }
                     }
                 }
-                Card { Layout.preferredWidth: 420; Layout.fillHeight: true; title: "Raccourcis"
+                Card { Layout.preferredWidth: 420; Layout.fillHeight: true; title: "Shortcuts"
                     GridLayout { anchors.fill: parent; columns: 2; rowSpacing: 16; columnSpacing: 16
                         Repeater { model: root.presets
                             Rectangle { Layout.fillWidth: true; Layout.fillHeight: true; Layout.minimumHeight: 70; radius: T.StyleManager.radiusMedium; color: modelData; border.width: 3; border.color: String(T.StyleManager.rawAccent).toLowerCase() === modelData.toLowerCase() ? "white" : T.StyleManager.outline

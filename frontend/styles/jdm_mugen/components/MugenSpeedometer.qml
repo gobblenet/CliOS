@@ -254,7 +254,7 @@ Item {
             width: 14
             height: 14
             radius: 7
-            color: S.UiState.cruiseMode === "REG" ? "#34D399" : "#F59E0B"
+            color: S.UiState.cruiseMode === "CRUISE" ? "#34D399" : "#F59E0B"
             border.width: 2
             border.color: "#FFFFFF"
         }

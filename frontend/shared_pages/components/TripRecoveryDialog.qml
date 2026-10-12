@@ -23,7 +23,7 @@ Rectangle {
 
     function formattedDate(value) {
         const date = new Date(value || "")
-        return isNaN(date.getTime()) ? "" : Qt.formatDateTime(date, "dd/MM/yyyy à hh:mm")
+        return isNaN(date.getTime()) ? "" : Qt.formatDateTime(date, "dd/MM/yyyy 'at' hh:mm")
     }
 
     Rectangle {
@@ -42,7 +42,7 @@ Rectangle {
 
             Text {
                 Layout.fillWidth: true
-                text: "CONTINUER LE TRAJET PRÉCÉDENT ?"
+                text: "CONTINUE THE PREVIOUS TRIP?"
                 color: T.StyleManager.text
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 31
@@ -52,9 +52,9 @@ Rectangle {
 
             Text {
                 Layout.fillWidth: true
-                text: "Le dernier trajet a été conservé lors de l’extinction."
+                text: "The last trip was kept when the system shut down."
                       + (root.formattedDate(root.tripSummary.date) !== ""
-                         ? "\nDernier arrêt : " + root.formattedDate(root.tripSummary.date) : "")
+                         ? "\nLast stop: " + root.formattedDate(root.tripSummary.date) : "")
                 color: T.StyleManager.textSecondary
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 19
@@ -83,7 +83,7 @@ Rectangle {
                     Column {
                         anchors.centerIn: parent
                         spacing: 7
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: "COÛT ESTIMÉ"; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.bold: true }
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: "ESTIMATED COST"; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.bold: true }
                         Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.fixed(root.tripSummary.cost_eur, 2) + " €"; color: T.StyleManager.text; font.pixelSize: 30; font.bold: true }
                     }
                 }
@@ -91,7 +91,7 @@ Rectangle {
 
             Text {
                 Layout.fillWidth: true
-                text: "Nouveau trajet automatique dans " + root.secondsRemaining + " s"
+                text: "New trip starts automatically in " + root.secondsRemaining + " s"
                 color: T.StyleManager.warning
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 17
@@ -104,12 +104,12 @@ Rectangle {
                 spacing: 18
                 Button {
                     Layout.preferredWidth: 300
-                    text: "NOUVEAU TRAJET"
+                    text: "NEW TRIP"
                     onClicked: root.newTripRequested()
                 }
                 Button {
                     Layout.preferredWidth: 350
-                    text: "CONTINUER LE TRAJET"
+                    text: "CONTINUE TRIP"
                     primary: true
                     onClicked: root.resumeRequested()
                 }

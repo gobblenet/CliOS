@@ -23,11 +23,11 @@ class CabinNoiseService(BaseService):
         }, source="cabin-noise")
 
         # Paramètres de calibration audio.
-        self.register_param("calib_offset", "Calibration Micro (dB)", ServiceParamType.SLIDER, 87.0,
+        self.register_param("calib_offset", "Microphone calibration (dB)", ServiceParamType.SLIDER, 87.0,
                             min_val=50.0, max_val=120.0)
-        self.register_param("fft_threshold", "Seuil de Silence (dB)", ServiceParamType.SLIDER, 40.0,
+        self.register_param("fft_threshold", "Silence threshold (dB)", ServiceParamType.SLIDER, 40.0,
                             min_val=20.0, max_val=80.0)
-        self.register_param("fft_rate", "Rafraîchissement FFT (s)", ServiceParamType.SLIDER, 0.25,
+        self.register_param("fft_rate", "FFT refresh (s)", ServiceParamType.SLIDER, 0.25,
                             min_val=0.05, max_val=1.0)
 
     def start(self, stop_event):
@@ -89,13 +89,13 @@ class CabinNoiseService(BaseService):
             self._sd = sd
             self._stream = self._sd.InputStream(callback=self._audio_callback, channels=1, samplerate=44100)
             self._stream.start()
-            self.set_ok("Microphone actif")
+            self.set_ok("Microphone active")
 
             while not stop_event.is_set():
                 stop_event.wait(0.5)
 
         except Exception as e:
-            self.set_error(f"Erreur d'accès au micro : {e}")
+            self.set_error(f"Microphone access error: {e}")
         finally:
             if self._stream:
                 self._stream.stop()

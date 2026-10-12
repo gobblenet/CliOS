@@ -16,7 +16,7 @@ Garmin GPS 17x HVS ──RS-232──► USB-RS232 adapter ──► /dev/ttyUSB
 
 ## Opening the map
 
-- In the settings rail, select **Carte**.
+- In the settings rail, select **Map**.
 - Press **Ctrl+M** on the keyboard from anywhere to toggle between the map and the cockpit.
 - A theme can call `settingsRequested("map")` from its own button.
 
@@ -25,8 +25,8 @@ On the map:
 | Control | Action |
 |---|---|
 | Drag / mouse wheel / pinch | Pan and zoom (this turns off auto-follow) |
-| **RECENTRER** or `C` | Follow the vehicle again, with speed-based auto-zoom |
-| **CAP EN HAUT / NORD EN HAUT** or `H` | Switch between heading-up and north-up |
+| **RECENTER** or `C` | Follow the vehicle again, with speed-based auto-zoom |
+| **HEADING UP / NORTH UP** or `H` | Switch between heading-up and north-up |
 | `+` / `-` | Zoom |
 | `Esc` / **‹ COCKPIT** | Back to the dashboard |
 
@@ -52,7 +52,7 @@ echo 'SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLI
 sudo udevadm control --reload && sudo udevadm trigger
 ```
 
-Replace the vendor and product IDs with the values printed by the first command. Then set the **Port série** setting of the GPS service to `/dev/gps0`. The CliOS user must be in the `dialout` group (`sudo usermod -aG dialout $USER`).
+Replace the vendor and product IDs with the values printed by the first command. Then set the **Serial port** setting of the GPS service to `/dev/gps0`. The CliOS user must be in the `dialout` group (`sudo usermod -aG dialout $USER`).
 
 ### Quick hardware check (without CliOS)
 
@@ -65,17 +65,17 @@ If you only see garbage, try `9600`.
 
 ## GPS service settings
 
-In **Avancé → Services → GPS**:
+In **Advanced → Services → GPS**:
 
 | Setting | Default | Notes |
 |---|---|---|
 | Source | `auto` | `auto` tries the serial port first, then falls back to gpsd |
-| Port série | *(empty)* | Empty = first `/dev/serial/by-id/*`, `/dev/ttyUSB*` or `/dev/ttyACM*` |
-| Débit série | `auto` | `auto` probes 4800, 9600, 19200 and 38400 baud and keeps the first rate that produces valid NMEA |
-| Hôte gpsd | `127.0.0.1:2947` | Used when the source is `gpsd` |
-| Vitesse mini cap | 3 km/h | Below this speed, the last heading is held. GPS course over ground is noise at standstill |
-| Serveur de tuiles | OSM standard | URL template using `%z/%x/%y`; see below |
-| Origine simulation | Eiffel Tower | Starting point for `--mock` |
+| Serial port | *(empty)* | Empty = first `/dev/serial/by-id/*`, `/dev/ttyUSB*` or `/dev/ttyACM*` |
+| Serial baud rate | `auto` | `auto` probes 4800, 9600, 19200 and 38400 baud and keeps the first rate that produces valid NMEA |
+| gpsd host | `127.0.0.1:2947` | Used when the source is `gpsd` |
+| Minimum speed for heading | 3 km/h | Below this speed, the last heading is held. GPS course over ground is noise at standstill |
+| Tile server | OSM standard | URL template using `%z/%x/%y`; see below |
+| Simulation origin | Eiffel Tower | Starting point for `--mock` |
 
 Published signals (domain `navigation`, also visible in the developer page): `latitude`, `longitude`, `altitude_m`, `gps_speed`, `heading`, `heading_valid`, `gps_fix`, `gps_mode`, `gps_quality`, `gps_satellites`, `gps_satellites_in_view`, `gps_hdop`, `gps_accuracy_m` (Garmin `PGRME`), `gps_source` and `tile_url`. Position signals become STALE after 3 s without data.
 
@@ -104,7 +104,7 @@ When you change the tile URL, reopen the map to load the new tiles.
 
 ## Testing without hardware
 
-`./clios --mock` simulates a GPS that drives a loop around **Origine simulation** at the simulated vehicle speed. Use the mock control panel to change the speed.
+`./clios --mock` simulates a GPS that drives a loop around **Simulation origin** at the simulated vehicle speed. Use the mock control panel to change the speed.
 
 ## Raspberry Pi 3B notes
 

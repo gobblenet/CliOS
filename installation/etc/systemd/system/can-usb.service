@@ -1,5 +1,5 @@
 [Unit]
-Description=Configuration native de la clé USB CAN
+Description=Native setup of the USB CAN adapter
 BindsTo=sys-subsystem-net-devices-can0.device
 After=sys-subsystem-net-devices-can0.device
 

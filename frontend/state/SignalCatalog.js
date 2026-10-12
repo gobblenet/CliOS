@@ -1,60 +1,60 @@
 .pragma library
 
-// Libellés lisibles des signaux runtime ("domaine.clé"). Un signal absent
-// d'ici reste affichable : son nom est dérivé de la clé.
+// Readable labels for runtime signals ("domain.key"). A signal missing
+// from this list can still be shown: its name is derived from the key.
 var labels = {
-    "obd.engine_load": "Charge moteur",
-    "obd.coolant_temp": "Température liquide",
-    "obd.short_fuel_trim_1": "Correction courte B1",
-    "obd.long_fuel_trim_1": "Correction longue B1",
-    "obd.fuel_pressure": "Pression carburant",
-    "obd.intake_pressure": "Pression admission",
-    "obd.rpm": "Régime",
-    "obd.speed": "Vitesse",
-    "obd.timing_advance": "Avance allumage",
-    "obd.intake_temp": "Température admission",
-    "obd.maf": "Débit d'air",
-    "obd.throttle": "Papillon",
-    "obd.run_time": "Temps moteur",
-    "obd.distance_with_mil": "Distance avec voyant",
-    "obd.fuel_rail_pressure": "Pression rampe",
-    "obd.egr_commanded": "EGR commandée",
-    "obd.fuel_level": "Niveau carburant",
-    "obd.distance_since_clear": "Distance depuis effacement",
-    "obd.baro_pressure": "Pression atmosphérique",
-    "obd.catalyst_temp_b1s1": "Température catalyseur",
-    "obd.module_voltage": "Tension batterie",
-    "obd.absolute_load": "Charge absolue",
-    "obd.commanded_afr": "Lambda commandé",
-    "obd.relative_throttle": "Papillon relatif",
-    "obd.ambient_temp": "Température extérieure",
-    "obd.accel_pedal_d": "Pédale accélérateur",
-    "obd.time_with_mil": "Temps avec voyant",
-    "obd.ethanol_pct": "Taux d'éthanol",
-    "obd.relative_accel_pedal": "Pédale relative",
-    "obd.oil_temp": "Température huile",
-    "obd.fuel_rate": "Consommation",
-    "obd.actual_torque_pct": "Couple réel",
-    "obd.mil_on": "Voyant moteur",
-    "obd.dtc_count": "Défauts mémorisés",
-    "powertrain.rpm": "Régime (CAN)",
-    "powertrain.engine_temp": "Température moteur (CAN)",
-    "powertrain.fuel_level": "Carburant (CAN)",
-    "powertrain.estimated_power_hp": "Puissance estimée",
-    "powertrain.estimated_torque_nm": "Couple estimé",
-    "motion.speed": "Vitesse (CAN)",
-    "motion.odometer": "Kilométrage",
-    "environment.outside_temp": "Température extérieure (CAN)",
-    "environment.cabin_db_spl": "Bruit habitacle",
-    "navigation.gps_speed": "Vitesse GPS",
+    "obd.engine_load": "Engine load",
+    "obd.coolant_temp": "Coolant temperature",
+    "obd.short_fuel_trim_1": "Short fuel trim B1",
+    "obd.long_fuel_trim_1": "Long fuel trim B1",
+    "obd.fuel_pressure": "Fuel pressure",
+    "obd.intake_pressure": "Intake pressure",
+    "obd.rpm": "Engine speed",
+    "obd.speed": "Speed",
+    "obd.timing_advance": "Timing advance",
+    "obd.intake_temp": "Intake air temperature",
+    "obd.maf": "Mass air flow",
+    "obd.throttle": "Throttle",
+    "obd.run_time": "Engine run time",
+    "obd.distance_with_mil": "Distance with MIL on",
+    "obd.fuel_rail_pressure": "Fuel rail pressure",
+    "obd.egr_commanded": "Commanded EGR",
+    "obd.fuel_level": "Fuel level",
+    "obd.distance_since_clear": "Distance since codes cleared",
+    "obd.baro_pressure": "Barometric pressure",
+    "obd.catalyst_temp_b1s1": "Catalyst temperature",
+    "obd.module_voltage": "Battery voltage",
+    "obd.absolute_load": "Absolute load",
+    "obd.commanded_afr": "Commanded lambda",
+    "obd.relative_throttle": "Relative throttle",
+    "obd.ambient_temp": "Outside temperature",
+    "obd.accel_pedal_d": "Accelerator pedal",
+    "obd.time_with_mil": "Time with MIL on",
+    "obd.ethanol_pct": "Ethanol content",
+    "obd.relative_accel_pedal": "Relative pedal",
+    "obd.oil_temp": "Oil temperature",
+    "obd.fuel_rate": "Fuel rate",
+    "obd.actual_torque_pct": "Actual torque",
+    "obd.mil_on": "Check-engine light",
+    "obd.dtc_count": "Stored fault codes",
+    "powertrain.rpm": "Engine speed (CAN)",
+    "powertrain.engine_temp": "Engine temperature (CAN)",
+    "powertrain.fuel_level": "Fuel (CAN)",
+    "powertrain.estimated_power_hp": "Estimated power",
+    "powertrain.estimated_torque_nm": "Estimated torque",
+    "motion.speed": "Speed (CAN)",
+    "motion.odometer": "Odometer",
+    "environment.outside_temp": "Outside temperature (CAN)",
+    "environment.cabin_db_spl": "Cabin noise",
+    "navigation.gps_speed": "GPS speed",
     "navigation.altitude_m": "Altitude",
-    "navigation.heading": "Cap",
-    "navigation.gps_satellites": "Satellites GPS"
+    "navigation.heading": "Heading",
+    "navigation.gps_satellites": "GPS satellites"
 }
 
-var units = { "degC": "°C", "deg": "°", "rpm": "tr/min" }
+var units = { "degC": "°C", "deg": "°", "rpm": "rpm" }
 
-// Tableau par défaut : l'essentiel pour surveiller un moteur via OBD-II.
+// Default layout: the essentials for watching an engine over OBD-II.
 var defaultTiles = [
     { domain: "obd", key: "rpm", low: null, high: null },
     { domain: "obd", key: "speed", low: null, high: null },
@@ -89,7 +89,7 @@ function numeric(value) {
     return isFinite(parsed) ? parsed : NaN
 }
 
-// "alarm" si hors bornes, "warning" à moins de 5 % de la plage d'une borne.
+// "alarm" when out of range, "warning" within 5 % of a limit.
 function level(tile, value) {
     var number = numeric(value)
     if (isNaN(number)) return "normal"
@@ -104,8 +104,8 @@ function level(tile, value) {
 }
 
 function format(value, decimals) {
-    if (value === true) return "OUI"
-    if (value === false) return "NON"
+    if (value === true) return "YES"
+    if (value === false) return "NO"
     var number = Number(value)
     if (value === undefined || value === null || !isFinite(number)) return value === undefined || value === null ? "—" : String(value)
     if (decimals === undefined || decimals < 0) {

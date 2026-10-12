@@ -11,12 +11,12 @@ Item {
     signal actionRequested(string action)
 
     readonly property var sections: [
-        { id: "appearance", number: "02", label: "APPARENCE", sub: "Thème, ambiance et couleurs du cockpit" },
-        { id: "vehicle", number: "03", label: "VÉHICULE", sub: "Profil actif, capteurs et étalonnage" },
-        { id: "diagnostic", number: "04", label: "DIAGNOSTIC", sub: "Codes défaut et état des calculateurs" },
-        { id: "services", number: "05", label: "SERVICES", sub: "Modules et fonctions embarquées" },
-        { id: "system", number: "06", label: "SYSTÈME", sub: "Stockage, mises à jour et alimentation" },
-        { id: "leds", number: "07", label: "ÉCLAIRAGES", sub: "Bandeaux LED Bluetooth, scan et groupes" }
+        { id: "appearance", number: "02", label: "APPEARANCE", sub: "Cockpit theme, ambience and colors" },
+        { id: "vehicle", number: "03", label: "VEHICLE", sub: "Active profile, sensors and calibration" },
+        { id: "diagnostic", number: "04", label: "DIAGNOSTIC", sub: "Fault codes and ECU status" },
+        { id: "services", number: "05", label: "SERVICES", sub: "On-board modules and features" },
+        { id: "system", number: "06", label: "SYSTEM", sub: "Storage, updates and power" },
+        { id: "leds", number: "07", label: "LIGHTING", sub: "Bluetooth LED strips, scan and groups" }
     ]
 
     Rectangle { anchors.fill: parent; color: T.StyleManager.background }
@@ -49,18 +49,18 @@ Item {
                     Layout.fillWidth: true
                     spacing: 1
                     Text { text: "MENU CLIOS"; color: T.StyleManager.text; font.pixelSize: 23; font.bold: true; font.letterSpacing: 2.0 }
-                    Text { text: "Toutes les commandes dans un seul espace"; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
+                    Text { text: "All controls in one place"; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
                 }
                 Text {
-                    text: S.UiState.usbConnected ? "USB" : (S.UiState.internalStorage ? "CARTE SD" : "MODE RAM")
+                    text: S.UiState.usbConnected ? "USB" : (S.UiState.internalStorage ? "SD CARD" : "RAM MODE")
                     color: S.UiState.ramMode ? T.StyleManager.warning : T.StyleManager.success
                     font.pixelSize: 14; font.bold: true
                 }
                 Button {
                     Layout.preferredWidth: 190
                     Layout.preferredHeight: 48
-                    text: "DÉVELOPPEUR"
-                    subtext: "CAN et outils avancés"
+                    text: "DEVELOPER"
+                    subtext: "CAN and advanced tools"
                     onClicked: root.navigateRequested("developer")
                 }
                 Text { text: "CliOS " + S.UiState.systemVersion; color: T.StyleManager.textSecondary; font.pixelSize: 14 }
@@ -91,7 +91,7 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         Text { text: "01"; color: T.StyleManager.accent; font.pixelSize: 13; font.bold: true; font.letterSpacing: 2 }
-                        Text { text: "TRAJETS"; color: T.StyleManager.text; font.pixelSize: 23; font.bold: true; font.letterSpacing: 2 }
+                        Text { text: "TRIPS"; color: T.StyleManager.text; font.pixelSize: 23; font.bold: true; font.letterSpacing: 2 }
                         Item { Layout.fillWidth: true }
                         Text { text: S.UiState.sessionState; color: S.UiState.tripActive ? T.StyleManager.success : T.StyleManager.textSecondary; font.pixelSize: 12; font.bold: true }
                     }
@@ -123,13 +123,13 @@ Item {
                         Button { Layout.fillWidth: true; Layout.fillHeight: true; text: "RESET B"; destructive: true; onClicked: root.actionRequested("reset_b") }
                         Button {
                             Layout.fillWidth: true; Layout.fillHeight: true
-                            text: S.UiState.sessionState === "PAUSED" ? "REPRENDRE" : "PAUSE"
+                            text: S.UiState.sessionState === "PAUSED" ? "RESUME" : "PAUSE"
                             enabled: S.UiState.tripActive || S.UiState.sessionState === "PAUSED"
                             onClicked: root.actionRequested(S.UiState.sessionState === "PAUSED" ? "resume_trip" : "pause_trip")
                         }
                         Button {
                             Layout.fillWidth: true; Layout.fillHeight: true
-                            text: "TERMINER"; destructive: true
+                            text: "END"; destructive: true
                             enabled: S.UiState.tripActive || S.UiState.sessionState === "PAUSED"
                             onClicked: root.actionRequested("end_trip")
                         }

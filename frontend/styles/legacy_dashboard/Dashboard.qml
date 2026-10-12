@@ -108,7 +108,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: root.sessionState === "ENDED" ? "Trajet terminé" : "Résumé du trajet"
+                    text: root.sessionState === "ENDED" ? "Trip ended" : "Trip summary"
                     color: "white"
                     font.family: "Arial"
                     font.pixelSize: 34
@@ -119,16 +119,16 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 55
                     LegacyMetric { label: "Distance"; value: S.UiState.tripDistance.toFixed(1) + " km" }
-                    LegacyMetric { label: "Carburant"; value: S.UiState.tripFuelLiters.toFixed(2) + " L" }
-                    LegacyMetric { label: "Coût"; value: S.UiState.tripCost.toFixed(2) + " €" }
+                    LegacyMetric { label: "Fuel"; value: S.UiState.tripFuelLiters.toFixed(2) + " L" }
+                    LegacyMetric { label: "Cost"; value: S.UiState.tripCost.toFixed(2) + " €" }
                 }
 
                 Row {
                     visible: root.sessionState === "PAUSED"
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 20
-                    LegacyButton { text: "CONTINUER"; onClicked: root.commandRequested("resume_trip") }
-                    LegacyButton { text: "TERMINER"; dangerous: true; onClicked: root.commandRequested("end_trip") }
+                    LegacyButton { text: "CONTINUE"; onClicked: root.commandRequested("resume_trip") }
+                    LegacyButton { text: "END"; dangerous: true; onClicked: root.commandRequested("end_trip") }
                 }
             }
         }
@@ -148,7 +148,7 @@ Item {
         Text {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            text: "Autonomie  " + S.UiState.autonomy.toFixed(0) + " km"
+            text: "Range  " + S.UiState.autonomy.toFixed(0) + " km"
             color: "white"
             font.family: "Arial"
             font.pixelSize: 22
@@ -185,7 +185,7 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: "RÉGLAGES CLIOS"
+            text: "CLIOS SETTINGS"
             color: "white"
             font.family: "Arial"
             font.pixelSize: 16

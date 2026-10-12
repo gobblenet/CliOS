@@ -108,5 +108,5 @@ class VehicleMetricsService(BaseService):
                 ))
                 self.set_ok()
             except Exception as exc:
-                self.set_error(f"Calcul véhicule impossible : {exc}")
+                self.set_error(f"Vehicle calculation failed: {exc}")
             stop_event.wait(self.RATE_SECONDS)

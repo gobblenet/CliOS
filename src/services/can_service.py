@@ -44,9 +44,9 @@ class CanService(BaseService):
             available_interfaces = sorted(set(serial_ports))
 
         if not available_interfaces:
-            available_interfaces = ["can0", "Aucun réseau CAN détecté"]
+            available_interfaces = ["can0", "No CAN network detected"]
 
-        self.register_param("can_interface", "Interface Réseau", ServiceParamType.LIST, available_interfaces[0], persistent=True,
+        self.register_param("can_interface", "Network interface", ServiceParamType.LIST, available_interfaces[0], persistent=True,
                             options=available_interfaces)
 
         # Applique l'interface sélectionnée au provider.
@@ -81,9 +81,9 @@ class CanService(BaseService):
                     self.provider.connect()
                     self.activity_source.set_provider_connected(bool(self.provider.is_connected))
                     self._last_frame_ts = None
-                    self.set_warning(f"Connecté sur {self.provider.channel}, en attente de trames CAN.")
+                    self.set_warning(f"Connected on {self.provider.channel}, waiting for CAN frames.")
                 except Exception as e:
-                    self.set_error(f"Échec : {str(e)}")
+                    self.set_error(f"Failed: {str(e)}")
                     stop_event.wait(2.0)
                     continue
             else:
@@ -145,16 +145,16 @@ class CanService(BaseService):
 
             # Le service est nominal uniquement si des trames récentes sont reçues.
             if self._last_frame_ts is None:
-                self.set_warning("Connecté mais aucune trame CAN reçue.")
+                self.set_warning("Connected but no CAN frames received.")
             else:
                 frame_age = now - self._last_frame_ts
                 decoded_age = None if self._last_decoded_frame_ts is None else now - self._last_decoded_frame_ts
                 if frame_age > self._stale_timeout_s:
-                    self.set_warning(f"Aucune trame CAN depuis {frame_age:.1f}s.")
+                    self.set_warning(f"No CAN frames for {frame_age:.1f}s.")
                 elif decoded_age is None or decoded_age > self._stale_timeout_s:
-                    self.set_warning("Trames reçues, mais aucun signal véhicule récent n'est décodé.")
+                    self.set_warning("Frames received, but no recent vehicle signal is decoded.")
                 else:
-                    self.set_ok(f"Trames CAN reçues sur {self.provider.channel}.")
+                    self.set_ok(f"CAN frames received on {self.provider.channel}.")
 
             if now - last_error_publish >= 1.0:
                 self.runtime.publish(

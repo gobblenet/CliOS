@@ -25,10 +25,10 @@ class ExportService(BaseService):
         self._force_reexport_all = False
 
         # Enregistrement des parametres modifiables depuis l'interface
-        self.register_param("scan_interval", "Fréquence de scan (s)", ServiceParamType.SLIDER,
+        self.register_param("scan_interval", "Scan interval (s)", ServiceParamType.SLIDER,
                             10.0, min_val=5.0, max_val=60.0)
-        self.register_param("delete_after", "Supprimer après export", ServiceParamType.TOGGLE, False)
-        self.register_param("reexport_all", "Ré-exporter tout", ServiceParamType.BUTTON, False, persistent=False)
+        self.register_param("delete_after", "Delete after export", ServiceParamType.TOGGLE, False)
+        self.register_param("reexport_all", "Re-export everything", ServiceParamType.BUTTON, False, persistent=False)
 
         # Initialisation du registre interne des fichiers exportes
         self.history_key = f"services.{self.service_name}.history_v2"
@@ -47,7 +47,7 @@ class ExportService(BaseService):
 
     def request_reexport_all(self):
         self._force_reexport_all = True
-        self.print_message("Ré-export complet demandé pour le prochain cycle USB.")
+        self.print_message("Full re-export requested for the next USB cycle.")
         self._notifier("INFO", "Re-export total programme", 3000)
 
     def start(self, stop_event: threading.Event, implemented=False):
@@ -106,7 +106,7 @@ class ExportService(BaseService):
                     self._process_usb_export(mountpoint, config_path)
                     break
         except (OSError, RuntimeError, TypeError) as exc:
-            self.set_error(f"Erreur d'analyse des partitions : {exc}")
+            self.set_error(f"Partition scan error: {exc}")
 
     def update_data_dir(self, data_dir: str):
         """Suit le répertoire des trajets après une transition de stockage."""
@@ -150,10 +150,10 @@ class ExportService(BaseService):
                     pending_files.append((filename, src, tmp_dst, final_dst, signature))
 
             if not pending_files:
-                self.set_ok("Aucun nouveau fichier a exporter.")
+                self.set_ok("No new files to export.")
                 return
 
-            self.set_warning("Processus d'exportation actif.")
+            self.set_warning("Export in progress.")
             mode_label = " (mode re-export total)" if self._force_reexport_all else ""
             self._notifier("INFO", f"Debut de l'exportation USB{mode_label}", 3000)
 
@@ -176,14 +176,14 @@ class ExportService(BaseService):
                 self.storage.set(self.history_key, sorted(self.export_history))
             self._save_usb_history(export_dest, usb_history)
 
-            msg = f"Export terminé : {exported_count} fichiers."
+            msg = f"Export finished: {exported_count} files."
             self.set_ok(msg)
             self._notifier("OK", msg, 5000)
             self._force_reexport_all = False
 
         except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
-            self.set_error(f"Echec du transfert : {exc}")
-            self._notifier("ERROR", "Échec de l'exportation", 5000)
+            self.set_error(f"Transfer failed: {exc}")
+            self._notifier("ERROR", "Export failed", 5000)
         finally:
             self.is_exporting = False
 
@@ -244,11 +244,11 @@ class ExportService(BaseService):
         # Refuse les chemins absolus ou traversées de répertoire.
         candidate = os.path.normpath(folder)
         if os.path.isabs(candidate) or candidate.startswith("..") or "/.." in candidate:
-            raise ValueError("target_folder invalide dans clios_export.json")
+            raise ValueError("invalid target_folder in clios_export.json")
 
         export_dest = os.path.normpath(os.path.join(mountpoint, candidate))
         mount_abs = os.path.abspath(mountpoint)
         dest_abs = os.path.abspath(export_dest)
         if not (dest_abs == mount_abs or dest_abs.startswith(mount_abs + os.sep)):
-            raise ValueError("target_folder sort du point de montage")
+            raise ValueError("target_folder escapes the mount point")
         return export_dest

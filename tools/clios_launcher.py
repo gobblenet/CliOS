@@ -69,8 +69,8 @@ def main() -> int:
         manager.mark_healthy(version)
         return process.wait()
     print(
-        f"CliOS non sain après {opts.health_timeout:.1f} s; "
-        f"dernière phase: {last_startup_phase(startup_status)}",
+        f"CliOS unhealthy after {opts.health_timeout:.1f} s; "
+        f"last phase: {last_startup_phase(startup_status)}",
         file=sys.stderr,
     )
     process.terminate()
@@ -81,7 +81,7 @@ def main() -> int:
     try:
         UpdaterClient(timeout=10).rollback()
     except UpdaterClientError as exc:
-        print(f"Rollback privilégié impossible: {exc}", file=sys.stderr)
+        print(f"Privileged rollback failed: {exc}", file=sys.stderr)
         return 1
     # Le helper redémarre clios.service après avoir restauré N-1.
     return 0

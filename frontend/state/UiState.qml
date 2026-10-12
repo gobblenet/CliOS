@@ -66,7 +66,7 @@ QtObject {
     readonly property real tempWarning: number(config.engine_temp && config.engine_temp.warning, 105)
     readonly property real tempMax: number(config.engine_temp && config.engine_temp.max_display, 120)
     readonly property real instantConsMax: number(config.instant_fuel_consumption && config.instant_fuel_consumption.max_display, 20.0)
-    readonly property string engineLabel: text(config.engine && config.engine.label, "Moteur")
+    readonly property string engineLabel: text(config.engine && config.engine.label, "Engine")
     readonly property real maxPowerKw: number(config.engine && config.engine.max_power_kw, 100)
     readonly property real maxPowerHp: maxPowerKw * 1.359621617
     readonly property real maxPowerRpm: number(config.engine && config.engine.max_power_rpm, maxRpm * 0.8)
@@ -130,7 +130,7 @@ QtObject {
     // =========================================================================
     property real speed: rawSpeed
 
-    // Navigation GPS (service clios.gps)
+    // GPS navigation (clios.gps service)
     readonly property bool gpsFix: navigation.gps_fix === true && navigation.latitude !== undefined
                                    && signalFresh("navigation", "latitude")
     readonly property real latitude: number(navigation.latitude, 0)
@@ -146,7 +146,7 @@ QtObject {
     readonly property string gpsSource: text(navigation.gps_source, "")
     readonly property string mapTileUrl: text(navigation.tile_url, "https://tile.openstreetmap.org/%z/%x/%y.png")
 
-    // Données temps réel (page Live) : tuiles choisies et alarmes actives.
+    // Live data page: selected tiles and active alarms.
     readonly property bool obdConnected: obd.obd_connected === true
     readonly property string obdInterface: text(obd.obd_interface, "")
     readonly property var liveTiles: parseLiveTiles(config.ui && config.ui.live_tiles)
@@ -331,17 +331,17 @@ QtObject {
     // 9. TABLEAU UNIVERSEL DES VOYANTS DU COMBINÉ
     // =========================================================================
     readonly property var indicators: [
-        { code: "G", label: "Clignotant gauche", active: turnLeftActive, color: "#4DDB8A", blink: true },
-        { code: "D", label: "Clignotant droit", active: turnRightActive, color: "#4DDB8A", blink: true },
-        { code: "FEU", label: "Feux", active: lightsActive || highBeamActive || fogFrontActive || fogRearActive, color: "#4DDB8A", blink: false },
-        { code: "STOP", label: "Frein", active: handbrakeActive || brakeWarning, color: "#FF4D5A", blink: false },
-        { code: "CEINT", label: "Ceinture", active: driverUnbelted, color: "#FF4D5A", blink: false },
-        { code: "PORTE", label: "Porte", active: doorOpen, color: "#FFB33B", blink: false },
-        { code: "HUILE", label: "Huile", active: oilWarning, color: "#FF4D5A", blink: false },
-        { code: "BAT", label: "Batterie", active: batteryWarning, color: "#FF4D5A", blink: false },
+        { code: "L", label: "Left turn signal", active: turnLeftActive, color: "#4DDB8A", blink: true },
+        { code: "R", label: "Right turn signal", active: turnRightActive, color: "#4DDB8A", blink: true },
+        { code: "LGT", label: "Lights", active: lightsActive || highBeamActive || fogFrontActive || fogRearActive, color: "#4DDB8A", blink: false },
+        { code: "STOP", label: "Brake", active: handbrakeActive || brakeWarning, color: "#FF4D5A", blink: false },
+        { code: "BELT", label: "Seatbelt", active: driverUnbelted, color: "#FF4D5A", blink: false },
+        { code: "DOOR", label: "Door", active: doorOpen, color: "#FFB33B", blink: false },
+        { code: "OIL", label: "Oil", active: oilWarning, color: "#FF4D5A", blink: false },
+        { code: "BAT", label: "Battery", active: batteryWarning, color: "#FF4D5A", blink: false },
         { code: "ABS", label: "ABS", active: absWarning, color: "#FFB33B", blink: false },
         { code: "ESP", label: "ESP", active: espWarning, color: "#FFB33B", blink: false },
-        { code: "MOT", label: "Moteur", active: engineWarning, color: "#FFB33B", blink: false }
+        { code: "ENG", label: "Engine", active: engineWarning, color: "#FFB33B", blink: false }
     ]
 
     // =========================================================================
@@ -366,14 +366,14 @@ QtObject {
     }
 
     function cruiseModeLabel(value) {
-        if (value === "REG" || Number(value) === 2) return "REG"
+        if (value === "REG" || value === "CRUISE" || Number(value) === 2) return "CRUISE"
         if (value === "LIM" || Number(value) === 3) return "LIM"
         return "OFF"
     }
 
     function cruiseStatusLabel(value) {
-        if (value === "ACTIF" || Number(value) === 4) return "ACTIF"
-        return "INACTIF"
+        if (value === "ACTIF" || value === "ACTIVE" || Number(value) === 4) return "ACTIVE"
+        return "INACTIVE"
     }
 
     function fixed(value, decimals, fallback) {

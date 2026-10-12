@@ -5,7 +5,7 @@ import "components"
 import "../style" as T
 import "../state" as S
 
-// Carte plein écran : position GPS, cap, trace et suivi automatique.
+// Full-screen map: GPS position, heading, trail and auto-follow.
 Item {
     id: root
     objectName: "mapPage"
@@ -38,7 +38,7 @@ Item {
         if (!hasFix) return
         const point = QtPositioning.coordinate(S.UiState.latitude, S.UiState.longitude)
         const last = trail.length > 0 ? trail[trail.length - 1] : null
-        // Une trace par déplacement réel (> 3 m) limite le bruit à l'arrêt.
+        // Only record real movement (> 3 m) to limit noise while stopped.
         if (last && last.distanceTo(point) < 3) return
         const next = trail.slice(Math.max(0, trail.length - maxTrailPoints + 1))
         next.push(point)
@@ -106,7 +106,7 @@ Item {
             coordinate: root.vehicleCoordinate
             anchorPoint.x: arrow.width / 2
             anchorPoint.y: arrow.height / 2
-            // Interpolation entre deux fix (1 Hz sur Garmin) pour un mouvement fluide.
+            // Interpolate between fixes (1 Hz on Garmin) for smooth movement.
             Behavior on coordinate { CoordinateAnimation { duration: 950 } }
             sourceItem: Canvas {
                 id: arrow
@@ -153,12 +153,12 @@ Item {
         }
     }
 
-    // ── Bandeau supérieur ────────────────────────────────────────────────────
+    // ── Top bar ────────────────────────────────────────────────────
     Row {
         anchors.left: parent.left; anchors.top: parent.top; anchors.margins: 18
         spacing: 12
         Button { width: 190; height: 64; text: "‹ COCKPIT"; primary: true; onClicked: root.cockpitRequested() }
-        Button { width: 160; height: 64; text: "RÉGLAGES"; onClicked: root.settingsRequested() }
+        Button { width: 160; height: 64; text: "SETTINGS"; onClicked: root.settingsRequested() }
     }
 
     Rectangle {
@@ -175,18 +175,18 @@ Item {
             spacing: 4
             Row {
                 spacing: 8
-                // Vitesse CAN si disponible, sinon vitesse GPS.
+                // CAN speed when available, otherwise GPS speed.
                 Text { id: speedValue; text: Math.round(S.UiState.speed > 0 ? S.UiState.speed : S.UiState.gpsSpeed); color: T.StyleManager.text; font.pixelSize: 54; font.bold: true }
                 Text { anchors.baseline: speedValue.baseline; text: "km/h"; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
             }
             Text {
-                text: root.cardinal(S.UiState.heading) + "  " + Math.round(S.UiState.heading) + "°" + (S.UiState.headingValid ? "" : "  (à l'arrêt)")
+                text: root.cardinal(S.UiState.heading) + "  " + Math.round(S.UiState.heading) + "°" + (S.UiState.headingValid ? "" : "  (stopped)")
                 color: T.StyleManager.text; font.pixelSize: 20; font.bold: true
             }
             Text {
                 text: root.hasFix
                       ? "GPS " + S.UiState.gpsMode + " · " + S.UiState.gpsSatellites + " sat" + (S.UiState.gpsAccuracy > 0 ? " · ±" + Math.round(S.UiState.gpsAccuracy) + " m" : "")
-                      : "Recherche GPS… " + S.UiState.gpsSatellitesInView + " sat visibles"
+                      : "Searching GPS… " + S.UiState.gpsSatellitesInView + " sats in view"
                 color: root.hasFix ? T.StyleManager.success : T.StyleManager.warning
                 font.pixelSize: 15; font.bold: true
             }
@@ -198,7 +198,7 @@ Item {
         }
     }
 
-    // ── Commandes de carte ───────────────────────────────────────────────────
+    // ── Map controls ───────────────────────────────────────────────────
     Column {
         anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: 18
         spacing: 10
@@ -206,14 +206,14 @@ Item {
         Button { width: 210; height: 60; text: "−"; onClicked: { root.autoZoom = false; root.manualZoom = Math.max(3, map.zoomLevel - 1) } }
         Button {
             width: 210; height: 60
-            text: root.headingUp ? "CAP EN HAUT" : "NORD EN HAUT"
+            text: root.headingUp ? "HEADING UP" : "NORTH UP"
             onClicked: root.headingUp = !root.headingUp
         }
         Button {
             objectName: "recenterButton"
             width: 210; height: 60
             primary: !root.followVehicle || !root.autoZoom
-            text: "RECENTRER"
+            text: "RECENTER"
             onClicked: { root.followVehicle = true; root.autoZoom = true }
         }
     }
@@ -227,10 +227,10 @@ Item {
         border.width: 2; border.color: T.StyleManager.warning
         Column {
             anchors.centerIn: parent; spacing: 6
-            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "EN ATTENTE DU SIGNAL GPS"; color: T.StyleManager.text; font.pixelSize: 24; font.bold: true }
+            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "WAITING FOR GPS SIGNAL"; color: T.StyleManager.text; font.pixelSize: 24; font.bold: true }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: S.UiState.gpsSource !== "" ? "Source : " + S.UiState.gpsSource : "Vérifiez le service GPS et le câblage de l'antenne"
+                text: S.UiState.gpsSource !== "" ? "Source: " + S.UiState.gpsSource : "Check the GPS service and the antenna wiring"
                 color: T.StyleManager.textSecondary; font.pixelSize: 15
             }
         }

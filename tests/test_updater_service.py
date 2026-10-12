@@ -83,7 +83,7 @@ class UpdaterServiceTest(unittest.TestCase):
         mountinfo.write_text("36 25 0:32 / / rw - overlay overlay rw\n", encoding="utf-8")
         engine.update_safety.mountinfo_path = mountinfo
 
-        with self.assertRaisesRegex(RuntimeError, "protection SD active"):
+        with self.assertRaisesRegex(RuntimeError, "SD protection active"):
             engine.stage("2.0.1-rc.10")
         self.assertFalse((self.install / "releases/2.0.1-rc.10").exists())
 
@@ -112,7 +112,7 @@ class UpdaterServiceTest(unittest.TestCase):
         self.assertEqual(status["error"]["code"], "PRIVILEGE")
         self.assertEqual(status["error"]["phase"], "self_check")
         self.assertIn("self-check", status["message"])
-        self.assertIn("permission système", status["detail"])
+        self.assertIn("system permission", status["detail"])
         self.assertGreater(status["updated_at"], 0)
 
     def test_error_codes_distinguish_absence_permission_and_subprocess(self):

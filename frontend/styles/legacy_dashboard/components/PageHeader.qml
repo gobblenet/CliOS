@@ -5,7 +5,7 @@ import "../../../style" as T
 Item {
     id: root
 
-    property string title: "TITRE"
+    property string title: "TITLE"
 
     // Signal émis lors d'une demande de retour.
     signal backClicked()
@@ -47,7 +47,7 @@ Item {
             }
 
             Text {
-                text: "Retour"
+                text: "Back"
                 color: T.Theme.textMain
                 font.pixelSize: 22
                 font.bold: true

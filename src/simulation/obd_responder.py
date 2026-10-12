@@ -1,4 +1,4 @@
-"""Répondeur OBD-II mode 01 du simulateur : PID standard calculés depuis la physique."""
+"""Simulator OBD-II mode 01 responder: standard PIDs computed from the physics."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ def _frame(payload: bytes) -> can.Message:
 
 
 def mode01_responses(request: can.Message, state, params) -> list[can.Message]:
-    """Réponse trame unique à une requête mode 01, ou [] si non concernée."""
+    """Single-frame response to a mode 01 request, or [] if not applicable."""
     data = bytes(request.data)
     if request.arbitration_id not in (0x7DF, 0x7E0) or len(data) < 3:
         return []

@@ -77,7 +77,7 @@ class ProfileManagerResilientTest(unittest.TestCase):
 
             self.assertTrue(manager.recovery_mode)
             self.assertEqual(manager.active_profile_id, "missing")
-            self.assertIn("introuvable", manager.error_message)
+            self.assertIn("not found", manager.error_message)
 
 
 if __name__ == "__main__":

@@ -19,9 +19,9 @@ Item {
     property string chosenName: ""
     property string newGroupName: "Ambiance"
     readonly property var colorOptions: [
-        { label: "Accent", value: "" }, { label: "Rouge", value: "#FF3030" },
-        { label: "Vert", value: "#35D06F" }, { label: "Bleu", value: "#308CFF" },
-        { label: "Ambre", value: "#FFAA22" }, { label: "Violet", value: "#A855F7" }
+        { label: "Accent", value: "" }, { label: "Red", value: "#FF3030" },
+        { label: "Green", value: "#35D06F" }, { label: "Blue", value: "#308CFF" },
+        { label: "Amber", value: "#FFAA22" }, { label: "Violet", value: "#A855F7" }
     ]
 
     Component.onCompleted: {
@@ -77,8 +77,8 @@ Item {
                 C.Button { Layout.preferredWidth: 190; Layout.preferredHeight: 48; text: "‹ MENU"; primary: true; onClicked: root.backRequested() }
                 ColumnLayout {
                     Layout.fillWidth: true; spacing: 0
-                    Text { text: "ÉCLAIRAGES BLE"; color: T.StyleManager.text; font.pixelSize: 23; font.bold: true; font.letterSpacing: 2 }
-                    Text { text: "Jusqu'à " + S.UiState.ledMaxDevices + " contrôleurs • couleur d'accent par défaut"; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
+                    Text { text: "BLE LIGHTING"; color: T.StyleManager.text; font.pixelSize: 23; font.bold: true; font.letterSpacing: 2 }
+                    Text { text: "Up to " + S.UiState.ledMaxDevices + " controllers • accent color by default"; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
                 }
                 Text {
                     text: S.UiState.ledDevices.length + " / " + S.UiState.ledMaxDevices
@@ -93,24 +93,24 @@ Item {
 
             C.Card {
                 Layout.preferredWidth: 350; Layout.fillHeight: true
-                title: "GESTION"
+                title: "MANAGE"
                 ColumnLayout {
                     anchors.fill: parent; spacing: 12
                     Text {
                         Layout.fillWidth: true
-                        text: S.UiState.bleScanning ? "Recherche des appareils proches…" :
-                              (S.UiState.ledDevices.length === 0 ? "Aucun éclairage configuré" : S.UiState.ledDevices.length + " éclairage(s) configuré(s)")
+                        text: S.UiState.bleScanning ? "Searching for nearby devices…" :
+                              (S.UiState.ledDevices.length === 0 ? "No lighting configured" : S.UiState.ledDevices.length + " light(s) configured")
                         color: T.StyleManager.text; font.pixelSize: 19; font.bold: true; wrapMode: Text.WordWrap
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Les appareils suivent l'accent, sauf si une couleur est définie sur l'appareil ou son groupe."
+                        text: "Devices follow the accent color unless a color is set on the device or its group."
                         color: T.StyleManager.textSecondary; font.pixelSize: 14; wrapMode: Text.WordWrap
                     }
                     Item { Layout.fillHeight: true }
                     C.Button {
                         Layout.fillWidth: true; Layout.preferredHeight: 64
-                        text: S.UiState.bleScanning ? "ARRÊTER LE SCAN" : "SCANNER"
+                        text: S.UiState.bleScanning ? "STOP SCAN" : "SCAN"
                         primary: !S.UiState.bleScanning
                         enabled: S.UiState.bleScanning || S.UiState.ledDevices.length < S.UiState.ledMaxDevices
                         onClicked: {
@@ -118,14 +118,14 @@ Item {
                             else { root.view = "scan"; bridge.requestBleScan() }
                         }
                     }
-                    C.Button { Layout.fillWidth: true; Layout.preferredHeight: 56; text: "MES APPAREILS"; onClicked: root.view = "devices" }
-                    C.Button { Layout.fillWidth: true; Layout.preferredHeight: 56; text: "GROUPES"; onClicked: root.view = "groups" }
+                    C.Button { Layout.fillWidth: true; Layout.preferredHeight: 56; text: "MY DEVICES"; onClicked: root.view = "devices" }
+                    C.Button { Layout.fillWidth: true; Layout.preferredHeight: 56; text: "GROUPS"; onClicked: root.view = "groups" }
                 }
             }
 
             C.Card {
                 Layout.fillWidth: true; Layout.fillHeight: true
-                title: root.view === "scan" ? "APPAREILS DÉTECTÉS" : (root.view === "wizard" ? "ASSISTANT DE CONFIGURATION" : (root.view === "groups" ? "GROUPES" : "MES ÉCLAIRAGES"))
+                title: root.view === "scan" ? "DETECTED DEVICES" : (root.view === "wizard" ? "SETUP ASSISTANT" : (root.view === "groups" ? "GROUPS" : "MY LIGHTS"))
 
                 ListView {
                     anchors.fill: parent
@@ -143,7 +143,7 @@ Item {
                                 Layout.preferredWidth: 275; spacing: 2
                                 Text { text: modelData.name; color: T.StyleManager.text; font.pixelSize: 19; font.bold: true }
                                 Text { text: modelData.protocol + " • " + modelData.ble_address; color: T.StyleManager.textSecondary; font.pixelSize: 12; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                            Text { text: modelData.color_override || "Suit la couleur d'accent"; color: modelData.color_override || T.StyleManager.accent; font.pixelSize: 12 }
+                            Text { text: modelData.color_override || "Follows the accent color"; color: modelData.color_override || T.StyleManager.accent; font.pixelSize: 12 }
                             }
                             QC.ComboBox {
                                 Layout.preferredWidth: 128
@@ -161,10 +161,10 @@ Item {
                                 onMoved: bridge.updateLedDevice(modelData.id, "brightness", String(value))
                             }
                             Text { text: Math.round(modelData.brightness) + "%"; color: T.StyleManager.text; font.pixelSize: 14; Layout.preferredWidth: 44 }
-                            C.Button { Layout.preferredWidth: 128; Layout.preferredHeight: 54; text: "SUPPRIMER"; destructive: true; onClicked: bridge.removeLedDevice(modelData.id) }
+                            C.Button { Layout.preferredWidth: 128; Layout.preferredHeight: 54; text: "DELETE"; destructive: true; onClicked: bridge.removeLedDevice(modelData.id) }
                         }
                     }
-                    Text { anchors.centerIn: parent; visible: parent.count === 0; text: "Aucun appareil. Lancez un scan pour commencer."; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
+                    Text { anchors.centerIn: parent; visible: parent.count === 0; text: "No devices. Start a scan to begin."; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
                 }
 
                 ListView {
@@ -180,20 +180,20 @@ Item {
                             anchors.fill: parent; anchors.margins: 12; spacing: 14
                             ColumnLayout {
                                 Layout.fillWidth: true
-                                Text { text: modelData.name || "Appareil sans nom"; color: T.StyleManager.text; font.pixelSize: 19; font.bold: true }
+                                Text { text: modelData.name || "Unnamed device"; color: T.StyleManager.text; font.pixelSize: 19; font.bold: true }
                                 Text { text: modelData.address + " • " + modelData.rssi + " dBm"; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
                             }
-                            Text { text: modelData.is_candidate ? "CONNU" : "BLE"; color: modelData.is_candidate ? T.StyleManager.success : T.StyleManager.textSecondary; font.bold: true }
-                            C.Button { Layout.preferredWidth: 190; Layout.preferredHeight: 56; text: "CONFIGURER ›"; enabled: S.UiState.ledDevices.length < S.UiState.ledMaxDevices; onClicked: root.beginConfiguration(modelData) }
+                            Text { text: modelData.is_candidate ? "KNOWN" : "BLE"; color: modelData.is_candidate ? T.StyleManager.success : T.StyleManager.textSecondary; font.bold: true }
+                            C.Button { Layout.preferredWidth: 190; Layout.preferredHeight: 56; text: "CONFIGURE ›"; enabled: S.UiState.ledDevices.length < S.UiState.ledMaxDevices; onClicked: root.beginConfiguration(modelData) }
                         }
                     }
-                    Text { anchors.centerIn: parent; visible: !S.UiState.bleScanning && parent.count === 0; text: "Aucun appareil détecté"; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
+                    Text { anchors.centerIn: parent; visible: !S.UiState.bleScanning && parent.count === 0; text: "No devices detected"; color: T.StyleManager.textSecondary; font.pixelSize: 18 }
                 }
 
                 ColumnLayout {
                     anchors.fill: parent; visible: root.view === "wizard"; spacing: 12
-                    Text { text: selectedDevice.name || selectedDevice.address || "Appareil"; color: T.StyleManager.text; font.pixelSize: 22; font.bold: true }
-                    Text { Layout.fillWidth: true; text: S.UiState.bleTestState.stage === "connecting" ? "Connexion et découverte GATT…" : "Choisissez la caractéristique, puis vérifiez visuellement chaque couleur témoin."; color: T.StyleManager.textSecondary; font.pixelSize: 14; wrapMode: Text.WordWrap }
+                    Text { text: selectedDevice.name || selectedDevice.address || "Device"; color: T.StyleManager.text; font.pixelSize: 22; font.bold: true }
+                    Text { Layout.fillWidth: true; text: S.UiState.bleTestState.stage === "connecting" ? "Connecting and discovering GATT…" : "Choose the characteristic, then visually check each test color."; color: T.StyleManager.textSecondary; font.pixelSize: 14; wrapMode: Text.WordWrap }
 
                     RowLayout {
                         Layout.fillWidth: true; Layout.preferredHeight: 54; spacing: 8
@@ -202,7 +202,7 @@ Item {
                             C.Button {
                                 required property var modelData
                                 Layout.fillWidth: true; Layout.fillHeight: true
-                                text: modelData.uuid.substring(4, 8).toUpperCase() + (modelData.is_preferred ? " • CONSEILLÉ" : "")
+                                text: modelData.uuid.substring(4, 8).toUpperCase() + (modelData.is_preferred ? " • RECOMMENDED" : "")
                                 primary: root.selectedChar.uuid === modelData.uuid
                                 onClicked: root.selectedChar = modelData
                             }
@@ -217,12 +217,12 @@ Item {
                             Rectangle { width: 74; height: 74; radius: 37; color: protocols.length ? protocols[protocolIndex].witness_color : T.StyleManager.surfaceSoft }
                             ColumnLayout {
                                 Layout.fillWidth: true
-                                Text { text: protocols.length ? protocols[protocolIndex].identifier : "Aucun protocole"; color: T.StyleManager.text; font.pixelSize: 20; font.bold: true }
-                                Text { text: protocols.length ? "Couleur attendue : " + protocols[protocolIndex].witness_name : ""; color: T.StyleManager.textSecondary; font.pixelSize: 14 }
+                                Text { text: protocols.length ? protocols[protocolIndex].identifier : "No protocol"; color: T.StyleManager.text; font.pixelSize: 20; font.bold: true }
+                                Text { text: protocols.length ? "Expected color: " + protocols[protocolIndex].witness_name : ""; color: T.StyleManager.textSecondary; font.pixelSize: 14 }
                             }
-                            C.Button { Layout.preferredWidth: 150; Layout.preferredHeight: 58; text: "RE-TESTER"; primary: true; enabled: !!selectedChar.uuid && !S.UiState.bleTestState.running; onClicked: root.runProtocol(protocolIndex) }
-                            C.Button { Layout.preferredWidth: 160; Layout.preferredHeight: 58; text: "C'EST BON"; enabled: !!selectedChar.uuid; onClicked: root.confirmedProtocol = protocols[protocolIndex].identifier }
-                            C.Button { Layout.preferredWidth: 130; Layout.preferredHeight: 58; text: "SUIVANT"; enabled: protocols.length > 0; onClicked: { protocolIndex = (protocolIndex + 1) % protocols.length; root.runProtocol(protocolIndex) } }
+                            C.Button { Layout.preferredWidth: 150; Layout.preferredHeight: 58; text: "RETEST"; primary: true; enabled: !!selectedChar.uuid && !S.UiState.bleTestState.running; onClicked: root.runProtocol(protocolIndex) }
+                            C.Button { Layout.preferredWidth: 160; Layout.preferredHeight: 58; text: "LOOKS GOOD"; enabled: !!selectedChar.uuid; onClicked: root.confirmedProtocol = protocols[protocolIndex].identifier }
+                            C.Button { Layout.preferredWidth: 130; Layout.preferredHeight: 58; text: "NEXT"; enabled: protocols.length > 0; onClicked: { protocolIndex = (protocolIndex + 1) % protocols.length; root.runProtocol(protocolIndex) } }
                         }
                     }
 
@@ -244,9 +244,9 @@ Item {
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        C.Button { Layout.preferredWidth: 170; Layout.preferredHeight: 52; text: "ANNULER"; destructive: true; onClicked: { bridge.stopBleTest(); root.view = "scan" } }
+                        C.Button { Layout.preferredWidth: 170; Layout.preferredHeight: 52; text: "CANCEL"; destructive: true; onClicked: { bridge.stopBleTest(); root.view = "scan" } }
                         Item { Layout.fillWidth: true }
-                        C.Button { Layout.preferredWidth: 230; Layout.preferredHeight: 52; text: "AJOUTER"; primary: true; enabled: confirmedProtocol !== "" && chosenName !== ""; onClicked: root.addConfirmedDevice() }
+                        C.Button { Layout.preferredWidth: 230; Layout.preferredHeight: 52; text: "ADD"; primary: true; enabled: confirmedProtocol !== "" && chosenName !== ""; onClicked: root.addConfirmedDevice() }
                     }
                 }
 
@@ -254,8 +254,8 @@ Item {
                     anchors.fill: parent; visible: root.view === "groups"; spacing: 10
                     RowLayout {
                         Layout.fillWidth: true
-                        QC.TextField { Layout.fillWidth: true; text: root.newGroupName; placeholderText: "Nom du groupe"; onTextChanged: root.newGroupName = text }
-                        C.Button { Layout.preferredWidth: 180; Layout.preferredHeight: 54; text: "CRÉER"; onClicked: bridge.addLedGroup(root.newGroupName) }
+                        QC.TextField { Layout.fillWidth: true; text: root.newGroupName; placeholderText: "Group name"; onTextChanged: root.newGroupName = text }
+                        C.Button { Layout.preferredWidth: 180; Layout.preferredHeight: 54; text: "CREATE"; onClicked: bridge.addLedGroup(root.newGroupName) }
                     }
                     ListView {
                         Layout.fillWidth: true; Layout.fillHeight: true; clip: true; spacing: 8
@@ -270,7 +270,7 @@ Item {
                                 anchors.fill: parent; anchors.margins: 10; spacing: 6
                                 RowLayout {
                                     Layout.fillWidth: true; Layout.preferredHeight: 62; spacing: 12
-                                    ColumnLayout { Layout.preferredWidth: 210; Text { text: groupCard.groupData.name; color: T.StyleManager.text; font.pixelSize: 18; font.bold: true } Text { text: groupCard.groupData.device_count + " appareil(s)"; color: T.StyleManager.textSecondary; font.pixelSize: 12 } }
+                                    ColumnLayout { Layout.preferredWidth: 210; Text { text: groupCard.groupData.name; color: T.StyleManager.text; font.pixelSize: 18; font.bold: true } Text { text: groupCard.groupData.device_count + " device(s)"; color: T.StyleManager.textSecondary; font.pixelSize: 12 } }
                                     C.Toggle { checked: groupCard.groupData.enabled; onToggled: checked => bridge.updateLedGroup(groupCard.groupData.id, "enabled", checked ? "true" : "false") }
                                     QC.Slider { Layout.fillWidth: true; from: 0; to: 100; value: groupCard.groupData.brightness; onMoved: bridge.updateLedGroup(groupCard.groupData.id, "brightness", String(value)) }
                                     QC.ComboBox {
@@ -278,12 +278,12 @@ Item {
                                         currentIndex: root.colorIndex(groupCard.groupData.color_override)
                                         onActivated: index => bridge.updateLedGroup(groupCard.groupData.id, "color_override", root.colorOptions[index].value)
                                     }
-                                    C.Button { Layout.preferredWidth: 130; Layout.preferredHeight: 52; text: "SUPPRIMER"; destructive: true; enabled: groupCard.groupData.id !== "all"; onClicked: bridge.removeLedGroup(groupCard.groupData.id) }
+                                    C.Button { Layout.preferredWidth: 130; Layout.preferredHeight: 52; text: "DELETE"; destructive: true; enabled: groupCard.groupData.id !== "all"; onClicked: bridge.removeLedGroup(groupCard.groupData.id) }
                                 }
                                 RowLayout {
                                     Layout.fillWidth: true; Layout.preferredHeight: 48
                                     visible: groupCard.groupData.id !== "all"
-                                    Text { text: "MEMBRES"; color: T.StyleManager.textSecondary; font.pixelSize: 12; font.bold: true }
+                                    Text { text: "MEMBERS"; color: T.StyleManager.textSecondary; font.pixelSize: 12; font.bold: true }
                                     Repeater {
                                         model: S.UiState.ledDevices
                                         C.Button {
@@ -298,7 +298,7 @@ Item {
                             }
                         }
                     }
-                    Text { text: "L'appartenance aux groupes est conservée dans le catalogue. Le groupe Tout contient chaque nouvel appareil."; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
+                    Text { text: "Group membership is kept in the catalog. The All group contains every new device."; color: T.StyleManager.textSecondary; font.pixelSize: 13 }
                 }
             }
         }

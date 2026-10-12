@@ -102,7 +102,7 @@ def normalize_param_type(param_type: Any) -> ServiceParamType:
         return ServiceParamType(str(param_type).strip().lower())
     except Exception as exc:
         allowed = ", ".join(t.value for t in ServiceParamType)
-        raise ValueError(f"Type de parametre invalide: {param_type!r}. Types autorises: {allowed}") from exc
+        raise ValueError(f"Invalid parameter type: {param_type!r}. Allowed types: {allowed}") from exc
 
 
 def coerce_param_value(param_type: Any, value: Any, default: Any, schema: Mapping[str, Any]) -> Any:

@@ -63,7 +63,7 @@ class UpdaterEngine:
         state = str(previous.get("state", "IDLE"))
         if state not in ACTIVE_UPDATE_STATES:
             return
-        message = f"opération {state.lower()} interrompue au redémarrage du helper"
+        message = f"operation {state.lower()} interrupted when the helper restarted"
         previous.update({
             "state": "ERROR",
             "message": message,
@@ -76,10 +76,10 @@ class UpdaterEngine:
 
     def handle(self, request: object) -> dict:
         if not isinstance(request, dict):
-            raise UpdaterProtocolError("la requête doit être un objet JSON")
+            raise UpdaterProtocolError("the request must be a JSON object")
         operation = request.get("operation")
         if operation not in self.OPERATIONS:
-            raise UpdaterProtocolError("opération inconnue")
+            raise UpdaterProtocolError("unknown operation")
         allowed = self.OPERATIONS[operation] | {"operation"}
         extra = set(request) - allowed
         if extra:
@@ -87,7 +87,7 @@ class UpdaterEngine:
         if operation == "status":
             return self.status()
         if not self._lock.acquire(blocking=False):
-            raise ReleaseError("une opération updater est déjà en cours")
+            raise ReleaseError("an updater operation is already in progress")
         try:
             operation_id = self._operation_id(request.get("operation_id"))
             if operation == "stage":
@@ -96,7 +96,7 @@ class UpdaterEngine:
                 return self.activate(self._version(request.get("version")), operation_id)
             stable_only = request.get("stable_only", False)
             if not isinstance(stable_only, bool):
-                raise UpdaterProtocolError("stable_only doit être booléen")
+                raise UpdaterProtocolError("stable_only must be a boolean")
             return self.rollback(stable_only, operation_id)
         finally:
             self._lock.release()
@@ -119,15 +119,15 @@ class UpdaterEngine:
         self._write_status({
             "state": "DOWNLOADING", "operation": "stage", "version": version,
             "phase": "catalog", "progress": 1,
-            "message": "Résolution de la release sur GitHub",
-            "detail": "Lecture du catalogue et sélection des artefacts signés",
+            "message": "Resolving the release on GitHub",
+            "detail": "Reading the catalog and selecting signed artifacts",
             "error": None, "operation_id": operation_id, "indeterminate": True,
         })
         self._start_heartbeat(operation_id)
         try:
             if self.update_safety.path_is_overlay(self.manager.install_root):
                 error = ReleaseError(
-                    "protection SD active: désactivez OverlayFS et redémarrez avant la mise à jour"
+                    "SD protection active: disable OverlayFS and reboot before updating"
                 )
                 error.code = "OVERLAYFS"  # type: ignore[attr-defined]
                 raise error
@@ -135,8 +135,8 @@ class UpdaterEngine:
             self._write_status({
                 "state": "DOWNLOADING", "operation": "stage", "version": version,
                 "phase": "manifest", "progress": 4,
-                "message": "Métadonnées GitHub vérifiées",
-                "detail": "Le manifeste correspond à la version et à la plateforme",
+                "message": "GitHub metadata verified",
+                "detail": "The manifest matches the version and platform",
                 "last_manifest": manifest, "error": None,
                 "operation_id": operation_id, "indeterminate": False,
             })
@@ -157,7 +157,7 @@ class UpdaterEngine:
         self._active_operation_id = operation_id
         self._write_status({"state": "ACTIVATING", "operation": "activate", "version": version,
                             "phase": "activate", "progress": 99,
-                            "message": "Activation atomique", "detail": "Bascule du lien current",
+                            "message": "Atomic activation", "detail": "Switching the current link",
                             "error": None, "operation_id": operation_id, "indeterminate": True})
         try:
             marker = self.manager.state_root / f"health-{version}"
@@ -187,7 +187,7 @@ class UpdaterEngine:
         self._active_operation_id = operation_id
         self._write_status({"state": "ACTIVATING", "operation": "rollback", "progress": 99,
                             "phase": "rollback", "message": "Rollback",
-                            "detail": "Restauration de la release précédente", "error": None,
+                            "detail": "Restoring the previous release", "error": None,
                             "operation_id": operation_id, "indeterminate": True})
         try:
             target = self.manager.rollback(stable_only=stable_only)
@@ -218,7 +218,7 @@ class UpdaterEngine:
         if value is None:
             return uuid.uuid4().hex
         if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{7,63}", value):
-            raise UpdaterProtocolError("operation_id invalide")
+            raise UpdaterProtocolError("invalid operation_id")
         return value
 
     def _progress(self, state: str, progress: int, message: str, **details) -> None:
@@ -239,7 +239,7 @@ class UpdaterEngine:
         current = self._read_status()
         phase = str(current.get("phase", "operation"))
         raw_message = str(exc)
-        message = f"Échec pendant {self._phase_label(phase)} : {raw_message}"
+        message = f"Failed during {self._phase_label(phase)}: {raw_message}"
         diagnostic = self._exception_diagnostic(exc)
         current.update({
             "state": "ERROR", "message": message,
@@ -276,13 +276,13 @@ class UpdaterEngine:
             return "SHA256"
         if "signature" in message or "ed25519" in message:
             return "SIGNATURE"
-        if getattr(exc, "errno", None) == errno.ENOSPC or "espace disque" in message or "no space" in message:
+        if getattr(exc, "errno", None) == errno.ENOSPC or "espace disque" in message or "disk space" in message or "no space" in message:
             return "DISK_SPACE"
         if "self-check" in message:
             return "SELF_CHECK"
         if (
             getattr(exc, "errno", None) in {errno.ENETDOWN, errno.ENETUNREACH, errno.ECONNRESET, errno.ETIMEDOUT}
-            or "réseau" in message or "github inaccessible" in message or "timed out" in message
+            or "réseau" in message or "network" in message or "github inaccessible" in message or "timed out" in message
         ):
             return "NETWORK"
         return "UPDATE_ERROR"
@@ -290,30 +290,30 @@ class UpdaterEngine:
     @staticmethod
     def _phase_label(phase: str) -> str:
         return {
-            "catalog": "la résolution GitHub", "manifest": "la vérification du manifeste",
-            "signature": "la vérification de signature", "archive": "le téléchargement de l'archive",
-            "hash": "la vérification SHA-256", "extract": "l'extraction",
-            "environment": "l'installation de l'environnement", "self_check": "le self-check",
-            "precompile": "la précompilation", "activate": "l'activation",
-            "rollback": "le rollback",
-        }.get(phase, "la mise à jour")
+            "catalog": "GitHub resolution", "manifest": "manifest verification",
+            "signature": "signature verification", "archive": "archive download",
+            "hash": "SHA-256 verification", "extract": "extraction",
+            "environment": "environment installation", "self_check": "self-check",
+            "precompile": "precompilation", "activate": "activation",
+            "rollback": "rollback",
+        }.get(phase, "the update")
 
     @staticmethod
     def _error_hint(code: str, exc: Exception) -> str:
         if code == "PRIVILEGE":
             return (
-                "Le helper a été bloqué par une permission système. Consultez le journal "
-                "clios-updater pour connaître l'appel refusé."
+                "The helper was blocked by a system permission. Check the "
+                "clios-updater log to see which call was refused."
             )
         if code == "NETWORK":
-            return "Vérifiez la connexion Internet ; aucun fichier actif n'a été remplacé."
+            return "Check the Internet connection; no active file was replaced."
         if code == "DISK_SPACE":
-            return "Libérez de l'espace dans /opt/clios puis relancez le téléchargement."
+            return "Free up space in /opt/clios, then restart the download."
         if code == "DEPENDENCY_MISSING":
-            return "Installez la dépendance indiquée ou utilisez une release avec wheelhouse complet."
+            return "Install the listed dependency or use a release with a complete wheelhouse."
         if code == "NOT_FOUND":
-            return "Un chemin requis est absent ; collectez le diagnostic updater avant de relancer."
-        return f"Aucune release active n'a été remplacée. Détail système : {exc}"
+            return "A required path is missing; collect the updater diagnostics before retrying."
+        return f"No active release was replaced. System detail: {exc}"
 
     @staticmethod
     def _bounded(value: object, limit: int = 2048) -> str:
@@ -424,15 +424,15 @@ class UpdaterEngine:
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=30, check=False)
         except FileNotFoundError as exc:
-            raise ReleaseDependencyError("systemctl absent") from exc
+            raise ReleaseDependencyError("systemctl missing") from exc
         except subprocess.TimeoutExpired as exc:
             raise ReleaseCommandError(
-                "redémarrage clios.service expiré", command,
+                "clios.service restart timed out", command,
                 stderr=str(exc.stderr or exc.stdout or exc), code="SUBPROCESS_TIMEOUT",
             ) from exc
         if result.returncode:
             raise ReleaseCommandError(
-                "redémarrage clios.service impossible", command,
+                "clios.service restart failed", command,
                 returncode=result.returncode, stderr=result.stderr or result.stdout,
             )
 
@@ -445,7 +445,7 @@ class UpdaterEngine:
                     self._write_status({"state": "IDLE", "version": version, "progress": 100,
                                         "phase": "complete", "indeterminate": False,
                                         "operation_id": operation_id,
-                                        "message": "Premier démarrage validé", "error": None})
+                                        "message": "First start validated", "error": None})
                 return
             time.sleep(min(0.05, max(0.01, self.health_timeout)))
         with self._lock:
@@ -458,8 +458,8 @@ class UpdaterEngine:
                 self._write_status({"state": "ERROR", "version": restored.name, "progress": 100,
                                     "phase": "first_boot", "indeterminate": False,
                                     "operation_id": operation_id,
-                                    "message": f"{version} sans marqueur de santé; rollback automatique",
-                                    "error": {"code": "HEALTH_TIMEOUT", "message": "premier démarrage non validé",
+                                    "message": f"{version} has no health marker; automatic rollback",
+                                    "error": {"code": "HEALTH_TIMEOUT", "message": "first start not validated",
                                               "phase": "first_boot"}})
                 self.restart()
             except Exception as exc:
@@ -470,7 +470,7 @@ class _Handler(socketserver.StreamRequestHandler):
     def handle(self) -> None:
         raw = self.rfile.readline(4097)
         if not raw or len(raw) > 4096:
-            self._reply_error("PROTOCOL", "requête absente ou trop longue")
+            self._reply_error("PROTOCOL", "request missing or too long")
             return
         try:
             request = json.loads(raw.decode("utf-8"))
@@ -481,7 +481,7 @@ class _Handler(socketserver.StreamRequestHandler):
         except (CatalogError, ReleaseError, OSError) as exc:
             self._reply_error(self.server.engine.error_code(exc), str(exc))  # type: ignore[attr-defined]
         except Exception:
-            self._reply_error("INTERNAL", "erreur interne du helper")
+            self._reply_error("INTERNAL", "internal helper error")
 
     def _reply_error(self, code: str, message: str) -> None:
         self._reply({"ok": False, "error": {"code": code, "message": message}})
@@ -505,14 +505,14 @@ class UpdaterServer(socketserver.ThreadingMixIn, socketserver.UnixStreamServer):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Helper privilégié CliOS")
+    parser = argparse.ArgumentParser(description="CliOS privileged helper")
     parser.add_argument("--socket", default="/run/clios/updater.sock")
     parser.add_argument("--install-root", default="/opt/clios")
     parser.add_argument("--state-root", default="/var/lib/clios")
     parser.add_argument("--config", default="/etc/clios/updater.json")
     args = parser.parse_args()
     if os.geteuid() != 0:
-        raise SystemExit("clios-updater doit être exécuté par root")
+        raise SystemExit("clios-updater must be run as root")
     manager = ReleaseManager(args.install_root, args.state_root, self_check_user="clios")
     catalog = ReleaseCatalog(args.config, str(Path(args.state_root) / "catalog-cache.json"))
     engine = UpdaterEngine(manager, catalog, str(Path(args.state_root) / "updater-status.json"))

@@ -68,7 +68,7 @@ Item {
                         Layout.fillWidth: true
                         spacing: 2
                         Text {
-                            text: Qt.formatDate(new Date(), "dddd d MMMM yyyy").toUpperCase()
+                            text: new Date().toLocaleDateString(Qt.locale("en_US"), "dddd d MMMM yyyy").toUpperCase()
                             color: T.StyleManager.accent
                             font.family: T.StyleManager.fontFamily
                             font.pixelSize: 13
@@ -76,7 +76,7 @@ Item {
                             font.letterSpacing: 1.5
                         }
                         Text {
-                            text: S.UiState.profileName() + " · CHÂSSIS ACTIF"
+                            text: S.UiState.profileName() + " · ACTIVE CHASSIS"
                             color: "#BAC8D9"
                             font.family: T.StyleManager.fontFamily
                             font.pixelSize: 11
@@ -92,7 +92,7 @@ Item {
                     ColumnLayout {
                         spacing: 2
                         Text {
-                            text: "TEMPÉRATURE EXT."
+                            text: "OUTSIDE TEMP."
                             color: "#8A9BAF"
                             font.family: T.StyleManager.fontFamily
                             font.pixelSize: 10
@@ -152,7 +152,7 @@ Item {
                                 color: S.UiState.tripActive ? T.StyleManager.accent : "#8A9BAF"
                             }
                             Text {
-                                text: "SESSION DE CONDUITE"
+                                text: "DRIVING SESSION"
                                 color: S.UiState.tripActive ? T.StyleManager.accent : "#BAC8D9"
                                 font.family: T.StyleManager.fontFamily
                                 font.pixelSize: 12
@@ -189,7 +189,7 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 2
-                                Text { text: "CARBURANT"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "FUEL"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Text { text: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00") + " L"; color: "#FFFFFF"; font.pixelSize: 22; font.weight: Font.Bold }
                             }
 
@@ -199,7 +199,7 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 2
-                                Text { text: "COÛT ESTIMÉ"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "ESTIMATED COST"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Text { text: S.UiState.fixed(S.UiState.tripCost, 2, "0,00") + " €"; color: T.StyleManager.accent; font.pixelSize: 22; font.weight: Font.Bold }
                             }
                         }
@@ -212,12 +212,12 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 2
-                                Text { text: "DÉCÉLÉRATION SANS GAZ"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "COASTING DECELERATION"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Text { text: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0,0") + " km"; color: T.StyleManager.success; font.pixelSize: 20; font.weight: Font.Bold }
                             }
                             ColumnLayout {
                                 spacing: 2
-                                Text { text: "AGRESSIVITÉ"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "AGGRESSIVENESS"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Text { text: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0") + " %"; color: "#FFFFFF"; font.pixelSize: 20; font.weight: Font.Bold }
                             }
                         }
@@ -244,7 +244,7 @@ Item {
                         RowLayout {
                             Layout.fillWidth: true
                             Text {
-                                text: "TRIP B JOURNALIER"
+                                text: "DAILY TRIP B"
                                 color: "#BAC8D9"
                                 font.family: T.StyleManager.fontFamily
                                 font.pixelSize: 12
@@ -305,7 +305,7 @@ Item {
                                     font.pixelSize: 32
                                     font.weight: Font.Bold
                                 }
-                                Text { text: "MOYENNE / 100 KM"; color: "#8A9BAF"; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "AVERAGE / 100 KM"; color: "#8A9BAF"; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
                             }
                         }
 
@@ -318,7 +318,7 @@ Item {
 
                             RowLayout {
                                 Layout.fillWidth: true
-                                Text { text: "ACCÉLÉRATION LONG."; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "LONG. ACCELERATION"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Item { Layout.fillWidth: true }
                                 Text {
                                     text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0.00") + " G"
@@ -353,9 +353,9 @@ Item {
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 2
-                                Text { text: "RÉVISION ENTRETIEN"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
+                                Text { text: "SERVICE DUE"; color: "#8A9BAF"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1 }
                                 Text {
-                                    text: S.UiState.fixed(S.UiState.kmBeforeService, 0, "—") + " km restants"
+                                    text: S.UiState.fixed(S.UiState.kmBeforeService, 0, "—") + " km remaining"
                                     color: S.UiState.serviceWarning ? T.StyleManager.warning : "#FFFFFF"
                                     font.family: T.StyleManager.fontFamily
                                     font.pixelSize: 16

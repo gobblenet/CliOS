@@ -1,5 +1,5 @@
 [Unit]
-Description=Pont SLCAN pour modem USB ttyACM0
+Description=SLCAN bridge for the ttyACM0 USB adapter
 # Le service s'allume et s'eteint en meme temps que le port USB
 BindsTo=dev-ttyACM0.device
 After=dev-ttyACM0.device

@@ -34,7 +34,7 @@ Item {
         majorStep: 1000
         minorTicksCount: 3
         redlineStartValue: S.UiState.number(S.UiState.redlineRpm, 6500)
-        unitText: "TR/MIN"
+        unitText: "RPM"
         isRightDial: true
     }
 
@@ -91,7 +91,7 @@ Item {
                 spacing: 2
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "CONSO INSTANTANÉE"
+                    text: "INSTANT CONSUMPTION"
                     color: "#BAC8D9"
                     font.family: T.StyleManager.fontFamily
                     font.pixelSize: 11
@@ -126,7 +126,7 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
                     Text {
-                        text: "EAU MOTEUR"
+                        text: "COOLANT"
                         color: S.UiState.engineTemp >= 105 ? T.StyleManager.danger : "#BAC8D9"
                         font.family: T.StyleManager.fontFamily
                         font.pixelSize: 11

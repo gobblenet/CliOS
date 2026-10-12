@@ -20,7 +20,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: 1120
-            title: "POWERTRAIN  /  TEMPS RÉEL"
+            title: "POWERTRAIN  /  REAL TIME"
             highlighted: S.UiState.redline
             glowColor: S.UiState.redline ? "#FF5964" : T.StyleManager.accent
 
@@ -35,9 +35,9 @@ Item {
 
                     Repeater {
                         model: [
-                            { label: "PUISSANCE", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "ch", color: T.StyleManager.accent },
-                            { label: "COUPLE", value: S.UiState.fixed(S.UiState.torque, 0, "0"), unit: "N·m", color: "#FFFFFF" },
-                            { label: "RÉGIME", value: Math.round(S.UiState.rpm), unit: "tr/min", color: S.UiState.redline ? "#FF6670" : "#FFFFFF" }
+                            { label: "POWER", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "ch", color: T.StyleManager.accent },
+                            { label: "TORQUE", value: S.UiState.fixed(S.UiState.torque, 0, "0"), unit: "N·m", color: "#FFFFFF" },
+                            { label: "RPM", value: Math.round(S.UiState.rpm), unit: "rpm", color: S.UiState.redline ? "#FF6670" : "#FFFFFF" }
                         ]
                         delegate: Item {
                             Layout.fillWidth: true
@@ -139,8 +139,8 @@ Item {
                         anchors.top: parent.top
                         anchors.margins: 18
                         spacing: 20
-                        Row { spacing: 7; Rectangle { width: 16; height: 3; radius: 2; color: T.StyleManager.accent; anchors.verticalCenter: parent.verticalCenter } Text { text: "PUISSANCE  ·  " + Math.round(S.UiState.maxPowerHp) + " CH À " + Math.round(S.UiState.maxPowerRpm) + " TR/MIN"; color: "#C0CEDA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0 } }
-                        Row { spacing: 7; Rectangle { width: 16; height: 3; radius: 2; color: "#FFFFFF"; opacity: 0.72; anchors.verticalCenter: parent.verticalCenter } Text { text: "COUPLE  ·  " + Math.round(S.UiState.maxTorqueNm) + " N·M À " + Math.round(S.UiState.maxTorqueRpm) + " TR/MIN"; color: "#C0CEDA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0 } }
+                        Row { spacing: 7; Rectangle { width: 16; height: 3; radius: 2; color: T.StyleManager.accent; anchors.verticalCenter: parent.verticalCenter } Text { text: "POWER  ·  " + Math.round(S.UiState.maxPowerHp) + " HP AT " + Math.round(S.UiState.maxPowerRpm) + " RPM"; color: "#C0CEDA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0 } }
+                        Row { spacing: 7; Rectangle { width: 16; height: 3; radius: 2; color: "#FFFFFF"; opacity: 0.72; anchors.verticalCenter: parent.verticalCenter } Text { text: "TORQUE  ·  " + Math.round(S.UiState.maxTorqueNm) + " N·M AT " + Math.round(S.UiState.maxTorqueRpm) + " RPM"; color: "#C0CEDA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.0 } }
                     }
                 }
 
@@ -151,8 +151,8 @@ Item {
 
                     Repeater {
                         model: [
-                            { label: "ACCÉLÉRATEUR", value: Math.min(1, S.UiState.throttle / 100), text: S.UiState.fixed(S.UiState.throttle, 0, "0") + " %", color: T.StyleManager.accent },
-                            { label: "ACCÉLÉRATION LONG.", value: Math.min(1, Math.abs(S.UiState.longitudinalG)), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0,00") + " G", color: "#FFB84D" }
+                            { label: "THROTTLE", value: Math.min(1, S.UiState.throttle / 100), text: S.UiState.fixed(S.UiState.throttle, 0, "0") + " %", color: T.StyleManager.accent },
+                            { label: "LONG. ACCELERATION", value: Math.min(1, Math.abs(S.UiState.longitudinalG)), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0,00") + " G", color: "#FFB84D" }
                         ]
                         delegate: Rectangle {
                             Layout.fillWidth: true
@@ -181,7 +181,7 @@ Item {
             ApexCard3D {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 285
-                title: "EFFICIENCE"
+                title: "EFFICIENCY"
 
                 RowLayout {
                     anchors.fill: parent
@@ -190,13 +190,13 @@ Item {
                         Layout.fillWidth: true
                         spacing: -5
                         Text { text: S.UiState.fixed(S.UiState.instantCons, 1, "—"); color: S.UiState.instantCons > 14 ? "#FFB84D" : "#54E3A5"; font.pixelSize: 72; font.weight: Font.Black; font.letterSpacing: -3 }
-                        Text { text: "L/100 KM INSTANTANÉ"; color: "#AABACA"; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.4 }
+                        Text { text: "L/100 KM INSTANT"; color: "#AABACA"; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.4 }
                     }
                     Column {
                         Layout.alignment: Qt.AlignRight
                         spacing: 6
                         Text { anchors.right: parent.right; text: S.UiState.fixed(S.UiState.avgConsB, 1, "—"); color: "#FFFFFF"; font.pixelSize: 32; font.bold: true }
-                        Text { anchors.right: parent.right; text: "MOYENNE B"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.2 }
+                        Text { anchors.right: parent.right; text: "AVERAGE B"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.2 }
                     }
                 }
             }
@@ -204,7 +204,7 @@ Item {
             ApexCard3D {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                title: "SIGNATURE DU TRAJET"
+                title: "TRIP SIGNATURE"
 
                 GridLayout {
                     anchors.fill: parent
@@ -215,9 +215,9 @@ Item {
                     Repeater {
                         model: [
                             { label: "DISTANCE", value: S.UiState.fixed(S.UiState.tripDistance, 1, "0"), unit: "km" },
-                            { label: "RÉGIME MOY.", value: Math.round(S.UiState.avgRpm), unit: "rpm" },
-                            { label: "DÉCÉL. SANS GAZ", value: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0"), unit: "km" },
-                            { label: "AGRESSIVITÉ", value: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0"), unit: "%" }
+                            { label: "AVG. RPM", value: Math.round(S.UiState.avgRpm), unit: "rpm" },
+                            { label: "COASTING DECEL.", value: S.UiState.fixed(S.UiState.decelerationWithoutThrottleKm, 1, "0"), unit: "km" },
+                            { label: "AGGRESSIVENESS", value: S.UiState.fixed(S.UiState.aggressivityPct, 0, "0"), unit: "%" }
                         ]
                         delegate: Rectangle {
                             Layout.fillWidth: true

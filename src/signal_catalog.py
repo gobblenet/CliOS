@@ -54,4 +54,4 @@ def definition_for(signal_name: str) -> SignalDefinition:
     try:
         return SIGNALS[signal_name]
     except KeyError as exc:
-        raise KeyError(f"Signal CAN non catalogue: {signal_name}") from exc
+        raise KeyError(f"Uncatalogued CAN signal: {signal_name}") from exc

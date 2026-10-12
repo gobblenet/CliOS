@@ -1,5 +1,5 @@
 [Unit]
-Description=Helper privilégié de mise à jour CliOS
+Description=CliOS privileged update helper
 Requires=clios-updater.socket
 After=network-online.target
 

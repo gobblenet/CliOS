@@ -46,20 +46,20 @@ Item {
         height: 28
         radius: 14
         visible: S.UiState.cruiseMode !== "OFF"
-        color: S.UiState.cruiseStatus === "ACTIF" ? Qt.rgba(T.StyleManager.accent.r, T.StyleManager.accent.g, T.StyleManager.accent.b, 0.22) : "#080D15"
+        color: S.UiState.cruiseStatus === "ACTIVE" ? Qt.rgba(T.StyleManager.accent.r, T.StyleManager.accent.g, T.StyleManager.accent.b, 0.22) : "#080D15"
         border.width: 1.2
-        border.color: S.UiState.cruiseStatus === "ACTIF" ? T.StyleManager.accent : "#2A3C52"
+        border.color: S.UiState.cruiseStatus === "ACTIVE" ? T.StyleManager.accent : "#2A3C52"
 
         RowLayout {
             anchors.centerIn: parent
             spacing: 6
             Rectangle {
                 width: 7; height: 7; radius: 3.5
-                color: S.UiState.cruiseStatus === "ACTIF" ? T.StyleManager.accent : "#8A9BAF"
+                color: S.UiState.cruiseStatus === "ACTIVE" ? T.StyleManager.accent : "#8A9BAF"
             }
             Text {
                 text: S.UiState.cruiseMode + " " + S.UiState.fixed(S.UiState.cruiseTarget, 0, "—") + " km/h"
-                color: S.UiState.cruiseStatus === "ACTIF" ? "#FFFFFF" : "#BAC8D9"
+                color: S.UiState.cruiseStatus === "ACTIVE" ? "#FFFFFF" : "#BAC8D9"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 11
                 font.weight: Font.Bold
@@ -140,7 +140,7 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
                     Text {
-                        text: "ACCÉLÉRATEUR"
+                        text: "ACCELERATOR"
                         color: "#BAC8D9"
                         font.family: T.StyleManager.fontFamily
                         font.pixelSize: 11
@@ -188,7 +188,7 @@ Item {
                 spacing: 2
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "TOTALISATEUR"
+                    text: "ODOMETER"
                     color: "#BAC8D9"
                     font.family: T.StyleManager.fontFamily
                     font.pixelSize: 11

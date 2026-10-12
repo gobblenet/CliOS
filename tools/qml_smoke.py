@@ -104,10 +104,10 @@ class FakeBridge(QObject):
             },
         }
         health = {
-            "CAN_Moteur": {"status": "OK", "message": "Bus CAN connecté"},
-            "Diag": {"status": "OK", "message": "Diagnostic prêt"},
-            "TripStats": {"status": "OK", "message": "Calcul actif"},
-            "EngineSound": {"status": "DISABLED", "message": "Désactivé"},
+            "CAN_Engine": {"status": "OK", "message": "CAN bus connected"},
+            "Diag": {"status": "OK", "message": "Diagnostics ready"},
+            "TripStats": {"status": "OK", "message": "Computing"},
+            "EngineSound": {"status": "DISABLED", "message": "Disabled"},
         }
         storage = {"mode": "USB", "usb_connected": True, "free_space_mb": 24680.0}
         self._system_state = {
@@ -179,8 +179,8 @@ class FakeBridge(QObject):
     def getAvailableUiStyles(self):
         return [
             {
-                "id": "gt_modern", "label": "GT moderne",
-                "description": "Graphite mat, blanc franc et détails lumineux",
+                "id": "gt_modern", "label": "Modern GT",
+                "description": "Matte graphite, pure white and luminous details",
                 "order": 10, "dashboard": "styles/gt_modern/Dashboard.qml",
                 "palette": {
                     "background": "#080B0F", "surface": "#11171D",
@@ -191,8 +191,8 @@ class FakeBridge(QObject):
                 "metrics": {"radiusSmall": 8, "radiusMedium": 14, "radiusLarge": 20, "borderWidth": 1},
             },
             {
-                "id": "legacy_dashboard", "label": "Ancien dashboard",
-                "description": "Votre ancien cockpit et ses compteurs circulaires",
+                "id": "legacy_dashboard", "label": "Legacy dashboard",
+                "description": "Classic cockpit with round gauges",
                 "order": 20, "dashboard": "styles/legacy_dashboard/Dashboard.qml",
                 "palette": {
                     "background": "#000000", "surface": "#151515",
@@ -216,7 +216,7 @@ class FakeBridge(QObject):
             },
             {
                 "id": "atelier_luxe", "label": "Atelier Luxe",
-                "description": "Horlogerie et télémétrie de prestige",
+                "description": "Watchmaking and prestige telemetry",
                 "order": 5, "dashboard": "styles/atelier_luxe/Dashboard.qml",
                 "palette": {
                     "background": "#070A0F", "surface": "#0F1622",
@@ -228,7 +228,7 @@ class FakeBridge(QObject):
             },
             {
                 "id": "jdm_mugen", "label": "Mugen Power JDM",
-                "description": "Combiné d'instruments blanc sport Mugen Power avec triple compteur analogique",
+                "description": "Mugen Power white sport instrument cluster with triple analog gauges",
                 "order": 2, "dashboard": "styles/jdm_mugen/Dashboard.qml",
                 "palette": {
                     "background": "#080B0F", "surface": "#101620",
@@ -289,15 +289,15 @@ class FakeBridge(QObject):
 
     @Slot(str, result=str)
     def getServiceParameters(self, service):
-        if service != "CAN_Moteur":
+        if service != "CAN_Engine":
             return "[]"
         return json.dumps([
-            {"key": "enabled", "label": "Activer", "type": "toggle", "value": True},
-            {"key": "rate", "label": "Fréquence", "type": "slider", "value": 25,
+            {"key": "enabled", "label": "Enable", "type": "toggle", "value": True},
+            {"key": "rate", "label": "Frequency", "type": "slider", "value": 25,
              "min_val": 1, "max_val": 100},
             {"key": "interface", "label": "Interface", "type": "list", "value": "can0",
              "options": ["can0", "vcan0"]},
-            {"key": "address", "label": "Adresse", "type": "text", "value": "AA:BB:CC:DD:EE:FF"},
+            {"key": "address", "label": "Address", "type": "text", "value": "AA:BB:CC:DD:EE:FF"},
             {"key": "action", "label": "Action", "type": "button", "value": False},
         ])
 
@@ -494,13 +494,13 @@ def main():
                 "available_version": "2.0.1-rc.1" if update_state in {"AVAILABLE", "DOWNLOADING", "STAGED", "ACTIVATING"} else "",
                 "channel": "beta",
                 "progress": 62 if update_state in {"DOWNLOADING", "ACTIVATING"} else 100 if update_state in {"STAGED", "UP_TO_DATE"} else 0,
-                "message": "SHA-256 incorrect" if update_state == "ERROR" else "État updater de qualification",
-                "detail": "Téléchargement de l'archive — 62%" if update_state == "DOWNLOADING" else "Détail de qualification updater",
+                "message": "SHA-256 mismatch" if update_state == "ERROR" else "Qualification updater state",
+                "detail": "Downloading the archive — 62%" if update_state == "DOWNLOADING" else "Qualification updater detail",
                 "phase": "archive" if update_state == "DOWNLOADING" else "complete",
                 "started_at": int(time.time()) - 42 if update_state in {"CHECKING", "DOWNLOADING", "ACTIVATING"} else 0,
                 "can_activate": update_state == "STAGED",
                 "can_rollback": True, "rollback_target": "2.0.0",
-                "error": {"code": "SHA256", "message": "SHA-256 incorrect", "phase": "hash"} if update_state == "ERROR" else {},
+                "error": {"code": "SHA256", "message": "SHA-256 mismatch", "phase": "hash"} if update_state == "ERROR" else {},
             }
             emit_runtime()
             shell = window.findChild(QObject, "appShell")
@@ -522,7 +522,7 @@ def main():
 
             def expand_service():
                 page = window.findChild(QObject, "servicesSettingsPage")
-                if page is None or not page.toggleServiceDetails("CAN_Moteur"):
+                if page is None or not page.toggleServiceDetails("CAN_Engine"):
                     failures.append("service CAN non dépliable")
                 QTimer.singleShot(260, finish_services)
 
@@ -551,7 +551,7 @@ def main():
                 "abs_warning": True, "esp_warning": True, "engine_warning": True,
             })
             bridge._system_state["storage"] = {"mode": "RAM", "usb_connected": False, "free_space_mb": 0.0}
-            bridge._system_state["health"]["CAN_Moteur"] = {"status": "ERROR", "message": "Bus indisponible"}
+            bridge._system_state["health"]["CAN_Engine"] = {"status": "ERROR", "message": "Bus unavailable"}
             emit_runtime()
         elif name == "paused":
             bridge._session_state["state"] = "PAUSED"

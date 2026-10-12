@@ -6,8 +6,8 @@ QtObject {
 
     readonly property var fallbackStyle: ({
         id: "gt_modern",
-        label: "GT moderne",
-        description: "Style de secours CliOS GT",
+        label: "Modern GT",
+        description: "CliOS GT fallback style",
         dashboard: "styles/gt_modern/Dashboard.qml",
         palette: {
             background: "#080B0F", surface: "#11171D", surfaceRaised: "#182029",

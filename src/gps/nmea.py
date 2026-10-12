@@ -1,8 +1,8 @@
-"""Décodage NMEA 0183 pour récepteurs GPS série (Garmin GPS 17x HVS, etc.).
+"""NMEA 0183 decoding for serial GPS receivers (Garmin GPS 17x HVS, etc.).
 
-Le parseur est volontairement sans dépendance : il valide le checksum,
-reconnaît les talkers GP/GN/GL/GA/BD et accumule les phrases utiles
-(RMC, GGA, VTG, GSA, GSV, Garmin PGRME) dans un état de position unique.
+The parser is deliberately dependency-free: it validates the checksum,
+recognizes the GP/GN/GL/GA/BD talkers and accumulates the useful sentences
+(RMC, GGA, VTG, GSA, GSV, Garmin PGRME) into a single position state.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 
 KNOTS_TO_KMH = 1.852
 
-# Qualité GGA → libellé court exposé à l'UI.
+# GGA quality → short label exposed to the UI.
 FIX_QUALITY = {
     0: "NONE", 1: "GPS", 2: "DGPS", 3: "PPS", 4: "RTK",
     5: "RTK_FLOAT", 6: "ESTIMATED", 7: "MANUAL", 8: "SIMULATION",
@@ -26,10 +26,10 @@ def checksum(body: str) -> str:
 
 
 def split_sentence(line: str) -> list[str] | None:
-    """Retourne les champs d'une phrase valide, ou None si invalide.
+    """Return the fields of a valid sentence, or None if invalid.
 
-    Une phrase sans checksum est refusée : les récepteurs Garmin en émettent
-    toujours un, et une ligne tronquée ne doit jamais déplacer le véhicule.
+    A sentence without a checksum is rejected: Garmin receivers always send
+    one, and a truncated line must never move the vehicle.
     """
     line = line.strip()
     if not line.startswith("$") or "*" not in line:
@@ -55,7 +55,7 @@ def _int(value: str) -> int | None:
 
 
 def parse_coordinate(value: str, hemisphere: str) -> float | None:
-    """Convertit ddmm.mmmm / dddmm.mmmm + hémisphère en degrés décimaux."""
+    """Convert ddmm.mmmm / dddmm.mmmm + hemisphere to decimal degrees."""
     if not value or not hemisphere or "." not in value:
         return None
     try:
@@ -96,13 +96,13 @@ class GpsFix:
 
 
 class NmeaParser:
-    """Accumule les phrases NMEA dans un GpsFix cohérent."""
+    """Accumulate NMEA sentences into a consistent GpsFix."""
 
     def __init__(self):
         self.fix = GpsFix()
 
     def feed(self, line: str) -> str | None:
-        """Traite une ligne. Retourne le type de phrase reconnu (ex. "RMC")."""
+        """Process one line. Return the recognized sentence type (e.g. "RMC")."""
         fields = split_sentence(line)
         if fields is None:
             if line.strip():
@@ -110,7 +110,7 @@ class NmeaParser:
             return None
         address = fields[0]
         if address.startswith("P"):
-            kind = address  # Phrase propriétaire : PGRME, PGRMT...
+            kind = address  # Proprietary sentence: PGRME, PGRMT...
         elif len(address) == 5:
             kind = address[2:]
         else:
@@ -180,7 +180,7 @@ class NmeaParser:
             self.fix.satellites_in_view = total
 
     def _on_pgrme(self, f: list[str]):
-        # Garmin : $PGRME,hpe,M,vpe,M,epe,M*hh (erreur horizontale estimée).
+        # Garmin: $PGRME,hpe,M,vpe,M,epe,M*hh (estimated horizontal error).
         hpe = _float(f[1])
         if hpe is not None:
             self.fix.accuracy_m = hpe

@@ -150,7 +150,7 @@ class ArchitectureContractTest(unittest.TestCase):
         self.assertIn("C.TripRecoveryDialog", app_shell)
         self.assertIn('executeUiCommand("new_trip"', app_shell)
         self.assertIn("S.UiState.tripCost", apex_drive)
-        self.assertIn("COÛT EST.", apex_drive)
+        self.assertIn("EST. COST", apex_drive)
 
     def test_every_shared_detail_page_can_return_to_the_menu(self):
         pages = os.path.join(ROOT, "frontend", "shared_pages")
@@ -168,6 +168,7 @@ class ArchitectureContractTest(unittest.TestCase):
             toggle = stream.read()
 
         self.assertNotIn("RÉGLAGES", services)
+        self.assertNotIn("SETTINGS", services)
         self.assertIn("onClicked: serviceRow.toggleDetails()", services)
         self.assertIn("function reloadParams()", services)
         for parameter_type in ("toggle", "slider", "list", "text", "number", "button"):

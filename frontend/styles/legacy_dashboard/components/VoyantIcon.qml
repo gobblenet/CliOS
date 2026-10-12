@@ -8,7 +8,7 @@ Item {
     property bool isActive: false
     property color activeColor: "#00ff00"
     property color inactiveColor: "#333333"
-    property string label: "Voyant"
+    property string label: "Indicator"
     property url iconSource: ""
 
     width: 40 // Un peu plus petit par défaut vu qu'il n'y a plus de marges de fond

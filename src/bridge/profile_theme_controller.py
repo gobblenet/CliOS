@@ -43,30 +43,30 @@ class ProfileThemeController:
                     palette = manifest.get("palette", {})
                     problems: list[str] = []
                     if style_id != entry.name:
-                        problems.append("id différent du dossier")
+                        problems.append("id differs from the folder")
                     if manifest.get("apiVersion") != 1:
-                        problems.append("apiVersion doit valoir 1")
+                        problems.append("apiVersion must be 1")
                     try:
                         minimum = tuple(int(part) for part in str(manifest.get("minCliOSVersion", "")).split("."))
                         if len(minimum) != 3 or minimum > target._clios_version:
                             problems.append(f"requiert CliOS {manifest.get('minCliOSVersion')}")
                     except ValueError:
-                        problems.append("minCliOSVersion invalide")
+                        problems.append("invalid minCliOSVersion")
                     if "1920x720" not in manifest.get("supportedResolutions", []):
-                        problems.append("résolution 1920x720 non déclarée")
+                        problems.append("1920x720 resolution not declared")
                     if not isinstance(manifest.get("capabilities"), list):
-                        problems.append("capabilities manquant")
+                        problems.append("capabilities missing")
                     if not dashboard_file.endswith(".qml") or not os.path.isfile(os.path.join(entry.path, dashboard_file)):
-                        problems.append("dashboard QML manquant")
+                        problems.append("dashboard QML missing")
                     if not isinstance(palette, dict) or not required_colors.issubset(palette):
-                        problems.append("palette incomplète")
+                        problems.append("incomplete palette")
                     if is_local and style_id in official_ids:
-                        problems.append("un thème local ne peut pas remplacer un thème officiel")
+                        problems.append("a local theme cannot replace an official theme")
                     if problems:
                         diagnostics.append(f"{entry.name}: " + "; ".join(problems))
                         continue
                 except (OSError, json.JSONDecodeError, TypeError, ValueError) as exc:
-                    diagnostics.append(f"{entry.name}: manifeste invalide ({exc})")
+                    diagnostics.append(f"{entry.name}: invalid manifest ({exc})")
                     continue
 
                 if not is_local:
@@ -82,7 +82,7 @@ class ProfileThemeController:
                     "apiVersion": 1,
                     "capabilities": target._sanitize_for_qml(manifest.get("capabilities", [])),
                     "local": is_local,
-                    "trustedCodeWarning": "Code QML local de confiance, non sandboxé" if is_local else "",
+                    "trustedCodeWarning": "Trusted local QML code, not sandboxed" if is_local else "",
                 })
 
         target._theme_diagnostics = diagnostics
@@ -141,6 +141,6 @@ class ProfileThemeController:
                 extra={"error_code": "PROFILE_CHANGED"},
             )
             self.target.send_notification(
-                "info", f"Profil '{profile_id}' sélectionné. Veuillez redémarrer l'application.", 4000,
+                "info", f"Profile '{profile_id}' selected. Please restart the application.", 4000,
             )
         return success

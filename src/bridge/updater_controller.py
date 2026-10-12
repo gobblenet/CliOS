@@ -132,7 +132,7 @@ class UpdaterController:
     def set_channel(self, channel: str) -> bool:
         target = self.target
         if channel not in ReleaseManager.VALID_CHANNELS:
-            target.send_notification("ERROR", "Canal de mise à jour inconnu", 3500)
+            target.send_notification("ERROR", "Unknown update channel", 3500)
             return False
         target.save_setting("updates.channel", channel)
         target._set_updater_state(channel=channel)
@@ -143,12 +143,12 @@ class UpdaterController:
                 "Canal non synchronisé avec le gestionnaire système: %s", exc,
                 extra={"error_code": "RELEASE_CHANNEL_STATE_WARNING"},
             )
-        label = "Bêta" if channel == "beta" else "Stable"
+        label = "Beta" if channel == "beta" else "Stable"
         target.logger.info(
             "Canal de mise à jour sélectionné: %s", channel,
             extra={"error_code": "RELEASE_CHANNEL_CHANGED"},
         )
-        target.send_notification("WARNING" if channel == "beta" else "SUCCESS", f"Canal {label} sélectionné", 3500)
+        target.send_notification("WARNING" if channel == "beta" else "SUCCESS", f"{label} channel selected", 3500)
         return True
 
     def check(self, force: bool) -> None:
@@ -160,8 +160,8 @@ class UpdaterController:
         target._updater_operation_id = operation_id
         target._last_updater_sequence = 0
         self._publish(
-            state="CHECKING", progress=0, phase="catalog", message="Recherche sur GitHub…",
-            detail="Connexion à l'API GitHub et lecture du catalogue des releases",
+            state="CHECKING", progress=0, phase="catalog", message="Checking GitHub…",
+            detail="Connecting to the GitHub API and reading the release catalog",
             started_at=int(time.time()), updated_at=int(time.time()), error={},
             operation_id=operation_id, sequence=0, indeterminate=True,
         )
@@ -172,18 +172,18 @@ class UpdaterController:
                 if release:
                     self._publish(
                         state="AVAILABLE", available_version=release["version"], progress=0,
-                        message=f"CliOS {release['version']} est disponible", can_activate=False,
-                        detail="La release est prête à être téléchargée et vérifiée",
+                        message=f"CliOS {release['version']} is available", can_activate=False,
+                        detail="The release is ready to be downloaded and verified",
                         phase="available", last_manifest=release, error={}, indeterminate=False,
                     )
                     target.send_notification("INFO", f"Release {release['version']} disponible", 5000)
                 else:
                     self._publish(
                         state="UP_TO_DATE", available_version="", progress=100,
-                        message="CliOS est à jour", detail="Aucune release plus récente sur ce canal",
+                        message="CliOS is up to date", detail="No newer release on this channel",
                         phase="complete", can_activate=False, error={}, indeterminate=False,
                     )
-                    target.send_notification("SUCCESS", "CliOS est à jour", 3500)
+                    target.send_notification("SUCCESS", "CliOS is up to date", 3500)
                 last_success = str(int(time.time()))
                 self._run_on_owner_thread(
                     lambda: target.save_setting("updates.last_success_epoch", last_success)
@@ -206,7 +206,7 @@ class UpdaterController:
         target = self.target
         version = str(target._updater_state.get("available_version", ""))
         if not version:
-            target.send_notification("WARNING", "Aucune mise à jour sélectionnée", 3500)
+            target.send_notification("WARNING", "No update selected", 3500)
             return
         target.logger.info(
             "Staging de %s demandé à %.1f km/h", version, speed_kmh,
@@ -217,8 +217,8 @@ class UpdaterController:
         target._last_updater_sequence = 0
         self._publish(
             state="DOWNLOADING", progress=0, phase="request",
-            message="Préparation du téléchargement…",
-            detail="La demande a été transmise au helper système",
+            message="Preparing download…",
+            detail="The request was sent to the system helper",
             started_at=int(time.time()), updated_at=int(time.time()), error={},
             operation_id=operation_id, sequence=0, indeterminate=True,
         )
@@ -235,7 +235,7 @@ class UpdaterController:
         target._updater_operation_id = operation_id
         target._last_updater_sequence = 0
         self._publish(
-            state="ACTIVATING", progress=99, message="Activation en cours", error={},
+            state="ACTIVATING", progress=99, message="Activating", error={},
             operation_id=operation_id, sequence=0, indeterminate=True,
         )
         self._run(lambda client: client.activate(version, operation_id), "ACTIVATING", version, operation_id)
@@ -243,7 +243,7 @@ class UpdaterController:
     def rollback(self, speed_kmh: float, stable_only: bool) -> None:
         target = self.target
         if not target._updater_state.get("can_rollback", False):
-            target.send_notification("INFO", "Aucune version précédente disponible", 4000)
+            target.send_notification("INFO", "No previous version available", 4000)
             return
         target.logger.warning(
             "Rollback confirmé à %.1f km/h (stable=%s)", speed_kmh, stable_only,
@@ -253,7 +253,7 @@ class UpdaterController:
         target._updater_operation_id = operation_id
         target._last_updater_sequence = 0
         self._publish(
-            state="ACTIVATING", progress=99, message="Rollback en cours", error={},
+            state="ACTIVATING", progress=99, message="Rolling back", error={},
             operation_id=operation_id, sequence=0, indeterminate=True,
         )
         self._run(
@@ -270,7 +270,7 @@ class UpdaterController:
                 operation(UpdaterClient(timeout=900))
                 self._publish(
                     state=success_state, available_version=version, progress=100,
-                    message="Release préparée" if success_state == "STAGED" else "Redémarrage en cours",
+                    message="Release staged" if success_state == "STAGED" else "Restarting",
                     can_activate=success_state == "STAGED", error={},
                     operation_id=operation_id, indeterminate=success_state != "STAGED",
                 )
@@ -281,13 +281,13 @@ class UpdaterController:
                     code = exc.code
                 elif "sha-256" in lowered or "sha256" in lowered:
                     code = "SHA256"
-                elif "espace disque" in lowered or "no space" in lowered:
+                elif "espace disque" in lowered or "disk space" in lowered or "no space" in lowered:
                     code = "DISK_SPACE"
                 elif "self-check" in lowered:
                     code = "SELF_CHECK"
-                elif "permission" in lowered or "privil" in lowered or "indisponible" in lowered:
+                elif "permission" in lowered or "privil" in lowered or "indisponible" in lowered or "unavailable" in lowered:
                     code = "PRIVILEGE"
-                elif "réseau" in lowered or "github" in lowered:
+                elif "réseau" in lowered or "network" in lowered or "github" in lowered:
                     code = "NETWORK"
                 else:
                     code = "UPDATE_ERROR"
