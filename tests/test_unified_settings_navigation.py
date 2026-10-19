@@ -93,6 +93,23 @@ class UnifiedSettingsNavigationTest(unittest.TestCase):
         page.removeTile(0)
         self.assertEqual(len(saved_tiles()), initial)
 
+    def test_alarm_limits_are_edited_in_fahrenheit_and_stored_in_celsius(self):
+        self.bridge._data_quality = {"obd": {"coolant_temp": {"unit": "degC", "quality": "VALID"}}}
+        self.bridge.dataQualityChanged.emit()
+        self.bridge.save_setting("ui.units", "imperial")
+        self.shell.openRoute("live")
+        self.app.processEvents()
+        page = self.shell.findChild(QObject, "liveDataPage")
+        tiles = page.property("tiles").toVariant()
+        index = next(i for i, tile in enumerate(tiles) if tile["key"] == "coolant_temp")
+        coolant = tiles[index]
+        self.assertEqual(coolant["high"], 105)
+        self.assertEqual(page.limitText(coolant, coolant["high"]), "221")
+
+        page.setLimits(index, "", "230")
+        saved = json.loads(self.bridge._config["ui"]["live_tiles"])
+        self.assertAlmostEqual(saved[index]["high"], 110.0, places=2)
+
     def test_legacy_maintenance_signal_opens_storage(self):
         self.bridge.openMaintenanceRequested.emit()
         self.app.processEvents()

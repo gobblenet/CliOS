@@ -14,7 +14,7 @@ Rectangle {
 
     readonly property var info: S.UiState.signalInfo(tile.domain, tile.key)
     readonly property real numeric: Catalog.numeric(info.value)
-    readonly property string level: info.stale ? "stale" : Catalog.level(tile, info.value)
+    readonly property string level: info.stale ? "stale" : Catalog.level(tile, info.rawValue)
     readonly property color levelColor: level === "alarm" ? T.StyleManager.danger
                                       : level === "warning" ? T.StyleManager.warning
                                       : level === "stale" ? T.StyleManager.textSecondary

@@ -141,6 +141,7 @@ QtObject {
     readonly property string currency: imperial ? "$" : "€"
     readonly property string priceUnit: currency + "/" + volumeUnit
     readonly property string altitudeUnit: imperial ? "ft" : "m"
+    readonly property string temperatureUnit: imperial ? "°F" : "°C"
     readonly property real displaySpeed: toSpeed(speed)
     readonly property real displayMaxSpeed: imperial ? Math.ceil(toSpeed(maxSpeed) / 10) * 10 : maxSpeed
 
@@ -155,14 +156,25 @@ QtObject {
     }
     function toPrice(perLiter) { return imperial ? number(perLiter, 0) * 3.785411784 : number(perLiter, 0) }
     function fromPrice(perVolume) { return imperial ? number(perVolume, 0) / 3.785411784 : number(perVolume, 0) }
+    function toTemperature(celsius) { return imperial ? number(celsius, 0) * 1.8 + 32 : number(celsius, 0) }
     function toAltitude(meters) { return imperial ? number(meters, 0) * 3.28084 : number(meters, 0) }
     // Converts a runtime value tagged with a metric unit to the display units.
     function displayUnits(value, unit) {
+        if (!imperial || typeof value !== "number") return { value: value, unit: unit }
+        if (unit === "degC") return { value: value * 1.8 + 32, unit: "degF" }
         const factors = { "km/h": [0.621371, "mph"], "km": [0.621371, "mi"], "L": [0.264172, "gal"],
                           "L/h": [0.264172, "gal/h"], "m": [3.28084, "ft"] }
         const factor = factors[unit]
-        if (!imperial || !factor || typeof value !== "number") return { value: value, unit: unit }
+        if (!factor) return { value: value, unit: unit }
         return { value: value * factor[0], unit: factor[1] }
+    }
+    // Inverse of displayUnits: converts a value typed in display units back to
+    // the runtime (metric) unit, used for live data alarm limits.
+    function fromDisplayUnits(value, unit) {
+        if (!imperial || typeof value !== "number") return value
+        if (unit === "degC") return (value - 32) / 1.8
+        const factors = { "km/h": 0.621371, "km": 0.621371, "L": 0.264172, "L/h": 0.264172, "m": 3.28084 }
+        return factors[unit] ? value / factors[unit] : value
     }
     function money(value) { return currency + fixed(value, 2, "0.00") }
 
@@ -473,6 +485,8 @@ QtObject {
         const shown = displayUnits(values[key], metadata.unit || "")
         return {
             present: present,
+            rawValue: values[key],
+            rawUnit: metadata.unit || "",
             value: shown.value,
             unit: Catalog.unit(shown.unit),
             stale: !present || metadata.quality === "STALE",
@@ -485,7 +499,7 @@ QtObject {
         liveTiles.forEach(function(tile) {
             const info = signalInfo(tile.domain, tile.key)
             if (info.stale) return
-            if (Catalog.level(tile, info.value) === "alarm")
+            if (Catalog.level(tile, info.rawValue) === "alarm")
                 alarms.push({ label: info.label, text: info.label + " : " + Catalog.format(info.value) + " " + info.unit })
         })
         return alarms

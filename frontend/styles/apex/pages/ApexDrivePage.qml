@@ -253,13 +253,13 @@ Item {
                             Row {
                                 spacing: 6
                                 Text {
-                                    text: Math.round(S.UiState.engineTemp)
+                                    text: Math.round(S.UiState.toTemperature(S.UiState.engineTemp))
                                     color: S.UiState.hotEngine ? "#FF6670" : "#FFFFFF"
                                     font.pixelSize: 66
                                     font.weight: Font.Black
                                     font.letterSpacing: -2
                                 }
-                                Text { text: "°C"; color: S.UiState.hotEngine ? "#FF6670" : T.StyleManager.accent; font.pixelSize: 25; font.bold: true; anchors.baseline: parent.children[0].baseline }
+                                Text { text: S.UiState.temperatureUnit; color: S.UiState.hotEngine ? "#FF6670" : T.StyleManager.accent; font.pixelSize: 25; font.bold: true; anchors.baseline: parent.children[0].baseline }
                             }
                             Text {
                                 text: S.UiState.hotEngine ? "CRITICAL TEMPERATURE" : (S.UiState.engineTemp < 70 ? "WARMING UP" : "OPTIMAL RANGE")
@@ -332,7 +332,7 @@ Item {
                         Layout.fillWidth: true
                         Column {
                             Layout.fillWidth: true
-                            Text { text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + "°"; color: "#FFFFFF"; font.pixelSize: 40; font.bold: true }
+                            Text { text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + "°"; color: "#FFFFFF"; font.pixelSize: 40; font.bold: true }
                             Text { text: "OUTSIDE"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
                         }
                         Column {

@@ -135,7 +135,7 @@ Item {
                     }
                     Item { Layout.fillWidth: true }
                     Text {
-                        text: S.UiState.fixed(S.UiState.engineTemp, 0, "—") + " °C"
+                        text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.engineTemp), 0, "—") + " " + S.UiState.temperatureUnit
                         color: S.UiState.engineTemp >= 105 ? T.StyleManager.danger : "#FFFFFF"
                         font.family: T.StyleManager.fontFamily
                         font.pixelSize: 15

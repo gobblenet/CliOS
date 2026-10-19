@@ -77,7 +77,7 @@ Item {
         RowLayout {
             anchors.fill: parent; anchors.leftMargin: 18; anchors.rightMargin: 18; spacing: 12
             Text { text: root.timeText; color: T.StyleManager.text; font.pixelSize: 25; font.weight: Font.DemiBold; Layout.preferredWidth: 76 }
-            Text { text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + " °C"; color: T.StyleManager.textSecondary; font.pixelSize: 19; Layout.preferredWidth: 90 }
+            Text { text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + " " + S.UiState.temperatureUnit; color: T.StyleManager.textSecondary; font.pixelSize: 19; Layout.preferredWidth: 90 }
             Rectangle { width: 1; Layout.fillHeight: true; Layout.topMargin: 12; Layout.bottomMargin: 12; color: T.StyleManager.outline }
             Row {
                 Layout.fillWidth: true; Layout.alignment: Qt.AlignVCenter; spacing: 7
@@ -211,7 +211,7 @@ Item {
                 Layout.fillWidth: true; Layout.preferredHeight: 134; title: "Engine temperature"; highlighted: S.UiState.hotEngine
                 ColumnLayout {
                     anchors.fill: parent; spacing: 10
-                    RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: S.UiState.fixed(S.UiState.engineTemp, 0, "—"); color: S.UiState.hotEngine ? T.StyleManager.danger : T.StyleManager.text; font.pixelSize: 36; font.weight: Font.DemiBold } Text { text: "°C"; color: T.StyleManager.textSecondary; font.pixelSize: 18 } }
+                    RowLayout { Layout.fillWidth: true; Text { Layout.fillWidth: true; text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.engineTemp), 0, "—"); color: S.UiState.hotEngine ? T.StyleManager.danger : T.StyleManager.text; font.pixelSize: 36; font.weight: Font.DemiBold } Text { text: S.UiState.temperatureUnit; color: T.StyleManager.textSecondary; font.pixelSize: 18 } }
                     GtProgress { Layout.fillWidth: true; height: 12; value: S.UiState.engineTemp; from: 40; to: S.UiState.tempMax; fillColor: S.UiState.hotEngine ? T.StyleManager.danger : T.StyleManager.success }
                 }
             }

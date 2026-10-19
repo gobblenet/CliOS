@@ -38,7 +38,7 @@ Item {
         Rectangle { width: 1; height: 26; color: "#3B5065" }
 
         Text {
-            text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + " °C"
+            text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + " " + S.UiState.temperatureUnit
             color: "#D2DEE8"
             font.pixelSize: 17
             font.weight: Font.Bold

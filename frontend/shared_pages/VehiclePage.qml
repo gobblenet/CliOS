@@ -29,7 +29,7 @@ Item {
                 }
                 Card { Layout.fillWidth: true; Layout.fillHeight: true; title: "Mechanical status"
                     GridLayout { anchors.fill: parent; columns: 2; rowSpacing: 12; columnSpacing: 12
-                        Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Engine temperature"; value: S.UiState.fixed(S.UiState.engineTemp, 0, "—"); unit: "°C"; alignment: Text.AlignHCenter }
+                        Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Engine temperature"; value: S.UiState.fixed(S.UiState.toTemperature(S.UiState.engineTemp), 0, "—"); unit: S.UiState.temperatureUnit; alignment: Text.AlignHCenter }
                         Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Odometer"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "—"); unit: S.UiState.distanceUnit; alignment: Text.AlignHCenter }
                         Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Fuel"; value: S.UiState.fixed(S.UiState.fuelLevel, 0, "—"); unit: "%"; alignment: Text.AlignHCenter }
                         Metric { Layout.fillWidth: true; Layout.fillHeight: true; label: "Alerts"; value: S.UiState.engineWarning || S.UiState.serviceWarning ? "CHECK" : "OK"; alignment: Text.AlignHCenter; valueSize: 25 }

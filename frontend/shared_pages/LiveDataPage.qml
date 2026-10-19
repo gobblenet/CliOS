@@ -50,9 +50,22 @@ Item {
             const number = Number(cleaned)
             return isFinite(number) ? number : null
         }
+        // Limits are typed in display units but stored in the runtime (metric)
+        // unit, so alarms stay correct when the unit system changes.
+        const tile = tiles[index]
+        const rawUnit = S.UiState.signalInfo(tile.domain, tile.key).rawUnit
+        const toRaw = function(value) {
+            return value === null ? null : Math.round(S.UiState.fromDisplayUnits(value, rawUnit) * 1000) / 1000
+        }
         const next = tiles.slice()
-        next[index] = Object.assign({}, next[index], { low: parse(lowText), high: parse(highText) })
+        next[index] = Object.assign({}, tile, { low: toRaw(parse(lowText)), high: toRaw(parse(highText)) })
         save(next)
+    }
+    function limitText(tile, limit) {
+        if (limit === null || limit === undefined) return ""
+        const rawUnit = S.UiState.signalInfo(tile.domain, tile.key).rawUnit
+        const shown = S.UiState.displayUnits(Number(limit), rawUnit).value
+        return String(Math.round(shown * 10) / 10)
     }
     function pickerValue(row) {
         const shown = S.UiState.displayUnits(row.value, row.unit)
@@ -202,9 +215,14 @@ Item {
         anchors.fill: parent
         color: Qt.rgba(0, 0, 0, 0.7)
         readonly property var current: visible ? root.tiles[root.editIndex] : ({})
+        readonly property string unitSuffix: {
+            if (!visible) return ""
+            const unit = S.UiState.signalInfo(current.domain, current.key).unit
+            return unit ? " (" + unit + ")" : ""
+        }
         onVisibleChanged: if (visible) {
-            lowField.text = current.low === null || current.low === undefined ? "" : String(current.low)
-            highField.text = current.high === null || current.high === undefined ? "" : String(current.high)
+            lowField.text = root.limitText(current, current.low)
+            highField.text = root.limitText(current, current.high)
         }
         MouseArea { anchors.fill: parent; onClicked: root.editIndex = -1 }
         Rectangle {
@@ -223,9 +241,9 @@ Item {
                 Text { text: "Leave a field empty to disable that limit. The alarm shows on every screen."; color: T.StyleManager.textSecondary; font.pixelSize: 14; Layout.fillWidth: true; wrapMode: Text.WordWrap }
                 GridLayout {
                     columns: 2; columnSpacing: 14; rowSpacing: 10; Layout.fillWidth: true
-                    Text { text: "Alarm if below"; color: T.StyleManager.text; font.pixelSize: 17 }
+                    Text { text: "Alarm if below" + limitsEditor.unitSuffix; color: T.StyleManager.text; font.pixelSize: 17 }
                     QC.TextField { id: lowField; objectName: "lowLimitField"; Layout.fillWidth: true; inputMethodHints: Qt.ImhFormattedNumbersOnly }
-                    Text { text: "Alarm if above"; color: T.StyleManager.text; font.pixelSize: 17 }
+                    Text { text: "Alarm if above" + limitsEditor.unitSuffix; color: T.StyleManager.text; font.pixelSize: 17 }
                     QC.TextField { id: highField; objectName: "highLimitField"; Layout.fillWidth: true; inputMethodHints: Qt.ImhFormattedNumbersOnly }
                 }
                 Item { Layout.fillHeight: true }

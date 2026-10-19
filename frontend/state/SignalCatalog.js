@@ -52,7 +52,7 @@ var labels = {
     "navigation.gps_satellites": "GPS satellites"
 }
 
-var units = { "degC": "°C", "deg": "°", "rpm": "rpm" }
+var units = { "degC": "°C", "degF": "°F", "deg": "°", "rpm": "rpm" }
 
 // Default layout: the essentials for watching an engine over OBD-II.
 var defaultTiles = [

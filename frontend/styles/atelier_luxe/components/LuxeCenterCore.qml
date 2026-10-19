@@ -102,14 +102,14 @@ Item {
                         RowLayout {
                             spacing: 4
                             Text {
-                                text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—")
+                                text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—")
                                 color: "#FFFFFF"
                                 font.family: T.StyleManager.fontFamily
                                 font.pixelSize: 22
                                 font.weight: Font.Bold
                             }
                             Text {
-                                text: "°C"
+                                text: S.UiState.temperatureUnit
                                 color: T.StyleManager.accent
                                 font.family: T.StyleManager.fontFamily
                                 font.pixelSize: 14

@@ -163,7 +163,7 @@ Item {
         Text {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            text: S.UiState.outsideTemp.toFixed(1) + " °C"
+            text: S.UiState.toTemperature(S.UiState.outsideTemp).toFixed(1) + " " + S.UiState.temperatureUnit
             color: "white"
             font.family: "Arial"
             font.pixelSize: 22

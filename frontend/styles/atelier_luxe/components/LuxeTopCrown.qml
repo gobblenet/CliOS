@@ -39,7 +39,7 @@ Item {
                 font.letterSpacing: 1
             }
             Text {
-                text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + " °C"
+                text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + " " + S.UiState.temperatureUnit
                 color: "#FFFFFF"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 15

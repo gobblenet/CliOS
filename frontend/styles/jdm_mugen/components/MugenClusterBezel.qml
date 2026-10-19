@@ -223,7 +223,7 @@ Item {
         // Température extérieure ("24 °C" sur la photo)
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: S.UiState.fixed(S.UiState.outsideTemp, 0, "24") + " °C"
+            text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 0, "24") + " " + S.UiState.temperatureUnit
             color: "#E2F0D9"
             font.family: "Courier New, monospace"
             font.pixelSize: 22

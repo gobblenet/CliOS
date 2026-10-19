@@ -29,13 +29,13 @@ The layout and limits are saved in the active vehicle configuration under `ui.li
 
 Tile colours: **amber** means within 5 % of a limit, **red/blinking** means out of range, and **grey "STALE"** means the signal stopped updating (adapter unplugged, ignition off). Stale values never raise alarms.
 
-The default layout is OBD-II based: RPM, speed, coolant (alarm > 105 °C), battery voltage (alarm < 12.0 V or > 15.0 V), load, intake air (> 60 °C), oil (> 125 °C), fuel level (< 10 %), throttle, MAF, fuel rate and stored fault count (> 0). Only the PIDs your car supports will show values; you can remove the others.
+The default layout is OBD-II based: RPM, speed, coolant (alarm > 221 °F / 105 °C), battery voltage (alarm < 12.0 V or > 15.0 V), load, intake air (> 140 °F / 60 °C), oil (> 257 °F / 125 °C), fuel level (< 10 %), throttle, MAF, fuel rate and stored fault count (> 0). Only the PIDs your car supports will show values; you can remove the others.
 
 ## Units
 
-CliOS shows US units by default: mph, miles, MPG, gallons, feet and $. Switch between **US** and **METRIC** (km/h, km, L/100 km, liters, meters, €) with the **UNITS** button on the **Driving** settings page. The choice is saved as `ui.units` (`imperial` or `metric`) in the vehicle configuration.
+CliOS shows US units by default: mph, miles, MPG, gallons, feet, °F and $. Switch between **US** and **METRIC** (km/h, km, L/100 km, liters, meters, °C, €) with the **UNITS** button on the **Driving** settings page. The choice is saved as `ui.units` (`imperial` or `metric`) in the vehicle configuration.
 
-Only the display changes: sensors, trip statistics and logs stay metric internally, so switching never alters recorded data. Alarm limits on the live data screen are entered in the units shown. Temperatures stay in °C.
+Only the display changes: sensors, trip statistics and logs stay metric internally, so switching never alters recorded data. Alarm limits on the live data screen are typed in the units shown (the editor shows the unit, e.g. °F) and stored in metric, so alarms stay correct if you switch units later. The default limits (coolant 105 °C = 221 °F, oil 125 °C = 257 °F, intake air 60 °C = 140 °F) are converted automatically.
 
 ## Connecting to the car
 

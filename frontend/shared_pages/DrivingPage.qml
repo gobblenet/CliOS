@@ -47,7 +47,7 @@ Item {
             RowLayout { anchors.fill: parent; spacing: 12
                 Metric { Layout.fillWidth: true; Layout.preferredWidth: 180; Layout.minimumWidth: 150; label: "Fuel"; value: S.UiState.fixed(S.UiState.fuelLevel, 0, "—"); unit: "%"; alignment: Text.AlignHCenter }
                 Metric { Layout.fillWidth: true; Layout.preferredWidth: 180; Layout.minimumWidth: 150; label: "Range"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.autonomy), 0, "—"); unit: S.UiState.distanceUnit; alignment: Text.AlignHCenter }
-                Metric { Layout.fillWidth: true; Layout.preferredWidth: 180; Layout.minimumWidth: 150; label: "Engine"; value: S.UiState.fixed(S.UiState.engineTemp, 0, "—"); unit: "°C"; alignment: Text.AlignHCenter }
+                Metric { Layout.fillWidth: true; Layout.preferredWidth: 180; Layout.minimumWidth: 150; label: "Engine"; value: S.UiState.fixed(S.UiState.toTemperature(S.UiState.engineTemp), 0, "—"); unit: S.UiState.temperatureUnit; alignment: Text.AlignHCenter }
                 Metric { Layout.fillWidth: true; Layout.preferredWidth: 180; Layout.minimumWidth: 150; label: "Service in"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.kmBeforeService), 0, "—"); unit: S.UiState.distanceUnit; alignment: Text.AlignHCenter }
                 ColumnLayout { Layout.fillWidth: true; Layout.preferredWidth: 180; Layout.minimumWidth: 150; spacing: 8
                     Text { Layout.alignment: Qt.AlignHCenter; text: S.UiState.attentionVehicle || S.UiState.engineWarning ? "WARNING" : "VEHICLE OK"; color: S.UiState.attentionVehicle || S.UiState.engineWarning ? T.StyleManager.warning : T.StyleManager.success; font.pixelSize: 23; font.bold: true }
@@ -67,7 +67,7 @@ Item {
                         objectName: "unitsToggle"
                         Layout.fillWidth: true; Layout.minimumHeight: 72; Layout.maximumHeight: 72
                         text: S.UiState.imperial ? "US" : "METRIC"
-                        subtext: S.UiState.imperial ? "mph · mi · MPG · $" : "km/h · km · L/100 · €"
+                        subtext: S.UiState.imperial ? "mph · MPG · °F · $" : "km/h · L/100 · °C · €"
                         onClicked: bridge.save_setting("ui.units", S.UiState.imperial ? "metric" : "imperial")
                     }
                 }
