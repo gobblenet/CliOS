@@ -4,7 +4,7 @@ import "../../../style" as T
 // Métrique haute visibilité — label + valeur + unité
 Column {
     id: root
-    property string label:      "MÉTRIQUE"
+    property string label:      "METRIC"
     property string value:      "—"
     property string unit:       ""
     property color  valueColor: "#FFFFFF"

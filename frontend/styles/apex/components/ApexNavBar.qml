@@ -8,9 +8,9 @@ Item {
     signal tabSelected(string tabId)
 
     readonly property var tabs: [
-        { id: "drive", number: "01", label: "CONDUITE" },
+        { id: "drive", number: "01", label: "DRIVE" },
         { id: "perf", number: "02", label: "PERFORMANCE" },
-        { id: "menu", number: "03", label: "COMMANDES" }
+        { id: "menu", number: "03", label: "CONTROLS" }
     ]
 
     Rectangle {

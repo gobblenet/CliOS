@@ -11,7 +11,7 @@ Item {
 
     property string title: ""
     property string message: ""
-    property string acceptText: "CONFIRMER"
+    property string acceptText: "CONFIRM"
     property bool dangerous: false
 
     signal accepted()
@@ -70,7 +70,7 @@ Item {
                     Layout.fillWidth: true; height: 48; radius: 10
                     color: "#182436"
                     border.width: 1; border.color: Qt.rgba(1, 1, 1, 0.15)
-                    Text { anchors.centerIn: parent; text: "ANNULER"; color: "#BAC8D9"; font.pixelSize: 13; font.bold: true }
+                    Text { anchors.centerIn: parent; text: "CANCEL"; color: "#BAC8D9"; font.pixelSize: 13; font.bold: true }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.rejected() }
                 }
 

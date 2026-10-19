@@ -11,9 +11,9 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent; anchors.margins: 16; spacing: 12
-        PageHeader { Layout.fillWidth: true; title: "Développeur · CAN"; subtitle: root.signals.length + " signaux structurés"; onBackClicked: root.backRequested() }
+        PageHeader { Layout.fillWidth: true; title: "Developer · CAN"; subtitle: root.signals.length + " structured signals"; onBackClicked: root.backRequested() }
         Card {
-            Layout.fillWidth: true; Layout.fillHeight: true; title: "Données brutes normalisées"
+            Layout.fillWidth: true; Layout.fillHeight: true; title: "Normalized raw data"
             GridView {
                 anchors.fill: parent; clip: true
                 cellWidth: width / 3; cellHeight: 72; model: root.signals

@@ -4,8 +4,8 @@
     "supportedResolutions": ["1920x720"],
     "capabilities": ["settings", "commands", "vehicle-state"],
     "id": "_template",
-    "label": "Mon nouveau style",
-    "description": "Description affichée dans la page Apparence",
+    "label": "My new style",
+    "description": "Description shown on the Appearance page",
     "order": 100,
     "dashboard": "Dashboard.qml",
     "palette": {

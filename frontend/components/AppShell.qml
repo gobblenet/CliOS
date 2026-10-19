@@ -14,20 +14,22 @@ Item {
     property bool waitingForDashboard: false
 
     readonly property var confirmations: ({
-        reset_a: ["Remettre Trip A à zéro ?", "La distance Trip A sera effacée.", "REMETTRE À ZÉRO", true],
-        reset_b: ["Remettre Trip B à zéro ?", "La distance et la moyenne Trip B seront effacées.", "REMETTRE À ZÉRO", true],
-        reset_maintenance: ["Confirmer la révision ?", "Le compteur d’entretien repartira sur un intervalle complet.", "CONFIRMER", false],
-        end_trip: ["Terminer le trajet ?", "Les statistiques seront enregistrées avant la clôture.", "TERMINER", true],
-        quit: ["Quitter CliOS ?", "Les écritures et services seront arrêtés proprement.", "QUITTER", true],
-        restart: ["Relancer CliOS ?", "Le cockpit et les services seront relancés.", "RELANCER", true],
-        reboot: ["Redémarrer le système ?", "Le Raspberry Pi sera redémarré proprement.", "REDÉMARRER", true],
-        shutdown: ["Éteindre le système ?", "Le Raspberry Pi sera arrêté proprement.", "ÉTEINDRE", true],
-        toggle_overlayfs: ["Modifier la protection SD ?", "La configuration OverlayFS changera et un redémarrage sera requis.", "MODIFIER", true],
-        update_activate: ["Activer la mise à jour ?", "CliOS redémarrera pour charger la nouvelle version.", "ACTIVER", true],
-        update_rollback: ["Revenir à la version précédente ?", "CliOS redémarrera après le retour arrière.", "RETOUR ARRIÈRE", true]
+        reset_a: ["Reset Trip A?", "The Trip A distance will be cleared.", "RESET", true],
+        reset_b: ["Reset Trip B?", "The Trip B distance and average will be cleared.", "RESET", true],
+        reset_maintenance: ["Confirm the service?", "The maintenance counter will restart a full interval.", "CONFIRM", false],
+        end_trip: ["End the trip?", "Statistics will be saved before closing.", "END", true],
+        quit: ["Quit CliOS?", "Pending writes and services will be stopped cleanly.", "QUIT", true],
+        restart: ["Restart CliOS?", "The cockpit and services will be restarted.", "RESTART", true],
+        reboot: ["Reboot the system?", "The Raspberry Pi will reboot cleanly.", "REBOOT", true],
+        shutdown: ["Shut down the system?", "The Raspberry Pi will shut down cleanly.", "SHUT DOWN", true],
+        toggle_overlayfs: ["Change SD card protection?", "The OverlayFS configuration will change and a reboot will be required.", "CHANGE", true],
+        update_activate: ["Activate the update?", "CliOS will restart to load the new version.", "ACTIVATE", true],
+        update_rollback: ["Roll back to the previous version?", "CliOS will restart after the rollback.", "ROLL BACK", true]
     })
 
     function canonicalRoute(nextRoute) {
+        if (nextRoute === "map" || nextRoute === "navigation") return "map"
+        if (nextRoute === "live" || nextRoute === "data") return "live"
         if (nextRoute === "menu") return "driving"
         if (nextRoute === "diagnostic") return "vehicle"
         if (nextRoute === "transmission" || nextRoute === "vehicle_maintenance") return "vehicle"
@@ -48,9 +50,9 @@ Item {
     function requestCommand(command) {
         if (command.indexOf("activate_profile:") === 0) {
             pendingProfile = command.substring("activate_profile:".length)
-            confirm.title = "Activer ce profil véhicule ?"
-            confirm.message = "CliOS redémarrera automatiquement après l’activation du profil « " + pendingProfile + " »."
-            confirm.acceptText = "ACTIVER ET RELANCER"
+            confirm.title = "Activate this vehicle profile?"
+            confirm.message = "CliOS will restart automatically after activating profile “" + pendingProfile + "”."
+            confirm.acceptText = "ACTIVATE AND RESTART"
             confirm.dangerous = false
             confirm.visible = true
             return
@@ -84,9 +86,45 @@ Item {
         }
     }
 
+    // Loaded on demand: QtLocation and the tile cache cost nothing
+    // until the map is opened.
+    Loader {
+        id: mapLoader
+        objectName: "mapLoader"
+        anchors.fill: parent
+        active: root.route === "map"
+        visible: active
+        source: "../shared_pages/MapPage.qml"
+    }
+    Connections {
+        target: mapLoader.item; ignoreUnknownSignals: true
+        function onCockpitRequested() { root.route = "home" }
+        function onSettingsRequested() { root.openRoute("driving") }
+    }
+    Loader {
+        id: liveLoader
+        objectName: "liveLoader"
+        anchors.fill: parent
+        active: root.route === "live"
+        visible: active
+        source: "../shared_pages/LiveDataPage.qml"
+    }
+    Connections {
+        target: liveLoader.item; ignoreUnknownSignals: true
+        function onCockpitRequested() { root.route = "home" }
+    }
+    Shortcut {
+        sequence: "Ctrl+D"
+        onActivated: root.route === "live" ? root.openRoute("home") : root.openRoute("live")
+    }
+    Shortcut {
+        sequence: "Ctrl+M"
+        onActivated: root.route === "map" ? root.openRoute("home") : root.openRoute("map")
+    }
+
     SettingsShell {
         anchors.fill: parent
-        visible: root.route !== "home"
+        visible: ["home", "map", "live"].indexOf(root.route) < 0
         route: root.route
         requestedRoute: root.requestedRoute
         onCockpitRequested: root.route = "home"
@@ -126,6 +164,24 @@ Item {
         tripSummary: S.UiState.resumableTrip
         onResumeRequested: bridge.executeUiCommand("resume_trip", S.UiState.speed)
         onNewTripRequested: bridge.executeUiCommand("new_trip", S.UiState.speed)
+    }
+
+    // Monitoring alarm shown on every screen except the live data page.
+    Item {
+        objectName: "liveAlarmBanner"
+        z: 9200
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: alarmBanner.width; height: alarmBanner.y + alarmBanner.height
+        visible: alarmBanner.shown
+        C.AlertBanner {
+            id: alarmBanner
+            level: "danger"
+            shown: S.UiState.liveAlarms.length > 0 && root.route !== "live"
+            message: S.UiState.liveAlarms.length > 0
+                     ? "⚠ " + S.UiState.liveAlarms[0].text + (S.UiState.liveAlarms.length > 1 ? "  (+" + (S.UiState.liveAlarms.length - 1) + ")" : "")
+                     : ""
+        }
+        MouseArea { anchors.fill: parent; onClicked: root.openRoute("live") }
     }
 
     NotificationCenter { z: 9400 }

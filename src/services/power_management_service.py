@@ -43,9 +43,9 @@ class SystemPowerExecutor:
 
     def execute(self, action: str) -> tuple[bool, str]:
         if action not in {"poweroff", "reboot"}:
-            return False, f"action système interdite: {action}"
+            return False, f"system action not allowed: {action}"
         if self.is_simulated:
-            return True, f"Action {action} simulée ({'mock' if self.mock else self.system})"
+            return True, f"Action {action} simulated ({'mock' if self.mock else self.system})"
         try:
             completed = self.runner(
                 ["systemctl", action],
@@ -58,9 +58,9 @@ class SystemPowerExecutor:
         except (OSError, subprocess.SubprocessError) as exc:
             return False, f"commande impossible: {exc}"
         if completed.returncode != 0:
-            detail = (completed.stderr or completed.stdout or "sans détail").strip()
+            detail = (completed.stderr or completed.stdout or "no detail").strip()
             return False, f"code {completed.returncode}: {detail}"
-        return True, f"Action système demandée: {action}"
+        return True, f"System action requested: {action}"
 
     def poweroff(self) -> tuple[bool, str]:
         return self.execute("poweroff")
@@ -100,14 +100,14 @@ class PowerManagementService(BaseService):
         self._action_lock = threading.Lock()
 
         self.register_param(
-            "shutdown_delay", "Délai avant extinction (s)", ServiceParamType.SLIDER,
+            "shutdown_delay", "Delay before shutdown (s)", ServiceParamType.SLIDER,
             10.0, min_val=0.0, max_val=60.0,
         )
         self.register_param(
-            "shutdown_on_can_silence", "Arrêt sur silence CAN", ServiceParamType.TOGGLE, True,
+            "shutdown_on_can_silence", "Shut down when CAN goes silent", ServiceParamType.TOGGLE, True,
         )
         self.register_param(
-            "can_silence_delay", "Délai de silence CAN (s)", ServiceParamType.SLIDER,
+            "can_silence_delay", "CAN silence delay (s)", ServiceParamType.SLIDER,
             180.0, min_val=60.0, max_val=900.0,
         )
         self._publish_state(None)
@@ -120,7 +120,7 @@ class PowerManagementService(BaseService):
         self._thread.start()
 
     def _run(self, stop_event: threading.Event):
-        self.set_ok("Surveillance alimentation active")
+        self.set_ok("Power monitoring active")
         while not stop_event.is_set():
             self.evaluate()
             if self.state is PowerState.POWERING_OFF and self.power_executor.is_simulated:
@@ -141,7 +141,7 @@ class PowerManagementService(BaseService):
         if self.update_safety.update_in_progress():
             self._update_was_in_progress = True
             self._set_state(PowerState.WAITING_FOR_CONTACT, "update_in_progress", countdown_started_at=None)
-            self.set_warning("Extinction suspendue pendant la mise à jour")
+            self.set_warning("Shutdown suspended during update")
             return self.state
         powertrain = self.runtime.snapshot().domain("powertrain")
         has_contact_signal = "key_acc" in powertrain or "key_run" in powertrain
@@ -152,7 +152,7 @@ class PowerManagementService(BaseService):
             self._update_was_in_progress = False
             self._last_contact_active = True
             self._set_state(PowerState.CONTACT_ON, "", countdown_started_at=None)
-            self.set_ok("Contact actif")
+            self.set_ok("Ignition on")
             return self.state
 
         if self.state is PowerState.POWER_ACTION_FAILED:
@@ -197,7 +197,7 @@ class PowerManagementService(BaseService):
             self._continue_countdown(delay, current)
         else:
             self._set_state(PowerState.WAITING_FOR_CONTACT, "", countdown_started_at=None)
-            self.set_ok("En attente du contact")
+            self.set_ok("Waiting for ignition")
 
         return self.state
 
@@ -218,14 +218,14 @@ class PowerManagementService(BaseService):
         if self.update_safety.update_in_progress():
             self._update_was_in_progress = True
             self._set_state(PowerState.WAITING_FOR_CONTACT, "update_in_progress", countdown_started_at=None)
-            self.set_warning("Extinction suspendue pendant la mise à jour")
+            self.set_warning("Shutdown suspended during update")
             return
         if not self._action_lock.acquire(blocking=False):
             return
         try:
             self.state = PowerState.POWERING_OFF
             self._publish_state(0.0)
-            self.set_error("Extinction ordonnée en cours")
+            self.set_error("Orderly shutdown in progress")
             report = self.orchestrator.stop_all()
             if report.get("errors") or report.get("unresponsive"):
                 self.logger.error(
@@ -251,7 +251,7 @@ class PowerManagementService(BaseService):
         self._retry_at = now + self.RETRY_DELAY_S
         self.state = PowerState.POWER_ACTION_FAILED
         self._publish_state(self.RETRY_DELAY_S)
-        self.set_error(f"Échec de l'extinction; nouvelle tentative dans 30 s: {detail}")
+        self.set_error(f"Shutdown failed; retrying in 30 s: {detail}")
 
     @staticmethod
     def _flush_logs() -> None:
@@ -268,7 +268,7 @@ class PowerManagementService(BaseService):
         self._last_contact_active = None
         self._retry_at = None
         self._set_state(PowerState.WAITING_FOR_CONTACT, "", countdown_started_at=None)
-        self.set_ok("Extinction simulée; en attente du contact")
+        self.set_ok("Shutdown simulated; waiting for ignition")
 
     def _set_state(self, state: PowerState, reason: str, countdown_started_at: float | None) -> None:
         self.state = state

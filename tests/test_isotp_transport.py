@@ -73,7 +73,7 @@ class IsoTpTransportTest(unittest.TestCase):
         with self.assertRaises(IsoTpError):
             transport.feed(0x7E8, b"\x30\x00\x00", 0.0)
         transport.feed(0x7E8, bytes([0x10, 8, 1, 2, 3, 4, 5, 6]), 0.0)
-        with self.assertRaisesRegex(IsoTpError, "délai"):
+        with self.assertRaisesRegex(IsoTpError, "timed out"):
             transport.feed(0x7E8, bytes([0x21, 7, 8]), 0.6)
 
     def test_first_frame_claiming_payload_already_complete_is_rejected(self):

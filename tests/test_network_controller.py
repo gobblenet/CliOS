@@ -92,7 +92,7 @@ class NetworkControllerTest(unittest.TestCase):
     def test_missing_nmcli_timeout_and_command_error_are_reported(self):
         cases = [
             (FileNotFoundError(), "NetworkManager indisponible"),
-            (subprocess.TimeoutExpired("nmcli", 1), "Délai NetworkManager dépassé"),
+            (subprocess.TimeoutExpired("nmcli", 1), "NetworkManager timed out"),
             (subprocess.CompletedProcess([], 10, "", "permission"), "permission"),
         ]
         for result, message in cases:

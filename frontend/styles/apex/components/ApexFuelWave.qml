@@ -82,7 +82,7 @@ Item {
                 ctx.font = "bold 16px Arial"
                 ctx.textAlign = "center"
                 ctx.textBaseline = "middle"
-                ctx.fillText("RÉSERVOIR VIDE", w / 2, h / 2)
+                ctx.fillText("TANK EMPTY", w / 2, h / 2)
                 return
             }
 
@@ -159,12 +159,12 @@ Item {
             ctx.font = "bold 26px Arial"
             ctx.textAlign = "center"
             ctx.textBaseline = "middle"
-            ctx.fillText(S.UiState.fixed(root.fuelLevel, 1, "—") + " L", w / 2, h * 0.44)
+            ctx.fillText(S.UiState.fixed(S.UiState.toVolume(root.fuelLevel), 1, "—") + " " + S.UiState.volumeUnit, w / 2, h * 0.44)
 
-            var autoVal = Math.round(S.UiState.autonomy)
+            var autoVal = Math.round(S.UiState.toDistance(S.UiState.autonomy))
             ctx.fillStyle = Qt.rgba(1.0, 1.0, 1.0, 0.65)
             ctx.font = "bold 13px Arial"
-            ctx.fillText("AUTONOMIE " + autoVal + " KM", w / 2, h * 0.78)
+            ctx.fillText("RANGE " + autoVal + " " + S.UiState.distanceUnit.toUpperCase(), w / 2, h * 0.78)
         }
     }
 

@@ -16,7 +16,7 @@ Rectangle {
     property string colorOff: "#222222"  // Gris foncé
 
     // 3. Le texte dynamique (Bonus !)
-    property string label: "FEUX"
+    property string label: "LIGHTS"
 
     // LA MAGIE TRI-STATE :
     // Si Pos2 est Vrai -> Couleur2. SINON, si Pos1 est Vrai -> Couleur1. SINON -> Off.

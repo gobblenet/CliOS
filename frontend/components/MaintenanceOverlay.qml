@@ -52,7 +52,7 @@ Item {
                 maintenanceData = JSON.parse(raw)
             }
         } catch (e) {
-            console.log("Erreur rafraichissement maintenance:", e)
+            console.log("Maintenance refresh error:", e)
         }
     }
 
@@ -99,7 +99,7 @@ Item {
                 Layout.fillWidth: true
                 spacing: 2
                 Text {
-                    text: "MENU DE MAINTENANCE SYSTÈME"
+                    text: "SYSTEM MAINTENANCE MENU"
                     color: "#FFFFFF"
                     font.family: T.StyleManager.fontFamily
                     font.pixelSize: 22
@@ -107,7 +107,7 @@ Item {
                     font.letterSpacing: 1.2
                 }
                 Text {
-                    text: "Accès direct technicien · CliOS " + S.UiState.systemVersion + " · " + (root.maintenanceData.git_info || "main")
+                    text: "Direct technician access · CliOS " + S.UiState.systemVersion + " · " + (root.maintenanceData.git_info || "main")
                     color: "#8FA3B8"
                     font.family: T.StyleManager.fontFamily
                     font.pixelSize: 13
@@ -124,7 +124,7 @@ Item {
                     anchors.centerIn: parent
                     spacing: 8
                     Text { text: "\u2715"; color: "#FFFFFF"; font.pixelSize: 16; font.bold: true }
-                    Text { text: "FERMER"; color: "#FFFFFF"; font.pixelSize: 14; font.bold: true }
+                    Text { text: "CLOSE"; color: "#FFFFFF"; font.pixelSize: 14; font.bold: true }
                 }
 
                 MouseArea {
@@ -150,12 +150,12 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true; spacing: 2
                         Text {
-                            text: root.maintenanceData.wifi_ssid ? "WI-FI · " + root.maintenanceData.wifi_ssid.toUpperCase() : "RÉSEAU IP"
+                            text: root.maintenanceData.wifi_ssid ? "WI-FI · " + root.maintenanceData.wifi_ssid.toUpperCase() : "IP NETWORK"
                             color: "#9CA3AF"; font.pixelSize: 11; font.bold: true; elide: Text.ElideRight
                         }
                         Text {
-                            readonly property bool isOnline: root.maintenanceData.ip_address && root.maintenanceData.ip_address !== "Hors-ligne" && !root.maintenanceData.ip_address.startsWith("127.")
-                            text: isOnline ? root.maintenanceData.ip_address : "Hors-ligne"
+                            readonly property bool isOnline: root.maintenanceData.ip_address && root.maintenanceData.ip_address !== "Offline" && !root.maintenanceData.ip_address.startsWith("127.")
+                            text: isOnline ? root.maintenanceData.ip_address : "Offline"
                             color: isOnline ? T.StyleManager.success : "#EF4444"
                             font.pixelSize: 16; font.bold: true; font.family: T.StyleManager.fontMono
                         }
@@ -172,9 +172,9 @@ Item {
                     Text { text: root.maintenanceData.overlay_status === "READ_ONLY" ? "\uD83D\uDEE1" : "\u26A0" ; font.pixelSize: 22 }
                     ColumnLayout {
                         Layout.fillWidth: true; spacing: 2
-                        Text { text: "PROTECTION CARTE SD"; color: "#9CA3AF"; font.pixelSize: 11; font.bold: true }
+                        Text { text: "SD CARD PROTECTION"; color: "#9CA3AF"; font.pixelSize: 11; font.bold: true }
                         Text {
-                            text: root.maintenanceData.overlay_status === "READ_ONLY" ? "LECTURE SEULE (PROTÉGÉE)" : "ÉCRITURE (STANDARD)"
+                            text: root.maintenanceData.overlay_status === "READ_ONLY" ? "READ-ONLY (PROTECTED)" : "READ-WRITE (STANDARD)"
                             color: root.maintenanceData.overlay_status === "READ_ONLY" ? T.StyleManager.success : T.StyleManager.warning
                             font.pixelSize: 14; font.bold: true
                         }
@@ -191,7 +191,7 @@ Item {
                     Text { text: "\u26A1"; font.pixelSize: 22 }
                     ColumnLayout {
                         Layout.fillWidth: true; spacing: 2
-                        Text { text: "CHARGE SYSTÈME"; color: "#9CA3AF"; font.pixelSize: 11; font.bold: true }
+                        Text { text: "SYSTEM LOAD"; color: "#9CA3AF"; font.pixelSize: 11; font.bold: true }
                         Text {
                             text: S.UiState.fixed(S.UiState.appCpuTotalPct, 0, "0") + "% CPU · " + S.UiState.fixed(S.UiState.appRamMb, 0, "0") + " MB" + (root.maintenanceData.cpu_temp ? " · " + root.maintenanceData.cpu_temp : "")
                             color: "#E5E7EB"; font.pixelSize: 14; font.bold: true; font.family: T.StyleManager.fontMono
@@ -218,11 +218,11 @@ Item {
                     RowLayout {
                         spacing: 12
                         Text { text: "\u2B07"; font.pixelSize: 28 }
-                        Text { text: "METTRE À JOUR"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
+                        Text { text: "UPDATE"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Recherche une release stable ou bêta sans modifier la version active."
+                        text: "Looks for a stable or beta release without changing the active version."
                         color: "#94A3B8"; font.pixelSize: 13; wrapMode: Text.WordWrap
                     }
                 }
@@ -243,11 +243,11 @@ Item {
                     RowLayout {
                         spacing: 12
                         Text { text: "\uD83D\uDEE1"; font.pixelSize: 28 }
-                        Text { text: "BASCULE MODE SD"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
+                        Text { text: "TOGGLE SD MODE"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Active ou désactive la protection en écriture OverlayFS de la carte SD."
+                        text: "Enables or disables OverlayFS write protection of the SD card."
                         color: "#94A3B8"; font.pixelSize: 13; wrapMode: Text.WordWrap
                     }
                 }
@@ -266,11 +266,11 @@ Item {
                     RowLayout {
                         spacing: 12
                         Text { text: "\uD83D\uDD04"; font.pixelSize: 28 }
-                        Text { text: "RELANCER CLIOS"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
+                        Text { text: "RESTART CLIOS"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Redémarre l application sans redémarrer le système d exploitation."
+                        text: "Restarts the application without rebooting the operating system."
                         color: "#94A3B8"; font.pixelSize: 13; wrapMode: Text.WordWrap
                     }
                 }
@@ -291,11 +291,11 @@ Item {
                     RowLayout {
                         spacing: 12
                         Text { text: "\uD83D\uDDA5"; font.pixelSize: 28 }
-                        Text { text: "QUITTER CLIOS"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
+                        Text { text: "QUIT CLIOS"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Ferme proprement les services et retourne au bureau ou au shell."
+                        text: "Stops services cleanly and returns to the desktop or shell."
                         color: "#94A3B8"; font.pixelSize: 13; wrapMode: Text.WordWrap
                     }
                 }
@@ -318,7 +318,7 @@ Item {
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Arrête les services et redémarre complètement le Raspberry Pi."
+                        text: "Stops services and fully reboots the Raspberry Pi."
                         color: "#94A3B8"; font.pixelSize: 13; wrapMode: Text.WordWrap
                     }
                 }
@@ -337,11 +337,11 @@ Item {
                     RowLayout {
                         spacing: 12
                         Text { text: "\u23FB"; font.pixelSize: 28 }
-                        Text { text: "ÉTEINDRE SYSTÈME"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
+                        Text { text: "SHUT DOWN SYSTEM"; color: "#FFFFFF"; font.pixelSize: 18; font.bold: true }
                     }
                     Text {
                         Layout.fillWidth: true
-                        text: "Sauvegarde les données de trajet et coupe l alimentation en sécurité."
+                        text: "Saves trip data and powers off safely."
                         color: "#94A3B8"; font.pixelSize: 13; wrapMode: Text.WordWrap
                     }
                 }
@@ -398,7 +398,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true; height: 50; radius: 12
                         color: "#334155"
-                        Text { anchors.centerIn: parent; text: "ANNULER"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 15 }
+                        Text { anchors.centerIn: parent; text: "CANCEL"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 15 }
                         MouseArea {
                             anchors.fill: parent
                             onClicked: root.confirmAction = ""
@@ -408,7 +408,7 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true; height: 50; radius: 12
                         color: root.confirmAction === "shutdown" || root.confirmAction === "reboot" ? "#EF4444" : T.StyleManager.accent
-                        Text { anchors.centerIn: parent; text: "CONFIRMER"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 15 }
+                        Text { anchors.centerIn: parent; text: "CONFIRM"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 15 }
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {

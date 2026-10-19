@@ -35,14 +35,14 @@ def get_release_platform(identifier: str) -> ReleasePlatform:
     try:
         return SUPPORTED_PLATFORMS[identifier]
     except KeyError as exc:
-        raise ReleasePlatformError(f"plateforme de release non prise en charge: {identifier}") from exc
+        raise ReleasePlatformError(f"unsupported release platform: {identifier}") from exc
 
 
 def get_target_platform(target: str) -> ReleasePlatform:
     try:
         return PLATFORMS_BY_TARGET[target]
     except KeyError as exc:
-        raise ReleasePlatformError(f"cible de release non prise en charge: {target}") from exc
+        raise ReleasePlatformError(f"unsupported release target: {target}") from exc
 
 
 def detect_release_platform(
@@ -52,7 +52,7 @@ def detect_release_platform(
 ) -> ReleasePlatform:
     architecture = (machine or host_platform.machine()).lower()
     if architecture not in {"aarch64", "arm64"}:
-        raise ReleasePlatformError(f"architecture non prise en charge: {architecture or 'inconnue'}")
+        raise ReleasePlatformError(f"unsupported architecture: {architecture or 'unknown'}")
     values: dict[str, str] = {}
     try:
         for line in Path(os_release_path).read_text(encoding="utf-8").splitlines():
@@ -67,5 +67,5 @@ def detect_release_platform(
         return PLATFORMS_BY_CODENAME[codename]
     except KeyError as exc:
         raise ReleasePlatformError(
-            f"distribution non prise en charge: {codename or values.get('PRETTY_NAME', 'inconnue')}"
+            f"unsupported distribution: {codename or values.get('PRETTY_NAME', 'unknown')}"
         ) from exc

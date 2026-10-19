@@ -5,10 +5,10 @@ def chasse_au_tresor(port="/dev/cu.usbmodem207B3949534B1", baudrate=500000):
     driver = Slcan(channel=port, baudrate=baudrate)
 
     if not driver.connect():
-        print("❌ Port fermé.")
+        print("❌ Port closed.")
         return
 
-    print("✅ En écoute... Appuie doucement sur l'accélérateur pour faire varier le Turbo/Régime.")
+    print("✅ Listening... Gently press the accelerator to vary boost/RPM.")
 
     # On va mémoriser l'état précédent de chaque trame
     memoire_trames = {}
@@ -34,13 +34,13 @@ def chasse_au_tresor(port="/dev/cu.usbmodem207B3949534B1", baudrate=500000):
                     # S'il y a un changement, on l'affiche avec des couleurs (si ton terminal le supporte)
                     if changements:
                         hex_data = " ".join([f"{b:02X}" for b in data_actuelle])
-                        print(f"Trame [0x{id_trame:03X}] a changé ! -> {hex_data} (Octets modifiés : {changements})")
+                        print(f"Frame [0x{id_trame:03X}] changed! -> {hex_data} (bytes changed: {changements})")
 
                 # On met à jour la mémoire
                 memoire_trames[id_trame] = data_actuelle
 
     except KeyboardInterrupt:
-        print("\n🏁 Arrêt du chasseur.")
+        print("\n🏁 Frame hunter stopped.")
         driver.close()
 
 

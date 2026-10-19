@@ -41,7 +41,7 @@ Item {
             visible: !root.embedded
             Layout.fillWidth: true
             title: "Services"
-            subtitle: root.serviceKeys.length + " module(s) supervisé(s)"
+            subtitle: root.serviceKeys.length + " supervised module(s)"
             onBackClicked: root.backRequested()
         }
 
@@ -78,7 +78,7 @@ Item {
                         const raw = bridge.getServiceParameters(serviceId)
                         params = raw ? JSON.parse(raw) : []
                     } catch (error) {
-                        console.warn("Paramètres du service " + serviceId + " illisibles: " + error)
+                        console.warn("Service parameters " + serviceId + " unreadable: " + error)
                         params = []
                     }
                 }
@@ -155,7 +155,7 @@ Item {
                             }
                             Text {
                                 Layout.fillWidth: true
-                                text: serviceRow.details.message || serviceRow.details.status || "État inconnu"
+                                text: serviceRow.details.message || serviceRow.details.status || "Unknown status"
                                 color: T.StyleManager.textSecondary
                                 font.family: T.StyleManager.fontFamily
                                 font.pixelSize: 14
@@ -165,7 +165,7 @@ Item {
 
                         Text {
                             visible: serviceRow.hasParams
-                            text: serviceRow.params.length + " paramètre" + (serviceRow.params.length > 1 ? "s" : "")
+                            text: serviceRow.params.length + " parameter" + (serviceRow.params.length > 1 ? "s" : "")
                             color: T.StyleManager.textSecondary
                             font.family: T.StyleManager.fontFamily
                             font.pixelSize: 14
@@ -295,7 +295,7 @@ Item {
                                     visible: parameterRow.parameterType === "button"
                                     Layout.preferredWidth: 210
                                     Layout.preferredHeight: 56
-                                    text: "EXÉCUTER"
+                                    text: "RUN"
                                     onClicked: serviceRow.setParameter(modelData.key, true, true)
                                 }
                             }

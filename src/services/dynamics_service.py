@@ -33,11 +33,11 @@ class DynamicsService(BaseService):
             StatePatch("dynamics", {"dynamic_warning": "OK"}, "dynamics"),
         ))
 
-        self.register_param("min_speed", "Vitesse Min (km/h)", ServiceParamType.SLIDER, 5.0,
+        self.register_param("min_speed", "Minimum speed (km/h)", ServiceParamType.SLIDER, 5.0,
                             min_val=1.0, max_val=30.0)
-        self.register_param("slip_margin", "Tolérance Patinage (%)", ServiceParamType.SLIDER, 15.0,
+        self.register_param("slip_margin", "Wheel slip tolerance (%)", ServiceParamType.SLIDER, 15.0,
                             min_val=5.0, max_val=50.0)
-        self.register_param("lock_margin", "Seuil de Blocage (%)", ServiceParamType.SLIDER, 30.0,
+        self.register_param("lock_margin", "Wheel lock threshold (%)", ServiceParamType.SLIDER, 30.0,
                             min_val=5.0, max_val=80.0)
 
     def reload_config(self, new_config: dict):
@@ -45,7 +45,7 @@ class DynamicsService(BaseService):
         trans_config = new_config.get("transmission", {})
         self._gear_ratios = trans_config.get("ratios", self._gear_ratios)
         self._gear_tolerance = trans_config.get("tolerance", self._gear_tolerance)
-        self.print_message(f"Rapports de boîte rechargés ({len(self._gear_ratios)} rapports).")
+        self.print_message(f"Gear ratios reloaded ({len(self._gear_ratios)} gears).")
 
     def start(self, stop_event: threading.Event):
         self.thread = threading.Thread(target=self._run, args=(stop_event,), daemon=True, name=self.service_name)

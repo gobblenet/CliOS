@@ -31,7 +31,7 @@ Item {
         RowLayout {
             spacing: 4
             Text {
-                text: "EXT."
+                text: "OUT."
                 color: "#BAC8D9"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 12
@@ -39,7 +39,7 @@ Item {
                 font.letterSpacing: 1
             }
             Text {
-                text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + " °C"
+                text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + " " + S.UiState.temperatureUnit
                 color: "#FFFFFF"
                 font.family: T.StyleManager.fontFamily
                 font.pixelSize: 15
@@ -57,16 +57,16 @@ Item {
             model: [
                 { id: "turn_left", label: "◀", color: T.StyleManager.success, active: S.UiState.turnLeftActive },
                 { id: "turn_right", label: "▶", color: T.StyleManager.success, active: S.UiState.turnRightActive },
-                { id: "lights", label: "FEU", color: T.StyleManager.success, active: S.UiState.lightsActive },
-                { id: "high_beam", label: "ROUTE", color: "#3B82F6", active: S.UiState.highBeamActive },
+                { id: "lights", label: "LGT", color: T.StyleManager.success, active: S.UiState.lightsActive },
+                { id: "high_beam", label: "BEAM", color: "#3B82F6", active: S.UiState.highBeamActive },
                 { id: "stop", label: "STOP", color: T.StyleManager.danger, active: S.UiState.handbrakeActive || S.UiState.brakeWarning },
-                { id: "unbelted", label: "CEINT", color: T.StyleManager.danger, active: S.UiState.driverUnbelted },
-                { id: "door", label: "PORTE", color: T.StyleManager.warning, active: S.UiState.doorOpen },
-                { id: "oil", label: "HUILE", color: T.StyleManager.danger, active: S.UiState.oilWarning },
+                { id: "unbelted", label: "BELT", color: T.StyleManager.danger, active: S.UiState.driverUnbelted },
+                { id: "door", label: "DOOR", color: T.StyleManager.warning, active: S.UiState.doorOpen },
+                { id: "oil", label: "OIL", color: T.StyleManager.danger, active: S.UiState.oilWarning },
                 { id: "battery", label: "BAT", color: T.StyleManager.danger, active: S.UiState.batteryWarning },
                 { id: "abs", label: "ABS", color: T.StyleManager.warning, active: S.UiState.absWarning },
                 { id: "esp", label: "ESP", color: T.StyleManager.warning, active: S.UiState.espWarning },
-                { id: "engine", label: "MOT", color: T.StyleManager.warning, active: S.UiState.engineWarning }
+                { id: "engine", label: "ENG", color: T.StyleManager.warning, active: S.UiState.engineWarning }
             ]
 
             Rectangle {

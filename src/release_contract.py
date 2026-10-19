@@ -34,11 +34,11 @@ class SemVer:
     def parse(cls, value: str) -> "SemVer":
         match = _SEMVER_RE.fullmatch(str(value).strip())
         if not match:
-            raise ReleaseContractError(f"version SemVer invalide: {value}")
+            raise ReleaseContractError(f"invalid SemVer version: {value}")
         prerelease = tuple((match.group(4) or "").split(".")) if match.group(4) else ()
         for identifier in prerelease:
             if identifier.isdigit() and len(identifier) > 1 and identifier.startswith("0"):
-                raise ReleaseContractError(f"version SemVer invalide: {value}")
+                raise ReleaseContractError(f"invalid SemVer version: {value}")
         build = tuple((match.group(5) or "").split(".")) if match.group(5) else ()
         return cls(int(match.group(1)), int(match.group(2)), int(match.group(3)), prerelease, build)
 
@@ -99,7 +99,7 @@ def channel_for_version(version: str) -> str:
 def validate_manifest(manifest: object, *, require_https: bool = True) -> dict:
     """Valide et normalise un manifeste v1 sans conserver de champs ambigus."""
     if not isinstance(manifest, dict):
-        raise ReleaseContractError("le manifeste doit être un objet JSON")
+        raise ReleaseContractError("the manifest must be a JSON object")
     required = {"schema_version", "version", "channel", "platform", "archive_url", "archive_sha256", "files"}
     extra = sorted(set(manifest) - required)
     if extra:
@@ -108,34 +108,34 @@ def validate_manifest(manifest: object, *, require_https: bool = True) -> dict:
     if missing:
         raise ReleaseContractError("manifeste incomplet: " + ", ".join(missing))
     if manifest["schema_version"] != 1:
-        raise ReleaseContractError("version de schéma de release non prise en charge")
+        raise ReleaseContractError("unsupported release schema version")
     version = str(manifest["version"])
     expected_channel = channel_for_version(version)
     channel = str(manifest["channel"])
     if channel != expected_channel:
         raise ReleaseContractError(
-            f"canal {channel!r} contradictoire avec la version {version} ({expected_channel})"
+            f"channel {channel!r} conflicts with version {version} ({expected_channel})"
         )
     if manifest["platform"] not in SUPPORTED_PLATFORMS:
-        raise ReleaseContractError("plateforme de release non prise en charge")
+        raise ReleaseContractError("unsupported release platform")
     archive_url = str(manifest["archive_url"])
     parsed = urlparse(archive_url)
     if require_https and parsed.scheme != "https":
-        raise ReleaseContractError("l'archive doit utiliser HTTPS")
+        raise ReleaseContractError("the archive must use HTTPS")
     digest = str(manifest["archive_sha256"]).lower()
     if not re.fullmatch(r"[0-9a-f]{64}", digest):
-        raise ReleaseContractError("SHA-256 de l'archive invalide")
+        raise ReleaseContractError("invalid archive SHA-256")
     raw_files = manifest["files"]
     if not isinstance(raw_files, dict) or not raw_files:
-        raise ReleaseContractError("liste de fichiers vide ou invalide")
+        raise ReleaseContractError("empty or invalid file list")
     files: dict[str, str] = {}
     for raw_path, raw_digest in raw_files.items():
         path = str(raw_path)
         if not path or path.startswith("/") or ".." in path.split("/") or "\\" in path:
-            raise ReleaseContractError(f"chemin manifesté non sûr: {path}")
+            raise ReleaseContractError(f"unsafe manifest path: {path}")
         file_digest = str(raw_digest).lower()
         if not re.fullmatch(r"[0-9a-f]{64}", file_digest):
-            raise ReleaseContractError(f"SHA-256 invalide: {path}")
+            raise ReleaseContractError(f"invalid SHA-256: {path}")
         files[path] = file_digest
     return {
         "schema_version": 1,

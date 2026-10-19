@@ -17,12 +17,12 @@ class NotificationService(BaseService):
         }
         self._thread = None
 
-        self.register_param("enable_clutch_warn", "Alerte Embrayage", ServiceParamType.TOGGLE, True)
-        self.register_param("clutch_time_limit", "Temps Limite (s)", ServiceParamType.SLIDER, 5.0,
+        self.register_param("enable_clutch_warn", "Clutch alert", ServiceParamType.TOGGLE, True)
+        self.register_param("clutch_time_limit", "Time limit (s)", ServiceParamType.SLIDER, 5.0,
                             min_val=2.0, max_val=15.0)
-        self.register_param("min_speed", "Vitesse Min. (km/h)", ServiceParamType.SLIDER, 15.0,
+        self.register_param("min_speed", "Minimum speed (km/h)", ServiceParamType.SLIDER, 15.0,
                             min_val=0.0, max_val=50.0)
-        self.register_param("notif_duration", "Durée Affichage (ms)", ServiceParamType.SLIDER, 4000.0,
+        self.register_param("notif_duration", "Display duration (ms)", ServiceParamType.SLIDER, 4000.0,
                             min_val=1000.0, max_val=10000.0)
 
     def start(self, stop_event):
@@ -52,7 +52,7 @@ class NotificationService(BaseService):
                 data.update(snapshot.domain("motion"))
                 self.check_data(data)
             except Exception as e:
-                self.print_message(f"\n[ERREUR FATALE] Le service a planté : {e}")
+                self.print_message(f"\n[FATAL ERROR] The service crashed: {e}")
                 traceback.print_exc()
                 self.set_error(f"Crash inattendu : {str(e)}")
 
@@ -74,7 +74,7 @@ class NotificationService(BaseService):
             if self._states["clutch_start_time"] is None:
                 self._states["clutch_start_time"] = current_time
             elif (current_time - self._states["clutch_start_time"] > time_limit) and not self._states["clutch_warned"] and current_speed > min_speed:
-                self._notifier("WARNING", "ATTENTION : EMBRAYAGE SOLLICITÉ", duration)
+                self._notifier("WARNING", "WARNING: RIDING THE CLUTCH", duration)
                 self._states["clutch_warned"] = True
         else:
             self._states["clutch_start_time"] = None

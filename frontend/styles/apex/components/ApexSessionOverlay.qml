@@ -48,7 +48,7 @@ Item {
             // Titre
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: S.UiState.sessionState === "ENDED" ? "TRAJET TERMINÉ" : "SESSION EN PAUSE"
+                text: S.UiState.sessionState === "ENDED" ? "TRIP ENDED" : "SESSION PAUSED"
                 color: "#FFFFFF"
                 font.pixelSize: 20
                 font.weight: Font.Black
@@ -63,9 +63,9 @@ Item {
 
                 Repeater {
                     model: [
-                        { label: "Distance",  value: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0"),    unit: "km" },
-                        { label: "Carburant", value: S.UiState.fixed(S.UiState.tripFuelLiters, 2, "0,00"), unit: "L"  },
-                        { label: "Coût",      value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"),   unit: "€"  }
+                        { label: "Distance",  value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0"),    unit: S.UiState.distanceUnit },
+                        { label: "Fuel", value: S.UiState.fixed(S.UiState.toVolume(S.UiState.tripFuelLiters), 2, "0.00"), unit: S.UiState.volumeUnit  },
+                        { label: "Cost",      value: S.UiState.money(S.UiState.tripCost),   unit: ""  }
                     ]
                     delegate: Item {
                         Layout.fillWidth: true
@@ -125,7 +125,7 @@ Item {
                     color: Qt.rgba(T.StyleManager.accent.r, T.StyleManager.accent.g, T.StyleManager.accent.b, 0.15)
                     border.width: 1; border.color: T.StyleManager.accent
                     Text {
-                        anchors.centerIn: parent; text: "CONTINUER"
+                        anchors.centerIn: parent; text: "CONTINUE"
                         color: T.StyleManager.accent
                         font.pixelSize: 14; font.weight: Font.Black; font.letterSpacing: 2
                     }
@@ -141,7 +141,7 @@ Item {
                     color: Qt.rgba(1.0, 0.1, 0.1, 0.12)
                     border.width: 1; border.color: Qt.rgba(1.0, 0.2, 0.1, 0.5)
                     Text {
-                        anchors.centerIn: parent; text: "TERMINER LE TRAJET"
+                        anchors.centerIn: parent; text: "END TRIP"
                         color: "#FF4444"
                         font.pixelSize: 14; font.weight: Font.Black; font.letterSpacing: 2
                     }
@@ -157,7 +157,7 @@ Item {
             Text {
                 visible: S.UiState.sessionState === "ENDED"
                 Layout.alignment: Qt.AlignHCenter
-                text: "✓  Données sauvegardées"
+                text: "✓  Data saved"
                 color: "#00E676"
                 font.pixelSize: 18
                 font.weight: Font.Bold

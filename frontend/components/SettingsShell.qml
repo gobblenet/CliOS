@@ -13,11 +13,13 @@ Item {
     signal navigateRequested(string route)
     signal styleRequested(string styleId)
     readonly property var sections: [
-        { id: "driving", label: "Conduite", detail: "Trajets" },
-        { id: "appearance", label: "Apparence", detail: "Styles et lumière" },
-        { id: "vehicle", label: "Véhicule", detail: "Entretien et OBD" },
-        { id: "system", label: "Système", detail: "Réseau et stockage" },
-        { id: "advanced", label: "Avancé", detail: "Profils et services", secondary: true }
+        { id: "map", label: "Map", detail: "Live GPS position" },
+        { id: "live", label: "Live data", detail: "Real-time monitoring" },
+        { id: "driving", label: "Driving", detail: "Trips" },
+        { id: "appearance", label: "Appearance", detail: "Styles and lighting" },
+        { id: "vehicle", label: "Vehicle", detail: "Maintenance and OBD" },
+        { id: "system", label: "System", detail: "Network and storage" },
+        { id: "advanced", label: "Advanced", detail: "Profiles and services", secondary: true }
     ]
     readonly property var routeSources: ({
         menu: "../shared_pages/MenuPage.qml",
@@ -47,7 +49,7 @@ Item {
                 Text { anchors.centerIn: parent; text: "‹  COCKPIT"; color: T.StyleManager.text; font.pixelSize: 20; font.bold: true }
                 MouseArea { id: cockpitTouch; anchors.fill: parent; onClicked: root.cockpitRequested() }
             }
-            Text { text: "RÉGLAGES"; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.bold: true; font.letterSpacing: 2; Layout.topMargin: 8 }
+            Text { text: "SETTINGS"; color: T.StyleManager.textSecondary; font.pixelSize: 13; font.bold: true; font.letterSpacing: 2; Layout.topMargin: 8 }
             Repeater {
                 model: root.sections
                 Rectangle {

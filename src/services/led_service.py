@@ -60,7 +60,7 @@ class BleLedController(BaseService):
 
         # Parametre de luminosite globale (reste visible dans ServicesPage)
         self.register_param(
-            "global_brightness", "Luminosite globale (%)",
+            "global_brightness", "Global brightness (%)",
             ServiceParamType.SLIDER, 100.0, min_val=0.0, max_val=100.0,
         )
 
@@ -293,7 +293,7 @@ class BleLedController(BaseService):
     ) -> bool:
         """Envoie les trames de couleur a un appareil BLE."""
         if not BleakClient:
-            self.set_warning("Bleak non installe")
+            self.set_warning("Bleak not installed")
             return False
         if not device.ble_address or not device.ble_address.strip():
             return False
@@ -308,7 +308,7 @@ class BleLedController(BaseService):
                 self.set_ok(f"Connecte: {device.name}")
             except Exception:
                 self._catalog.update_device_health(device.id, "disconnected")
-                self.set_warning(f"Connexion echouee: {device.name}")
+                self.set_warning(f"Connection failed: {device.name}")
                 return False
 
         # Determine la caracteristique GATT a utiliser
@@ -322,7 +322,7 @@ class BleLedController(BaseService):
 
         if not char_info:
             self._catalog.update_device_health(device.id, "error")
-            self.set_error(f"GATT introuvable: {device.name}")
+            self.set_error(f"GATT not found: {device.name}")
             return False
 
         char_uuid, write_response = char_info
@@ -362,7 +362,7 @@ class BleLedController(BaseService):
             with self._scan_lock:
                 self._scan_state["scanning"] = False
         except Exception as exc:
-            self.set_warning(f"Erreur scan BLE: {exc}")
+            self.set_warning(f"BLE scan error: {exc}")
             with self._scan_lock:
                 self._scan_state["scanning"] = False
         finally:
@@ -381,7 +381,7 @@ class BleLedController(BaseService):
                 "running": False,
                 "stage": "characteristics" if chars else "error",
                 "address": address,
-                "message": "" if chars else "Aucune caracteristique GATT writable trouvee",
+                "message": "" if chars else "No writable GATT characteristic found",
             }
 
     async def _async_test_protocol(

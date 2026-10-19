@@ -64,11 +64,11 @@ class LauncherSystemdTest(unittest.TestCase):
         self.assertIn("install_release_tree", installer)
         self.assertIn("--exclude='./.venv'", installer)
         self.assertIn('mv "$VENV_DIR" "${staging_dir}/.venv"', installer)
-        self.assertIn("Self-check QML de la release", installer)
+        self.assertIn("Release QML self-check", installer)
         self.assertIn("QT_QPA_PLATFORM=minimal", installer)
         self.assertIn("QT_QUICK_BACKEND=software", installer)
         self.assertIn('qml_smoke.py" --validate-only', installer)
-        self.assertIn("Précompilation Python pour le premier démarrage", installer)
+        self.assertIn("Python precompilation for first start", installer)
         self.assertIn("-m compileall -q", installer)
         self.assertNotIn('cp -a "${PROJECT_DIR}/." "${RELEASE_DIR}/"', installer)
         self.assertLess(
@@ -83,15 +83,15 @@ class LauncherSystemdTest(unittest.TestCase):
 
     def test_installer_finishes_with_system_service_instructions(self):
         installer = (ROOT / "install.sh").read_text(encoding="utf-8")
-        self.assertIn("CliOS est installé dans /opt/clios/current", installer)
-        self.assertIn("Voulez-vous démarrer CliOS maintenant ?", installer)
+        self.assertIn("CliOS is installed in /opt/clios/current", installer)
+        self.assertIn("Start CliOS now?", installer)
         self.assertIn('start clios.service', installer)
 
     def test_fast_boot_keeps_hardware_features_and_uses_separate_prompts(self):
         installer = (ROOT / "install.sh").read_text(encoding="utf-8")
-        self.assertIn("Souhaitez-vous désactiver ces services lents", installer)
-        self.assertIn("Désactiver LightDM et démarrer par défaut sur multi-user.target", installer)
-        self.assertIn("Cette machine est-elle provisionnée et peut-on désactiver cloud-init", installer)
+        self.assertIn("Disable these slow services at boot?", installer)
+        self.assertIn("Disable LightDM and boot to multi-user.target by default", installer)
+        self.assertIn("Is this machine provisioned, and can cloud-init be disabled", installer)
         self.assertIn("touch /etc/cloud/cloud-init.disabled", installer)
         self.assertIn("set-default multi-user.target", installer)
         self.assertNotIn('disable bluetooth.service', installer)

@@ -125,6 +125,6 @@ class SystemOrchestrator:
             else:
                 health[srv.service_name] = {
                     "status": "DISABLED",
-                    "message": "Désactivé dans les réglages"
+                    "message": "Disabled in settings"
                 }
         return health

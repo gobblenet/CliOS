@@ -38,11 +38,11 @@ class DeviceCatalogTest(unittest.TestCase):
     def test_limit_and_duplicate_addresses_are_rejected(self):
         catalog = DeviceCatalog(None)
         catalog.add_device(device())
-        with self.assertRaisesRegex(ValueError, "deja configure"):
+        with self.assertRaisesRegex(ValueError, "already configured"):
             catalog.add_device(device(9, ble_address="aa:00"))
         for index in range(1, MAX_DEVICES):
             catalog.add_device(device(index))
-        with self.assertRaisesRegex(ValueError, "Limite"):
+        with self.assertRaisesRegex(ValueError, "Limit"):
             catalog.add_device(device(MAX_DEVICES))
 
     def test_legacy_values_are_migrated_without_deletion(self):

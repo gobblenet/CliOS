@@ -38,7 +38,7 @@ Item {
         Rectangle { width: 1; height: 26; color: "#3B5065" }
 
         Text {
-            text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + " °C"
+            text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + " " + S.UiState.temperatureUnit
             color: "#D2DEE8"
             font.pixelSize: 17
             font.weight: Font.Bold
@@ -101,7 +101,7 @@ Item {
             Text {
                 id: serviceText
                 anchors.centerIn: parent
-                text: S.UiState.serviceErrorKeys.length > 0 ? "SERVICE À CONTRÔLER" : "AVIS SYSTÈME"
+                text: S.UiState.serviceErrorKeys.length > 0 ? "SERVICE DUE" : "SYSTEM NOTICE"
                 color: S.UiState.serviceErrorKeys.length > 0 ? "#FF7B84" : "#FFD17D"
                 font.pixelSize: 12
                 font.bold: true
@@ -120,14 +120,14 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 0
                 Text {
-                    text: S.UiState.usbConnected ? "CLÉ USB CONNECTÉE" : (S.UiState.internalStorage ? "CARTE SD INTERNE" : "MÉMOIRE TEMPORAIRE")
+                    text: S.UiState.usbConnected ? "USB DRIVE CONNECTED" : (S.UiState.internalStorage ? "INTERNAL SD CARD" : "TEMPORARY MEMORY")
                     color: "#E5EDF4"
                     font.pixelSize: 11
                     font.bold: true
                     font.letterSpacing: 1.2
                 }
                 Text {
-                    text: S.UiState.ramMode ? "MODE DÉGRADÉ" : Math.round(S.UiState.storageFreeMb) + " MB LIBRES"
+                    text: S.UiState.ramMode ? "DEGRADED MODE" : Math.round(S.UiState.storageFreeMb) + " MB FREE"
                     color: "#91A4B5"
                     font.pixelSize: 10
                     font.bold: true

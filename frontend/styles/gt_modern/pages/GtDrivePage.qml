@@ -19,7 +19,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.columnSpan: 2
-            title: "CliOS GT · conduite"
+            title: "CliOS GT · driving"
             highlighted: S.UiState.tripActive
 
             RowLayout {
@@ -36,8 +36,8 @@ Item {
                         font.weight: Font.DemiBold
                     }
                     Text {
-                        text: S.UiState.tripActive ? "Trajet en cours · enregistrement actif" :
-                              (S.UiState.sessionState === "PAUSED" ? "Trajet en pause" : "Prêt à prendre la route")
+                        text: S.UiState.tripActive ? "Trip in progress · recording" :
+                              (S.UiState.sessionState === "PAUSED" ? "Trip paused" : "Ready to drive")
                         color: S.UiState.tripActive ? T.StyleManager.success : T.StyleManager.textSecondary
                         font.family: T.StyleManager.fontFamily
                         font.pixelSize: 19
@@ -45,9 +45,9 @@ Item {
                 }
                 GtMetric {
                     Layout.preferredWidth: 230
-                    label: "Odomètre"
-                    value: S.UiState.fixed(S.UiState.odometer, 0, "0")
-                    unit: "km"
+                    label: "Odometer"
+                    value: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "0")
+                    unit: S.UiState.distanceUnit
                     alignment: Text.AlignRight
                 }
             }
@@ -56,21 +56,21 @@ Item {
         GtCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            title: "Consommation"
+            title: "Consumption"
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 12
                 GtMetric {
                     Layout.fillWidth: true
-                    label: "Instantanée"
-                    value: S.UiState.fixed(S.UiState.instantCons, 1, "0,0")
-                    unit: "L/100"
+                    label: "Instant"
+                    value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.instantCons), 1, "0.0")
+                    unit: S.UiState.consumptionUnit
                 }
                 GtMetric {
                     Layout.fillWidth: true
-                    label: "Moyenne trajet"
-                    value: S.UiState.fixed(S.UiState.avgConsSession, 1, "0,0")
-                    unit: "L/100"
+                    label: "Trip average"
+                    value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsSession), 1, "0.0")
+                    unit: S.UiState.consumptionUnit
                     valueSize: 28
                 }
             }
@@ -79,13 +79,13 @@ Item {
         GtCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            title: "Ordinateur de bord"
+            title: "Trip computer"
             RowLayout {
                 anchors.fill: parent
                 spacing: 28
-                GtMetric { Layout.fillWidth: true; label: "Trip A"; value: S.UiState.fixed(S.UiState.tripA, 1, "0,0"); unit: "km" }
-                GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.tripB, 1, "0,0"); unit: "km" }
-                GtMetric { Layout.fillWidth: true; label: "Moy. B"; value: S.UiState.fixed(S.UiState.avgConsB, 1, "0,0"); unit: "L/100" }
+                GtMetric { Layout.fillWidth: true; label: "Trip A"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripA), 1, "0.0"); unit: S.UiState.distanceUnit }
+                GtMetric { Layout.fillWidth: true; label: "Trip B"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0"); unit: S.UiState.distanceUnit }
+                GtMetric { Layout.fillWidth: true; label: "Avg. B"; value: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "0.0"); unit: S.UiState.consumptionUnit }
             }
         }
 
@@ -97,9 +97,9 @@ Item {
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width * 0.44
-                label: "Révision"
-                value: S.UiState.fixed(S.UiState.kmBeforeService, 0, "—")
-                unit: "km"
+                label: "Service"
+                value: S.UiState.fixed(S.UiState.toDistance(S.UiState.kmBeforeService), 0, "—")
+                unit: S.UiState.distanceUnit
                 valueColor: S.UiState.serviceWarning ? T.StyleManager.warning : T.StyleManager.text
             }
             GtProgress {
@@ -116,14 +116,14 @@ Item {
         GtCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            title: "État véhicule"
+            title: "Vehicle status"
             highlighted: S.UiState.attentionVehicle
             RowLayout {
                 anchors.fill: parent
                 spacing: 12
                 Text {
                     Layout.fillWidth: true
-                    text: S.UiState.attentionVehicle ? "ATTENTION REQUISE" : "VÉHICULE PRÊT"
+                    text: S.UiState.attentionVehicle ? "ATTENTION NEEDED" : "VEHICLE READY"
                     color: S.UiState.attentionVehicle ? T.StyleManager.warning : T.StyleManager.success
                     font.family: T.StyleManager.fontFamily
                     font.pixelSize: S.UiState.attentionVehicle ? 20 : 22
@@ -133,8 +133,8 @@ Item {
                 Column {
                     Layout.preferredWidth: 155
                     spacing: 5
-                    Text { text: S.UiState.driverUnbelted ? "Ceinture conducteur" : "Ceinture bouclée"; color: T.StyleManager.textSecondary; font.pixelSize: 17 }
-                    Text { text: S.UiState.doorOpen ? "Ouvrant ouvert" : "Ouvrants contrôlés"; color: T.StyleManager.textSecondary; font.pixelSize: 17 }
+                    Text { text: S.UiState.driverUnbelted ? "Driver seatbelt" : "Seatbelt fastened"; color: T.StyleManager.textSecondary; font.pixelSize: 17 }
+                    Text { text: S.UiState.doorOpen ? "Door or hatch open" : "Doors and hatches closed"; color: T.StyleManager.textSecondary; font.pixelSize: 17 }
                 }
             }
         }

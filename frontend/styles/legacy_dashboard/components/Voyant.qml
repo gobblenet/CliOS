@@ -4,7 +4,7 @@ Rectangle {
     id: root
     property bool isActive: false
     property string activeColor: "#00ff00"
-    property string label: "Voyant"
+    property string label: "Indicator"
 
     // Chemin vers l'icône optionnelle.
     property string iconSource: ""

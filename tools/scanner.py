@@ -2,7 +2,7 @@ import asyncio
 from bleak import BleakScanner
 
 async def main():
-    print("Recherche des appareils Bluetooth en cours...")
+    print("Searching for Bluetooth devices...")
     devices = await BleakScanner.discover(timeout=5.0)
     for d in devices:
         # Filtre optionnel pour éviter d'afficher les télés des voisins

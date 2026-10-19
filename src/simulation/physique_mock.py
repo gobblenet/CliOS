@@ -11,6 +11,7 @@ from src.state_store import StatePatch
 from src.simulation.models import VehicleParameters
 from src.simulation.physics_engine import PhysicsEngine
 from src.simulation.can_encoder import CanFrameEncoder
+from src.simulation.obd_responder import mode01_responses
 from src.simulation.scenarios import ScenarioRunner, get_builtin_scenarios
 
 
@@ -54,7 +55,7 @@ class PhysicsMockProvider:
                 name="PhysicsMockThread"
             )
             self._thread.start()
-            print(f"[INFO] Simulateur Physique & Bus CAN Virtuel ({self.params.label}) démarré.")
+            print(f"[INFO] Physics simulator & virtual CAN bus ({self.params.label}) started.")
             return True
 
     def close(self):
@@ -97,7 +98,9 @@ class PhysicsMockProvider:
 
         msg = can.Message(arbitration_id=can_id, data=bytearray(data), is_extended_id=False, timestamp=time.time())
         # Traitement immédiat par le répondeur ISO-TP OBD2
-        responses = self.encoder.handle_obd_request(msg, self.engine.state.active_dtcs)
+        responses = mode01_responses(msg, self.engine.state, self.params)
+        if not responses:
+            responses = self.encoder.handle_obd_request(msg, self.engine.state.active_dtcs)
         if self.obd_callback:
             for resp in responses:
                 self.obd_callback(resp)

@@ -71,7 +71,7 @@ Rectangle {
                           ? "💾 " + (statusBar.storageStatus.free_space_mb >= 1024
                                      ? (statusBar.storageStatus.free_space_mb / 1024).toFixed(1) + " GB"
                                      : Math.round(statusBar.storageStatus.free_space_mb || 0) + " MB")
-                          : "💾 DÉGRADÉ"
+                          : "💾 DEGRADED"
                     color: usbStoragePill.usbOk ? "#00ff00" : "#ff0000"
                     font.pixelSize: 12
                     font.bold: true

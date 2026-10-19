@@ -117,7 +117,7 @@ class NetworkController:
             timeout=self._timeout if timeout is None else timeout, check=False,
         )
         if result.returncode != 0:
-            detail = (result.stderr or result.stdout or "commande refusée").strip()
+            detail = (result.stderr or result.stdout or "command refused").strip()
             raise RuntimeError(detail[:240])
         return (result.stdout or "").strip()
 
@@ -147,9 +147,9 @@ class NetworkController:
             except FileNotFoundError:
                 self._publish(available=False, error="NetworkManager indisponible")
             except subprocess.TimeoutExpired:
-                self._publish(error="Délai NetworkManager dépassé")
+                self._publish(error="NetworkManager timed out")
             except (OSError, RuntimeError) as exc:
-                self._publish(error=str(exc) or "Erreur NetworkManager")
+                self._publish(error=str(exc) or "NetworkManager error")
             finally:
                 self._finish()
 
@@ -188,7 +188,7 @@ class NetworkController:
     def connect(self, uuid: str) -> bool:
         allowed = {item["uuid"] for item in self.state["saved_networks"]}
         if not uuid or uuid not in allowed:
-            self._publish(error="Profil Wi-Fi non autorisé")
+            self._publish(error="Wi-Fi profile not allowed")
             return False
 
         def operation() -> None:

@@ -98,7 +98,7 @@ Item {
 
             // Texte placé à gauche du trait
             Text {
-                text: tickDelegate.tickVal
+                text: S.UiState.imperial ? Math.round(S.UiState.toTemperature(tickDelegate.tickVal)) : tickDelegate.tickVal
                 color: Theme.textDimmed
                 font.pixelSize: 16
                 font.family: "Arial"
@@ -134,7 +134,7 @@ Item {
 
         // Texte ancré à l'extrémité gauche de la barre
         Text {
-            text: Math.round(root.smoothTemp) + "°"
+            text: Math.round(S.UiState.toTemperature(root.smoothTemp)) + "°"
             color: parent.pointerColor
             font.pixelSize: 38
             font.bold: true

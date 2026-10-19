@@ -29,7 +29,7 @@ Item {
             ApexCard3D {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 280
-                title: "ÉNERGIE À BORD"
+                title: "ON-BOARD ENERGY"
                 highlighted: S.UiState.lowFuel
                 glowColor: S.UiState.lowFuel ? "#FFB84D" : T.StyleManager.accent
 
@@ -45,14 +45,14 @@ Item {
                             Layout.fillWidth: true
                             spacing: -3
                             Text {
-                                text: Math.round(S.UiState.autonomy)
+                                text: Math.round(S.UiState.toDistance(S.UiState.autonomy))
                                 color: "#FFFFFF"
                                 font.pixelSize: 58
                                 font.weight: Font.Black
                                 font.letterSpacing: -2
                             }
                             Text {
-                                text: "KM D'AUTONOMIE"
+                                text: S.UiState.distanceUnit.toUpperCase() + " RANGE"
                                 color: "#AABACA"
                                 font.pixelSize: 13
                                 font.weight: Font.Bold
@@ -65,14 +65,14 @@ Item {
                             spacing: 1
                             Text {
                                 anchors.right: parent.right
-                                text: S.UiState.fixed(S.UiState.fuelLevel, 1, "—") + " L"
+                                text: S.UiState.fixed(S.UiState.toVolume(S.UiState.fuelLevel), 1, "—") + " " + S.UiState.volumeUnit
                                 color: S.UiState.lowFuel ? "#FFB84D" : T.StyleManager.accent
                                 font.pixelSize: 26
                                 font.weight: Font.Black
                             }
                             Text {
                                 anchors.right: parent.right
-                                text: "CARBURANT"
+                                text: "FUEL"
                                 color: "#AABACA"
                                 font.pixelSize: 11
                                 font.weight: Font.Bold
@@ -112,7 +112,7 @@ Item {
 
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: "RÉSERVE"; color: "#FFCB70"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.2 }
+                        Text { text: "RESERVE"; color: "#FFCB70"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.2 }
                         Item { Layout.fillWidth: true }
                         Text { text: Math.round(100 * S.UiState.fuelLevel / Math.max(1, S.UiState.maxFuel)) + " %"; color: "#FFFFFF"; font.pixelSize: 14; font.bold: true }
                     }
@@ -124,15 +124,15 @@ Item {
                         spacing: 0
                         Column {
                             Layout.fillWidth: true
-                            Text { text: S.UiState.fixed(S.UiState.instantCons, 1, "—"); color: "#FFFFFF"; font.pixelSize: 28; font.bold: true }
-                            Text { text: "L/100 INSTANT."; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
+                            Text { text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.instantCons), 1, "—"); color: "#FFFFFF"; font.pixelSize: 28; font.bold: true }
+                            Text { text: S.UiState.consumptionUnit.toUpperCase() + " INSTANT"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
                         }
                         Rectangle { width: 1; height: 42; color: "#30465A" }
                         Column {
                             Layout.fillWidth: true
                             leftPadding: 22
-                            Text { text: S.UiState.fixed(S.UiState.avgConsB, 1, "—"); color: T.StyleManager.accent; font.pixelSize: 28; font.bold: true }
-                            Text { text: "L/100 MOYENNE"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
+                            Text { text: S.UiState.fixed(S.UiState.toConsumption(S.UiState.avgConsB), 1, "—"); color: T.StyleManager.accent; font.pixelSize: 28; font.bold: true }
+                            Text { text: S.UiState.consumptionUnit.toUpperCase() + " AVERAGE"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.1 }
                         }
                     }
                 }
@@ -141,7 +141,7 @@ Item {
             ApexCard3D {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                title: "SESSION EN COURS"
+                title: "CURRENT SESSION"
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -150,13 +150,13 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         Text {
-                            text: S.UiState.fixed(S.UiState.tripDistance, 1, "0,0")
+                            text: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripDistance), 1, "0.0")
                             color: "#FFFFFF"
                             font.pixelSize: 46
                             font.weight: Font.Black
                             font.letterSpacing: -1
                         }
-                        Text { text: "KM"; color: "#B3C1CE"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 9 }
+                        Text { text: S.UiState.distanceUnit.toUpperCase(); color: "#B3C1CE"; font.pixelSize: 16; font.bold: true; Layout.alignment: Qt.AlignBottom; Layout.bottomMargin: 9 }
                         Item { Layout.fillWidth: true }
                         Rectangle {
                             width: stateText.implicitWidth + 22
@@ -168,7 +168,7 @@ Item {
                             Text {
                                 id: stateText
                                 anchors.centerIn: parent
-                                text: S.UiState.sessionState === "SUSPENDED" ? "SAUVEGARDÉ" : (S.UiState.sessionState === "PAUSED" ? "EN PAUSE" : "ACTIVE")
+                                text: S.UiState.sessionState === "SUSPENDED" ? "SAVED" : (S.UiState.sessionState === "PAUSED" ? "PAUSED" : "ACTIVE")
                                 color: S.UiState.sessionState === "PAUSED" || S.UiState.sessionState === "SUSPENDED" ? "#FFD17D" : "#69EDB2"
                                 font.pixelSize: 12
                                 font.bold: true
@@ -180,9 +180,9 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 12
-                        ApexMetric { Layout.fillWidth: true; label: "TRIP A"; value: S.UiState.fixed(S.UiState.tripA, 1, "0,0"); unit: "km"; valueSize: 24 }
-                        ApexMetric { Layout.fillWidth: true; label: "TRIP B"; value: S.UiState.fixed(S.UiState.tripB, 1, "0,0"); unit: "km"; valueSize: 24 }
-                        ApexMetric { Layout.fillWidth: true; label: "COÛT EST."; value: S.UiState.fixed(S.UiState.tripCost, 2, "0,00"); unit: "€"; valueSize: 24 }
+                        ApexMetric { Layout.fillWidth: true; label: "TRIP A"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripA), 1, "0.0"); unit: S.UiState.distanceUnit; valueSize: 24 }
+                        ApexMetric { Layout.fillWidth: true; label: "TRIP B"; value: S.UiState.fixed(S.UiState.toDistance(S.UiState.tripB), 1, "0.0"); unit: S.UiState.distanceUnit; valueSize: 24 }
+                        ApexMetric { Layout.fillWidth: true; label: "EST. COST"; value: S.UiState.money(S.UiState.tripCost); unit: ""; valueSize: 24 }
                     }
 
                     Item { Layout.fillHeight: true }
@@ -200,7 +200,7 @@ Item {
                             spacing: 12
                             Rectangle { width: 10; height: 10; radius: 5; color: T.StyleManager.accent; anchors.verticalCenter: parent.verticalCenter }
                             Text {
-                                text: S.UiState.sessionState === "SUSPENDED" ? "EXTINCTION EN COURS" : (S.UiState.sessionState === "PAUSED" ? "REPRENDRE LE TRAJET" : "TERMINER LE TRAJET")
+                                text: S.UiState.sessionState === "SUSPENDED" ? "SHUTTING DOWN" : (S.UiState.sessionState === "PAUSED" ? "RESUME TRIP" : "END TRIP")
                                 color: "#FFFFFF"
                                 font.pixelSize: 15
                                 font.bold: true
@@ -237,7 +237,7 @@ Item {
             ApexCard3D {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 326
-                title: "ÉQUILIBRE MÉCANIQUE"
+                title: "MECHANICAL BALANCE"
                 highlighted: S.UiState.hotEngine
                 glowColor: S.UiState.hotEngine ? "#FF5964" : T.StyleManager.accent
 
@@ -253,16 +253,16 @@ Item {
                             Row {
                                 spacing: 6
                                 Text {
-                                    text: Math.round(S.UiState.engineTemp)
+                                    text: Math.round(S.UiState.toTemperature(S.UiState.engineTemp))
                                     color: S.UiState.hotEngine ? "#FF6670" : "#FFFFFF"
                                     font.pixelSize: 66
                                     font.weight: Font.Black
                                     font.letterSpacing: -2
                                 }
-                                Text { text: "°C"; color: S.UiState.hotEngine ? "#FF6670" : T.StyleManager.accent; font.pixelSize: 25; font.bold: true; anchors.baseline: parent.children[0].baseline }
+                                Text { text: S.UiState.temperatureUnit; color: S.UiState.hotEngine ? "#FF6670" : T.StyleManager.accent; font.pixelSize: 25; font.bold: true; anchors.baseline: parent.children[0].baseline }
                             }
                             Text {
-                                text: S.UiState.hotEngine ? "TEMPÉRATURE CRITIQUE" : (S.UiState.engineTemp < 70 ? "MISE EN TEMPÉRATURE" : "PLAGE OPTIMALE")
+                                text: S.UiState.hotEngine ? "CRITICAL TEMPERATURE" : (S.UiState.engineTemp < 70 ? "WARMING UP" : "OPTIMAL RANGE")
                                 color: S.UiState.hotEngine ? "#FF7881" : (S.UiState.engineTemp < 70 ? "#75D9FF" : "#69EDB2")
                                 font.pixelSize: 13
                                 font.bold: true
@@ -293,9 +293,9 @@ Item {
 
                     Repeater {
                         model: [
-                            { label: "CHARGE MOTEUR", value: S.UiState.engineLoad, text: S.UiState.fixed(S.UiState.engineLoad, 0, "0") + " %", color: T.StyleManager.accent },
-                            { label: "PUISSANCE", value: 100 * S.UiState.power / Math.max(1, S.UiState.maxPowerKw), text: S.UiState.fixed(S.UiState.powerHp, 0, "0") + " / " + S.UiState.fixed(S.UiState.maxPowerHp, 0, "0") + " ch", color: "#6EE8FF" },
-                            { label: "ACCÉLÉRATION LONG.", value: Math.min(100, Math.abs(S.UiState.longitudinalG) * 100), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0,00") + " G", color: "#FFCA68" }
+                            { label: "ENGINE LOAD", value: S.UiState.engineLoad, text: S.UiState.fixed(S.UiState.engineLoad, 0, "0") + " %", color: T.StyleManager.accent },
+                            { label: "POWER", value: 100 * S.UiState.power / Math.max(1, S.UiState.maxPowerKw), text: S.UiState.fixed(S.UiState.powerHp, 0, "0") + " / " + S.UiState.fixed(S.UiState.maxPowerHp, 0, "0") + " hp", color: "#6EE8FF" },
+                            { label: "LONG. ACCELERATION", value: Math.min(100, Math.abs(S.UiState.longitudinalG) * 100), text: S.UiState.fixed(S.UiState.longitudinalG, 2, "0.00") + " G", color: "#FFCA68" }
                         ]
                         delegate: ColumnLayout {
                             Layout.fillWidth: true
@@ -322,7 +322,7 @@ Item {
             ApexCard3D {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                title: "ROUTE & ENVIRONNEMENT"
+                title: "ROAD & ENVIRONMENT"
 
                 ColumnLayout {
                     anchors.fill: parent
@@ -332,13 +332,13 @@ Item {
                         Layout.fillWidth: true
                         Column {
                             Layout.fillWidth: true
-                            Text { text: S.UiState.fixed(S.UiState.outsideTemp, 1, "—") + "°"; color: "#FFFFFF"; font.pixelSize: 40; font.bold: true }
-                            Text { text: "EXTÉRIEUR"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
+                            Text { text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 1, "—") + "°"; color: "#FFFFFF"; font.pixelSize: 40; font.bold: true }
+                            Text { text: "OUTSIDE"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
                         }
                         Column {
                             Layout.fillWidth: true
-                            Text { text: S.UiState.fixed(S.UiState.odometer, 0, "—"); color: "#FFFFFF"; font.pixelSize: 27; font.bold: true }
-                            Text { text: "ODOMÈTRE KM"; color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
+                            Text { text: S.UiState.fixed(S.UiState.toDistance(S.UiState.odometer), 0, "—"); color: "#FFFFFF"; font.pixelSize: 27; font.bold: true }
+                            Text { text: "ODOMETER " + S.UiState.distanceUnit.toUpperCase(); color: "#AABACA"; font.pixelSize: 11; font.bold: true; font.letterSpacing: 1.3 }
                         }
                     }
 
@@ -363,14 +363,14 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 3
                                 Text {
-                                    text: S.UiState.attentionVehicle ? "ATTENTION REQUISE" : "VÉHICULE PRÊT"
+                                    text: S.UiState.attentionVehicle ? "ATTENTION NEEDED" : "VEHICLE READY"
                                     color: "#FFFFFF"
                                     font.pixelSize: 15
                                     font.bold: true
                                     font.letterSpacing: 1.2
                                 }
                                 Text {
-                                    text: S.UiState.attentionVehicle ? "Vérifiez ceinture et ouvrants" : "Tous les systèmes sont opérationnels"
+                                    text: S.UiState.attentionVehicle ? "Check seatbelt, doors and hatches" : "All systems operational"
                                     color: "#B6C4D0"
                                     font.pixelSize: 12
                                 }

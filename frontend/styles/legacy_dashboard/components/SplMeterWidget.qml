@@ -17,12 +17,12 @@ Rectangle {
     property int freqHz: S.UiState.cabinFreqHz
 
     function getFreqLabel(hz) {
-        if (numericDb < 40.0 || hz === 0) return "Calme";
-        if (hz < 80) return "Route / Grave";
-        if (hz < 250) return "Moteur";
-        if (hz < 2000) return "Voix / Médium";
-        if (hz < 5000) return "Aigu";
-        return "Sifflement";
+        if (numericDb < 40.0 || hz === 0) return "Quiet";
+        if (hz < 80) return "Road / Bass";
+        if (hz < 250) return "Engine";
+        if (hz < 2000) return "Voice / Mid";
+        if (hz < 5000) return "Treble";
+        return "Whistle";
     }
 
     RowLayout {

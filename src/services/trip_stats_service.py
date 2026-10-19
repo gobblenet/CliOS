@@ -46,9 +46,9 @@ class TripStatsService(BaseService):
         default_rev_interval = revision_config.get("interval_km", 20000)
         default_rev_warning = revision_config.get("warning_threshold_km", 2000)
 
-        self.register_param("revision_interval", "Intervalle Révision (km)", ServiceParamType.SLIDER, default_rev_interval,
+        self.register_param("revision_interval", "Service interval (km)", ServiceParamType.SLIDER, default_rev_interval,
                             min_val=5000.0, max_val=50000.0)
-        self.register_param("revision_warning", "Alerte Révision (km)", ServiceParamType.SLIDER, default_rev_warning, min_val=500.0,
+        self.register_param("revision_warning", "Service alert (km)", ServiceParamType.SLIDER, default_rev_warning, min_val=500.0,
                             max_val=30000.0)
 
         # Charge l'état persistant.
@@ -177,7 +177,7 @@ class TripStatsService(BaseService):
         with self._stats_lock:
             restored_stats = checkpoint["stats"]
             if not isinstance(restored_stats, dict):
-                raise ValueError("statistiques de checkpoint invalides")
+                raise ValueError("invalid checkpoint statistics")
             self._stats.update(restored_stats)
             self._stats["is_active"] = False
             self._stats["inst_cons"] = 0.0
@@ -338,9 +338,9 @@ class TripStatsService(BaseService):
                     "vehicle.last_odometer": current_odo,
                     "trips.b.fuel": self.fuel_b_accumulated
                 })
-            self.print_message("Sauvegarde finale effectuée avec succès.")
+            self.print_message("Final save completed successfully.")
         except Exception as e:
-            self.set_error(f"Échec de la sauvegarde finale : {str(e)}")
+            self.set_error(f"Final save failed: {str(e)}")
 
     def _run(self, stop_event):
         last_calc_time = time.monotonic()

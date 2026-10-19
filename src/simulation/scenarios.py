@@ -138,7 +138,7 @@ class ScenarioRunner:
                     elapsed_scenario += chunk
 
             if not self._stop_event.is_set() and self._progress_callback:
-                self._progress_callback(total_steps, total_steps, "Scénario terminé avec succès", 100.0)
+                self._progress_callback(total_steps, total_steps, "Scenario completed successfully", 100.0)
 
         finally:
             self._is_running = False
@@ -153,72 +153,72 @@ def get_builtin_scenarios() -> list[Scenario]:
 
     # 1. Trajet Urbain
     city_steps = [
-        ScenarioStep("1. Contact et allumage des feux de croisement", duration_s=1.0, ignition=True, low_beam=True),
-        ScenarioStep("2. Action démarreur (Lancement moteur)", duration_s=1.2, ignition=True, starter=True, low_beam=True),
-        ScenarioStep("3. Moteur au ralenti, débrayage et engagement de la 1ère", duration_s=1.0, clutch=100.0, gear=1, low_beam=True),
-        ScenarioStep("4. Départ arrêté et accélération modérée", duration_s=3.0, clutch=0.0, throttle=40.0, gear=1, low_beam=True),
-        ScenarioStep("5. Débrayage et passage en 2ème", duration_s=0.6, clutch=100.0, throttle=0.0, gear=2, low_beam=True),
-        ScenarioStep("6. Accélération jusqu'à 50 km/h", duration_s=3.5, clutch=0.0, throttle=50.0, gear=2, low_beam=True),
-        ScenarioStep("7. Débrayage et passage en 3ème", duration_s=0.6, clutch=100.0, throttle=0.0, gear=3, low_beam=True),
-        ScenarioStep("8. Vitesse stabilisée 50 km/h en ville", duration_s=4.0, clutch=0.0, throttle=18.0, gear=3, low_beam=True),
-        ScenarioStep("9. Clignotant gauche et léger virage", duration_s=2.5, throttle=15.0, gear=3, steering=-35.0, turn_left=True, low_beam=True),
-        ScenarioStep("10. Ligne droite, arrêt clignotant", duration_s=2.0, throttle=18.0, gear=3, steering=0.0, turn_left=False, low_beam=True),
-        ScenarioStep("11. Ralentissement, freinage et débrayage (Feu rouge)", duration_s=3.0, throttle=0.0, brake=45.0, clutch=100.0, gear=3, low_beam=True),
-        ScenarioStep("12. Arrêt complet au point mort avec frein à main", duration_s=2.0, brake=0.0, clutch=0.0, gear=0, handbrake=True, low_beam=True),
-        ScenarioStep("13. Coupure du contact", duration_s=1.0, ignition=False, low_beam=False, handbrake=True),
+        ScenarioStep("1. Ignition on and low beams on", duration_s=1.0, ignition=True, low_beam=True),
+        ScenarioStep("2. Starter (engine start)", duration_s=1.2, ignition=True, starter=True, low_beam=True),
+        ScenarioStep("3. Engine idling, clutch in and 1st gear engaged", duration_s=1.0, clutch=100.0, gear=1, low_beam=True),
+        ScenarioStep("4. Standing start and moderate acceleration", duration_s=3.0, clutch=0.0, throttle=40.0, gear=1, low_beam=True),
+        ScenarioStep("5. Clutch in and shift to 2nd", duration_s=0.6, clutch=100.0, throttle=0.0, gear=2, low_beam=True),
+        ScenarioStep("6. Accelerate to 50 km/h", duration_s=3.5, clutch=0.0, throttle=50.0, gear=2, low_beam=True),
+        ScenarioStep("7. Clutch in and shift to 3rd", duration_s=0.6, clutch=100.0, throttle=0.0, gear=3, low_beam=True),
+        ScenarioStep("8. Steady 50 km/h in town", duration_s=4.0, clutch=0.0, throttle=18.0, gear=3, low_beam=True),
+        ScenarioStep("9. Left turn signal and gentle turn", duration_s=2.5, throttle=15.0, gear=3, steering=-35.0, turn_left=True, low_beam=True),
+        ScenarioStep("10. Straight line, turn signal off", duration_s=2.0, throttle=18.0, gear=3, steering=0.0, turn_left=False, low_beam=True),
+        ScenarioStep("11. Slowing, braking and clutch in (red light)", duration_s=3.0, throttle=0.0, brake=45.0, clutch=100.0, gear=3, low_beam=True),
+        ScenarioStep("12. Full stop in neutral with handbrake", duration_s=2.0, brake=0.0, clutch=0.0, gear=0, handbrake=True, low_beam=True),
+        ScenarioStep("13. Ignition off", duration_s=1.0, ignition=False, low_beam=False, handbrake=True),
     ]
-    city_scenario = Scenario("Trajet Urbain", "Simulation d'un trajet citadin complet avec arrêts, vitesses et feux.", city_steps)
+    city_scenario = Scenario("City Trip", "Full city trip simulation with stops, gear changes and lights.", city_steps)
 
     # 2. Autoroute & Régulateur
     highway_steps = [
-        ScenarioStep("1. Démarrage moteur", duration_s=1.5, ignition=True, starter=True, clutch=100.0, gear=0),
-        ScenarioStep("2. Insertion vive en 1ère", duration_s=2.5, clutch=0.0, throttle=75.0, gear=1),
-        ScenarioStep("3. Passage 2ème", duration_s=0.5, clutch=100.0, throttle=0.0, gear=2),
-        ScenarioStep("4. Pleine accélération 2ème", duration_s=3.0, clutch=0.0, throttle=85.0, gear=2),
-        ScenarioStep("5. Passage 3ème", duration_s=0.5, clutch=100.0, throttle=0.0, gear=3),
-        ScenarioStep("6. Montée en régime 3ème jusqu'à 90 km/h", duration_s=3.5, clutch=0.0, throttle=80.0, gear=3),
-        ScenarioStep("7. Passage 4ème", duration_s=0.5, clutch=100.0, throttle=0.0, gear=4),
-        ScenarioStep("8. Accélération 4ème jusqu'à 120 km/h", duration_s=4.0, clutch=0.0, throttle=75.0, gear=4),
-        ScenarioStep("9. Passage 5ème", duration_s=0.5, clutch=100.0, throttle=0.0, gear=5),
-        ScenarioStep("10. Vitesse de croisière 130 km/h (Régulateur actif)", duration_s=6.0, clutch=0.0, throttle=32.0, gear=5),
-        ScenarioStep("11. Freinage d'approche de péage", duration_s=4.0, throttle=0.0, brake=60.0, clutch=100.0, gear=5),
-        ScenarioStep("12. Arrêt complet au point mort", duration_s=2.0, brake=20.0, clutch=0.0, gear=0),
+        ScenarioStep("1. Engine start", duration_s=1.5, ignition=True, starter=True, clutch=100.0, gear=0),
+        ScenarioStep("2. Brisk merge in 1st", duration_s=2.5, clutch=0.0, throttle=75.0, gear=1),
+        ScenarioStep("3. Shift to 2nd", duration_s=0.5, clutch=100.0, throttle=0.0, gear=2),
+        ScenarioStep("4. Full acceleration in 2nd", duration_s=3.0, clutch=0.0, throttle=85.0, gear=2),
+        ScenarioStep("5. Shift to 3rd", duration_s=0.5, clutch=100.0, throttle=0.0, gear=3),
+        ScenarioStep("6. Rev up in 3rd to 90 km/h", duration_s=3.5, clutch=0.0, throttle=80.0, gear=3),
+        ScenarioStep("7. Shift to 4th", duration_s=0.5, clutch=100.0, throttle=0.0, gear=4),
+        ScenarioStep("8. Accelerate in 4th to 120 km/h", duration_s=4.0, clutch=0.0, throttle=75.0, gear=4),
+        ScenarioStep("9. Shift to 5th", duration_s=0.5, clutch=100.0, throttle=0.0, gear=5),
+        ScenarioStep("10. Cruising at 130 km/h (cruise control on)", duration_s=6.0, clutch=0.0, throttle=32.0, gear=5),
+        ScenarioStep("11. Braking for the toll booth", duration_s=4.0, throttle=0.0, brake=60.0, clutch=100.0, gear=5),
+        ScenarioStep("12. Full stop in neutral", duration_s=2.0, brake=20.0, clutch=0.0, gear=0),
     ]
-    highway_scenario = Scenario("Autoroute & Régulateur", "Accélération soutenue jusqu'à 130 km/h et régulation.", highway_steps)
+    highway_scenario = Scenario("Highway & Cruise Control", "Sustained acceleration to 130 km/h and cruise control.", highway_steps)
 
     # 3. Circuit & Sport
     sport_steps = [
-        ScenarioStep("1. Départ arrêté Launch Control (Haut régime en 1ère)", duration_s=1.5, ignition=True, clutch=100.0, throttle=95.0, gear=1),
-        ScenarioStep("2. Lâcher d'embrayage brutal et patinage", duration_s=2.5, clutch=0.0, throttle=100.0, gear=1),
-        ScenarioStep("3. Rupteur 1ère (Bounce) et passage éclair en 2ème", duration_s=0.4, clutch=100.0, throttle=100.0, gear=2),
-        ScenarioStep("4. Pleine charge 2ème", duration_s=2.5, clutch=0.0, throttle=100.0, gear=2),
-        ScenarioStep("5. Passage 3ème", duration_s=0.4, clutch=100.0, throttle=100.0, gear=3),
-        ScenarioStep("6. Ligne droite des stands à 150 km/h", duration_s=4.0, clutch=0.0, throttle=100.0, gear=3),
-        ScenarioStep("7. Gros freinage en bout de ligne droite (ABS actif)", duration_s=2.5, throttle=0.0, brake=95.0, clutch=100.0, gear=3),
-        ScenarioStep("8. Virage serré à droite en 2ème avec accélération latérale", duration_s=3.0, clutch=0.0, throttle=65.0, gear=2, steering=85.0),
-        ScenarioStep("9. Sortie de virage et remise des gaz", duration_s=3.0, clutch=0.0, throttle=90.0, gear=2, steering=0.0),
-        ScenarioStep("10. Tour d'honneur et ralentissement", duration_s=3.0, throttle=0.0, brake=40.0, clutch=100.0, gear=0),
+        ScenarioStep("1. Launch control start (high rpm in 1st)", duration_s=1.5, ignition=True, clutch=100.0, throttle=95.0, gear=1),
+        ScenarioStep("2. Hard clutch drop and wheelspin", duration_s=2.5, clutch=0.0, throttle=100.0, gear=1),
+        ScenarioStep("3. Rev limiter in 1st and lightning shift to 2nd", duration_s=0.4, clutch=100.0, throttle=100.0, gear=2),
+        ScenarioStep("4. Full load in 2nd", duration_s=2.5, clutch=0.0, throttle=100.0, gear=2),
+        ScenarioStep("5. Shift to 3rd", duration_s=0.4, clutch=100.0, throttle=100.0, gear=3),
+        ScenarioStep("6. Pit straight at 150 km/h", duration_s=4.0, clutch=0.0, throttle=100.0, gear=3),
+        ScenarioStep("7. Heavy braking at the end of the straight (ABS active)", duration_s=2.5, throttle=0.0, brake=95.0, clutch=100.0, gear=3),
+        ScenarioStep("8. Tight right turn in 2nd with lateral acceleration", duration_s=3.0, clutch=0.0, throttle=65.0, gear=2, steering=85.0),
+        ScenarioStep("9. Corner exit and back on the throttle", duration_s=3.0, clutch=0.0, throttle=90.0, gear=2, steering=0.0),
+        ScenarioStep("10. Cool-down lap and slowing", duration_s=3.0, throttle=0.0, brake=40.0, clutch=100.0, gear=0),
     ]
-    sport_scenario = Scenario("Circuit & Performance", "Conduite sportive extrême : Launch control, rupteur et freinage ABS.", sport_steps)
+    sport_scenario = Scenario("Track & Performance", "Extreme sport driving: launch control, rev limiter and ABS braking.", sport_steps)
 
     # 4. Surchauffe & Alertes
     stress_steps = [
-        ScenarioStep("1. Moteur en fonctionnement normal", duration_s=2.0, ignition=True, throttle=20.0, gear=2, force_temp=85.0),
-        ScenarioStep("2. Forte charge continue et montée thermique", duration_s=3.0, throttle=90.0, gear=3, force_temp=98.0),
-        ScenarioStep("3. Alerte Surchauffe moteur (>105°C - Moto-ventilateur max)", duration_s=4.0, throttle=60.0, gear=3, force_temp=108.0),
-        ScenarioStep("4. Alerte Carburant bas (Niveau de réserve < 15%)", duration_s=3.0, throttle=20.0, gear=3, force_temp=95.0, force_fuel=3.5),
-        ScenarioStep("5. Débrayage et calage moteur involontaire", duration_s=2.5, throttle=0.0, clutch=0.0, brake=100.0, gear=3),
-        ScenarioStep("6. Rétablissement des paramètres de base", duration_s=1.0, ignition=True, gear=0, force_temp=88.0, force_fuel=40.0),
+        ScenarioStep("1. Engine running normally", duration_s=2.0, ignition=True, throttle=20.0, gear=2, force_temp=85.0),
+        ScenarioStep("2. Sustained heavy load and rising temperature", duration_s=3.0, throttle=90.0, gear=3, force_temp=98.0),
+        ScenarioStep("3. Engine overheating alert (>105°C - radiator fan max)", duration_s=4.0, throttle=60.0, gear=3, force_temp=108.0),
+        ScenarioStep("4. Low fuel alert (reserve level < 15%)", duration_s=3.0, throttle=20.0, gear=3, force_temp=95.0, force_fuel=3.5),
+        ScenarioStep("5. Clutch released and accidental stall", duration_s=2.5, throttle=0.0, clutch=0.0, brake=100.0, gear=3),
+        ScenarioStep("6. Restore baseline parameters", duration_s=1.0, ignition=True, gear=0, force_temp=88.0, force_fuel=40.0),
     ]
-    stress_scenario = Scenario("Stress & Alertes", "Déclenchement des alertes critiques : Surchauffe, Réserve carburant et Calage.", stress_steps)
+    stress_scenario = Scenario("Stress & Alerts", "Triggers critical alerts: overheating, low fuel and stall.", stress_steps)
 
     # 5. Injection Diagnostic OBD2
     diag_steps = [
-        ScenarioStep("1. Véhicule avec contact mis", duration_s=1.5, ignition=True),
-        ScenarioStep("2. Injection du code défaut P0300 (Raté d'allumage)", duration_s=2.0, ignition=True, dtcs=["P0300"]),
-        ScenarioStep("3. Injection de codes défauts multiples (P0300, P0115, P0420)", duration_s=4.0, ignition=True, dtcs=["P0300", "P0115", "P0420"]),
-        ScenarioStep("4. Prêt pour le scan OBD-II dans CliOS", duration_s=5.0, ignition=True, dtcs=["P0300", "P0115", "P0420"]),
+        ScenarioStep("1. Vehicle with ignition on", duration_s=1.5, ignition=True),
+        ScenarioStep("2. Inject fault code P0300 (misfire)", duration_s=2.0, ignition=True, dtcs=["P0300"]),
+        ScenarioStep("3. Inject multiple fault codes (P0300, P0115, P0420)", duration_s=4.0, ignition=True, dtcs=["P0300", "P0115", "P0420"]),
+        ScenarioStep("4. Ready for the OBD-II scan in CliOS", duration_s=5.0, ignition=True, dtcs=["P0300", "P0115", "P0420"]),
     ]
-    diag_scenario = Scenario("Diagnostic & Pannes OBD", "Injection de codes défauts DTC pour tester le service de diagnostic.", diag_steps)
+    diag_scenario = Scenario("OBD Diagnostics & Faults", "Injects DTC fault codes to test the diagnostic service.", diag_steps)
 
     return [city_scenario, highway_scenario, sport_scenario, stress_scenario, diag_scenario]

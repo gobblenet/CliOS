@@ -35,40 +35,40 @@ class BleProtocol:
 _PROTOCOLS: dict[str, BleProtocol] = {
     "LOTUS_9B": BleProtocol(
         identifier="LOTUS_9B",
-        label="Lotus Lantern / ELK-BLEDOM 9 octets",
+        label="Lotus Lantern / ELK-BLEDOM 9 bytes",
         witness_color=(255, 0, 0),
-        witness_name="ROUGE",
+        witness_name="RED",
     ),
     "LEDCAR_DMX_9B": BleProtocol(
         identifier="LEDCAR_DMX_9B",
-        label="LEDCAR-01 barres RGBIC / LED DMX 9 octets",
+        label="LEDCAR-01 barres RGBIC / LED DMX 9 bytes",
         witness_color=(0, 255, 255),
         witness_name="CYAN",
     ),
     "LED_LAMP_9B": BleProtocol(
         identifier="LED_LAMP_9B",
-        label="HiLighting / LED Lamp 9 octets",
+        label="HiLighting / LED Lamp 9 bytes",
         witness_color=(255, 0, 255),
         witness_name="MAGENTA",
     ),
     "TRIONES_7B": BleProtocol(
         identifier="TRIONES_7B",
-        label="LED BLE / Triones / Magic Home 7 octets",
+        label="LED BLE / Triones / Magic Home 7 bytes",
         witness_color=(0, 255, 0),
-        witness_name="VERT",
+        witness_name="GREEN",
     ),
     "SP110E_4B": BleProtocol(
         identifier="SP110E_4B",
-        label="BanlanX / SP110E DreamColor 4 octets",
+        label="BanlanX / SP110E DreamColor 4 bytes",
         witness_color=(0, 0, 255),
-        witness_name="BLEU",
+        witness_name="BLUE",
     ),
     # Protocoles de test scan uniquement (non utilises en runtime)
     "LEDCAR_A_9B": BleProtocol(
         identifier="LEDCAR_A_9B",
         label="LEDCAR-01 sortie analogique / LED BLE",
         witness_color=(255, 255, 0),
-        witness_name="JAUNE",
+        witness_name="YELLOW",
         runtime_capable=False,
     ),
     "LEDCAR_ALL_9B": BleProtocol(
@@ -82,7 +82,7 @@ _PROTOCOLS: dict[str, BleProtocol] = {
         identifier="LEDCAR_B_CLASSIC_9B",
         label="LEDCAR / LEDDMX dialecte B classique",
         witness_color=(255, 255, 255),
-        witness_name="BLANC",
+        witness_name="WHITE",
         runtime_capable=False,
     ),
 }

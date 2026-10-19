@@ -5,7 +5,7 @@
     "capabilities": ["settings", "commands", "vehicle-state"],
     "id": "atelier_luxe",
     "label": "Atelier Luxe",
-    "description": "Obsidienne satinée, horlogerie tourbillon et télémétrie de prestige",
+    "description": "Satin obsidian, tourbillon watchmaking and prestige telemetry",
     "order": 5,
     "dashboard": "Dashboard.qml",
     "palette": {

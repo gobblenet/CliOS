@@ -12,7 +12,7 @@ Item {
 
     readonly property real rpmRatio: Math.max(0, Math.min(1, S.UiState.rpm / Math.max(1, S.UiState.maxRpm)))
     readonly property bool redline: S.UiState.redline
-    property real animatedSpeed: S.UiState.speed
+    property real animatedSpeed: S.UiState.displaySpeed
     property real animatedRpm: S.UiState.rpm
 
     Behavior on animatedSpeed { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
@@ -126,7 +126,7 @@ Item {
                 anchors.right: parent.right
 
                 Text {
-                    text: "MOTEUR"
+                    text: "ENGINE"
                     color: "#DDE8F2"
                     font.pixelSize: 14
                     font.weight: Font.Bold
@@ -134,7 +134,7 @@ Item {
                 }
                 Item { Layout.fillWidth: true }
                 Text {
-                    text: Math.round(root.animatedRpm) + "  TR/MIN"
+                    text: Math.round(root.animatedRpm) + "  RPM"
                     color: root.redline ? "#FF5964" : "#FFFFFF"
                     font.pixelSize: 17
                     font.weight: Font.Bold
@@ -188,7 +188,7 @@ Item {
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "KM/H"
+                text: S.UiState.speedUnit.toUpperCase()
                 color: "#C9D7E4"
                 font.pixelSize: 20
                 font.weight: Font.Bold
@@ -214,7 +214,7 @@ Item {
                 spacing: -2
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "RAPPORT"
+                    text: "GEAR"
                     color: "#93A6B8"
                     font.pixelSize: 11
                     font.weight: Font.Bold
@@ -255,7 +255,7 @@ Item {
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: S.UiState.cruiseTarget > 0 ? Math.round(S.UiState.cruiseTarget) : "—"
+                    text: S.UiState.cruiseTarget > 0 ? Math.round(S.UiState.toSpeed(S.UiState.cruiseTarget)) : "—"
                     color: "#FFFFFF"
                     font.pixelSize: 48
                     font.weight: Font.Black
@@ -263,7 +263,7 @@ Item {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: S.UiState.cruiseStatus
-                    color: S.UiState.cruiseStatus === "ACTIF" ? "#54E3A5" : "#8495A5"
+                    color: S.UiState.cruiseStatus === "ACTIVE" ? "#54E3A5" : "#8495A5"
                     font.pixelSize: 11
                     font.weight: Font.Bold
                     font.letterSpacing: 1.0
@@ -290,9 +290,9 @@ Item {
 
                 Repeater {
                     model: [
-                        { label: "PUISSANCE", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "ch", accent: true },
-                        { label: "COUPLE", value: S.UiState.fixed(S.UiState.torque, 0, "0"), unit: "N·m", accent: false },
-                        { label: "ACCÉLÉRATEUR", value: S.UiState.fixed(S.UiState.throttle, 0, "0"), unit: "%", accent: false }
+                        { label: "POWER", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "ch", accent: true },
+                        { label: "TORQUE", value: S.UiState.fixed(S.UiState.torque, 0, "0"), unit: "N·m", accent: false },
+                        { label: "THROTTLE", value: S.UiState.fixed(S.UiState.throttle, 0, "0"), unit: "%", accent: false }
                     ]
                     delegate: Item {
                         Layout.fillWidth: true

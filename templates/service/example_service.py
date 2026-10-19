@@ -1,4 +1,4 @@
-"""Gabarit Service API v1. À copier dans src/services après revue."""
+"""Service API v1 template. Copy into src/services after review."""
 
 import threading
 
@@ -12,11 +12,11 @@ class ExampleService(BaseService):
             "Example",
             storage,
             service_id="community.example",
-            description="Exemple de service statiquement intégré",
+            description="Example of a statically integrated service",
         )
         self.runtime = runtime
         self._thread = None
-        self.register_param("enabled_feature", "Fonction exemple", ServiceParamType.TOGGLE, True)
+        self.register_param("enabled_feature", "Example feature", ServiceParamType.TOGGLE, True)
 
     def start(self, stop_event: threading.Event):
         self._thread = threading.Thread(target=self._run, args=(stop_event,), daemon=True, name="ExampleWorker")
@@ -25,4 +25,4 @@ class ExampleService(BaseService):
 
     def _run(self, stop_event: threading.Event):
         while not stop_event.wait(1.0):
-            self.set_ok("Exemple actif")
+            self.set_ok("Example active")

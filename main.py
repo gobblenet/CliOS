@@ -43,6 +43,9 @@ from src.storage import PersistentStorage
 from src.runtime import VehicleRuntime
 from src.qt_bridge import DashboardBridge
 from src.services.dynamics_service import DynamicsService
+from src.services.gps_service import GpsService
+from src.services.obd_live_service import ObdLiveService
+from src.obd.transport import CanObdTransport, ObdFrameRouter
 from src.logging_runtime import init_logging, relocate_log_dir, set_global_context, shutdown_logging, get_logger
 from src.crash_hooks import install_crash_hooks, relocate_crash_log
 from src.storage_manager import StorageManager, StorageMode
@@ -89,7 +92,7 @@ def write_startup_status(phase: str, logger=None) -> bool:
     return True
 
 
-def notify_systemd_ready(status: str = "CliOS prêt") -> bool:
+def notify_systemd_ready(status: str = "CliOS ready") -> bool:
     """Envoie READY=1 sans dépendre du module Python systemd."""
     notify_socket = os.environ.get("NOTIFY_SOCKET")
     if not notify_socket:
@@ -123,9 +126,9 @@ def ensure_supported_pyside(is_gui: bool, allow_unsupported: bool) -> None:
 
     if installed < minimum_stable and not allow_unsupported:
         print(
-            f"[ERREUR] PySide6 {pyside_version} est instable pour cette UI (segfault/bool_dealloc connus sur < 6.8.0)."
+            f"[ERROR] PySide6 {pyside_version} is unstable for this UI (known segfault/bool_dealloc below 6.8.0)."
         )
-        print("[ERREUR] Mettez à jour vers PySide6 6.8.0+ ou lancez avec --allow-unsupported-pyside.")
+        print("[ERROR] Upgrade to PySide6 6.8.0+ or run with --allow-unsupported-pyside.")
         sys.exit(2)
 
 
@@ -139,7 +142,7 @@ def load_system_version(root_dir: str) -> str:
         with open(version_file, 'r', encoding='utf-8') as f:
             return f.read().strip()
     except FileNotFoundError:
-        print("[ATTENTION] Fichier VERSION introuvable. Version fixée sur 'unknown'.")
+        print("[WARNING] VERSION file not found. Version set to 'unknown'.")
         return "unknown"
 
 
@@ -165,16 +168,20 @@ def setup_services(runtime, storage, orchestrator, can_provider, vehicle_config,
     """Initialise et enregistre tous les services via une boucle propre."""
 
     diag_service = DiagnosticService(runtime, can_provider)
+    obd_transport = CanObdTransport(can_provider) if enable_can else None
+    obd_router = ObdFrameRouter(diag_service.receive_obd_frame)
+    if obd_transport is not None:
+        obd_router.add(obd_transport.receive_frame)
     can_activity = CanActivitySource()
     can_service = None
     if enable_can:
         can_service = CanService(
-            name="CAN_Moteur",
+            name="CAN_Engine",
             runtime=runtime,
             storage=storage,
             dbc_path=profile_manager.get_can_path(),
             provider=can_provider,
-            obd_callback=diag_service.receive_obd_frame,
+            obd_callback=obd_router,
             activity_source=can_activity,
         )
 
@@ -199,6 +206,8 @@ def setup_services(runtime, storage, orchestrator, can_provider, vehicle_config,
         (dynamics_service, "services.Dynamics.enabled", True),
         (gear_calib_service, "services.GearCalibration.enabled", True),
         (SystemMonitorService(runtime, storage), "services.Monitor.enabled", True),
+        (GpsService(runtime, storage, mock=mock), "services.GPS.enabled", True),
+        (ObdLiveService(runtime, storage, can_transport=obd_transport), "services.OBD.enabled", True),
         (EngineSoundService(runtime, storage, engine_path=engine_dir), "services.EngineSound.enabled", False),
         (CabinNoiseService(runtime, storage), "services.Noise.enabled", True),
         (led_service, "services.Leds.enabled", True),
@@ -211,13 +220,17 @@ def setup_services(runtime, storage, orchestrator, can_provider, vehicle_config,
         (UsbStorageService(runtime, storage, storage_manager, development_mode=mock), None, True),
     ]
     if can_service is not None:
-        services_to_register.insert(0, (can_service, "services.CAN_Moteur.enabled", True))
+        services_to_register.insert(0, (can_service, "services.CAN_Engine.enabled", True))
 
-    # Rétrocompatibilité: anciennes sauvegardes utilisaient services.Can.enabled
-    can_enabled = storage.get("services.CAN_Moteur.enabled", storage.get("services.Can.enabled", True))
+    # Backward compatibility: older saves used services.CAN_Moteur.enabled,
+    # and before that services.Can.enabled
+    can_enabled = storage.get(
+        "services.CAN_Engine.enabled",
+        storage.get("services.CAN_Moteur.enabled", storage.get("services.Can.enabled", True)),
+    )
 
     for service, storage_key, default_state in services_to_register:
-        if service.service_name == "CAN_Moteur":
+        if service.service_name == "CAN_Engine":
             orchestrator.add_service(service, enabled=can_enabled)
         elif storage_key is None:
             orchestrator.add_service(service, enabled=True)
@@ -233,13 +246,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--ui', choices=['cli', 'gui'], default='gui')
     parser.add_argument('--mock', action='store_true')
-    parser.add_argument('--show-cursor', action='store_true', help='Affiche le pointeur en développement')
+    parser.add_argument('--show-cursor', action='store_true', help='Show the mouse pointer during development')
     parser.add_argument('--allow-unsupported-pyside', action='store_true')
     parser.add_argument('--log-level', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'])
     args = parser.parse_args()
 
     if platform.system() != "Linux" and not args.mock:
-        print("[INFO] Plateforme desktop détectée : activation automatique du mode --mock.")
+        print("[INFO] Desktop platform detected: enabling --mock mode automatically.")
         args.mock = True
 
     ensure_supported_pyside(is_gui=(args.ui == 'gui'), allow_unsupported=args.allow_unsupported_pyside)
@@ -408,9 +421,9 @@ def main():
                     )
                 marker_written = write_health_marker(logger)
                 ready_status = (
-                    "CliOS : premier frame affiché"
+                    "CliOS: first frame displayed"
                     if phase == "first_frame"
-                    else "CliOS : interface QML chargée (fallback)"
+                    else "CliOS: QML interface loaded (fallback)"
                 )
                 notified = marker_written and notify_systemd_ready(ready_status)
                 if marker_written and os.environ.get("NOTIFY_SOCKET") and not notified:
@@ -472,7 +485,7 @@ def main():
     if requested_power_action in {"reboot", "poweroff"}:
         ok, detail = SystemPowerExecutor(mock=args.mock).execute(requested_power_action)
         if not ok:
-            print(f"[ERREUR] Action système impossible: {detail}", file=sys.stderr)
+            print(f"[ERROR] System action failed: {detail}", file=sys.stderr)
 
 
 if __name__ == "__main__":

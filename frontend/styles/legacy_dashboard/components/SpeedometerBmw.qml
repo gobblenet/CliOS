@@ -8,10 +8,10 @@ Item {
     height: 400
 
     // --- Propriétés Publiques (Données Véhicule) ---
-    property real speed: S.UiState.speed
-    property int max_speed: S.UiState.maxSpeed
+    property real speed: S.UiState.displaySpeed
+    property int max_speed: S.UiState.displayMaxSpeed
 
-    property real targetSpeed: S.UiState.cruiseTarget
+    property real targetSpeed: S.UiState.toSpeed(S.UiState.cruiseTarget)
     property string regMode: S.UiState.cruiseMode
     property string regStatut: S.UiState.cruiseStatus
 
@@ -141,12 +141,12 @@ Item {
 
                 // Coloration selon l'état du régulateur
                 color: {
-                    if (safeMode === "REG" && safeStatut === "ACTIF") return Theme.redLine; // Régulateur Actif
-                    if (safeMode === "LIM" && safeStatut === "ACTIF") return "#ffa500"; // Limiteur Actif
+                    if (safeMode === "CRUISE" && safeStatut === "ACTIVE") return Theme.redLine; // Régulateur Actif
+                    if (safeMode === "LIM" && safeStatut === "ACTIVE") return "#ffa500"; // Limiteur Actif
                     return Theme.unselected; // En attente
                 }
                 border.color: "white"
-                border.width: (safeMode !== "OFF" && safeStatut === "ACTIF") ? 1 : 0
+                border.width: (safeMode !== "OFF" && safeStatut === "ACTIVE") ? 1 : 0
             }
         }
 

@@ -38,7 +38,7 @@ class GearCalibrationService(BaseService):
             "target_gears": self._target_gear_count(),
         }, source="gear-calibration")
 
-        self.register_param("calib_toggle", "Mode Étalonnage", ServiceParamType.TOGGLE, False, persistent=False)
+        self.register_param("calib_toggle", "Calibration mode", ServiceParamType.TOGGLE, False, persistent=False)
 
     def on_param_changed(self, key: str, value):
         if key == "calib_toggle":
@@ -59,8 +59,8 @@ class GearCalibrationService(BaseService):
             "target_gears": self._target_gear_count(),
         }, source="gear-calibration")
 
-        self.set_ok("Étalonnage en cours...")
-        self.print_message("Étalonnage incrémental actif. Les rapports trouvés sont conservés entre trajets.")
+        self.set_ok("Calibrating...")
+        self.print_message("Incremental calibration active. Gears found are kept between trips.")
 
     def stop_and_save_calibration(self):
         self.is_calibrating = False
@@ -72,12 +72,12 @@ class GearCalibrationService(BaseService):
         }, source="gear-calibration")
 
         if not self.collected_ratios and not self._ratio_hist:
-            self.set_warning("Annulé : Aucune donnée.")
+            self.set_warning("Cancelled: no data.")
             return False
 
         new_ratios = self._build_candidate_ratios()
         if not new_ratios:
-            self.set_error("Échec : Données instables.")
+            self.set_error("Failed: unstable data.")
             return False
 
         config_path = self.profile_manager.get_config_path()
@@ -100,8 +100,8 @@ class GearCalibrationService(BaseService):
             self.dynamics_service.reload_config(config_data)
             self._save_progress_to_storage(force=True)
 
-            self.set_ok(f"Succès : {len(new_ratios)} rapports enregistrés.")
-            self.print_message(f"Rapports recalibrés: {new_ratios}")
+            self.set_ok(f"Success: {len(new_ratios)} gear ratios saved.")
+            self.print_message(f"Gear ratios recalibrated: {new_ratios}")
             return True
 
         except Exception as e:
@@ -110,7 +110,7 @@ class GearCalibrationService(BaseService):
                     os.remove(tmp_path)
             except OSError:
                 pass
-            self.set_error(f"Erreur d'écriture : {str(e)}")
+            self.set_error(f"Write error: {str(e)}")
             return False
 
     def start(self, stop_event: threading.Event):

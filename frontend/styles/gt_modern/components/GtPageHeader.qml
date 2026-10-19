@@ -23,7 +23,7 @@ Item {
 
         Text {
             anchors.centerIn: parent
-            text: "‹  RETOUR"
+            text: "‹  BACK"
             color: T.StyleManager.text
             font.family: T.StyleManager.fontFamily
             font.pixelSize: 18

@@ -6,9 +6,9 @@ Rectangle {
     objectName: "globalConfirmDialog"
     signal accepted()
     signal rejected()
-    property string title: "Confirmer l’action"
-    property string message: "Cette action nécessite votre confirmation."
-    property string acceptText: "CONFIRMER"
+    property string title: "Confirm action"
+    property string message: "This action requires your confirmation."
+    property string acceptText: "CONFIRM"
     property bool dangerous: true
     visible: false
     anchors.fill: parent
@@ -51,7 +51,7 @@ Rectangle {
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 20
-                Button { text: "ANNULER"; width: 250; onClicked: root.rejected() }
+                Button { text: "CANCEL"; width: 250; onClicked: root.rejected() }
                 Button {
                     text: root.acceptText
                     width: 300

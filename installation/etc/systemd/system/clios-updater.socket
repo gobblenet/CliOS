@@ -1,5 +1,5 @@
 [Unit]
-Description=Socket du helper de mise à jour CliOS
+Description=CliOS update helper socket
 
 [Socket]
 ListenStream=/run/clios/updater.sock

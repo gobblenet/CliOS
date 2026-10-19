@@ -139,7 +139,7 @@ class SystemController:
             parts = line.strip().split()
             if len(parts) >= 2 and parts[0] == "inet" and not parts[1].startswith(("127.", "169.254.")):
                 return parts[1]
-        return "Hors-ligne"
+        return "Offline"
 
     def _wifi_ssid(self) -> str:
         output = self._command_text(["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show", "--active"])
@@ -200,14 +200,14 @@ class SystemController:
     def toggle_overlay(self) -> bool:
         target = self.target
         if self.update_safety.update_in_progress():
-            target.send_notification("ERROR", "OverlayFS verrouillé pendant la mise à jour", 4500)
+            target.send_notification("ERROR", "OverlayFS locked during update", 4500)
             return False
         state = self.maintenance_state()
         if state["overlay_busy"]:
-            target.send_notification("WARNING", "Modification OverlayFS déjà en cours", 3500)
+            target.send_notification("WARNING", "OverlayFS change already in progress", 3500)
             return False
         if state["restart_required"] or state["overlay_current"] != state["overlay_configured"]:
-            target.send_notification("WARNING", "Redémarrez avant une nouvelle modification OverlayFS", 4500)
+            target.send_notification("WARNING", "Reboot before another OverlayFS change", 4500)
             return False
         target.logger.info("Bascule protection SD demandée", extra={"error_code": "MAINT_SD_TOGGLE"})
         self._set_maintenance(overlay_busy=True, overlay_error="")
@@ -227,14 +227,14 @@ class SystemController:
                             restart_required=configured != state["overlay_current"],
                             overlay_error="",
                         )
-                        target.send_notification("WARNING", "Protection SD basculée ! Redémarrez le système.", 5000)
+                        target.send_notification("WARNING", "SD protection toggled! Reboot the system.", 5000)
                     else:
                         target.logger.error(
                             "Bascule SD refusée (code %s): %s", result.returncode, result.stderr.strip(),
                             extra={"error_code": "SD_TOGGLE_FAILED", "returncode": result.returncode},
                         )
                         self._set_maintenance(overlay_error=result.stderr.strip()[:240])
-                        target.send_notification("ERROR", f"Erreur SD : {result.stderr.strip()[:50]}", 4000)
+                        target.send_notification("ERROR", f"SD error: {result.stderr.strip()[:50]}", 4000)
                     return
                 check = subprocess.run(
                     ["sudo", "raspi-config", "nonint", "get_overlay_now"],
@@ -251,17 +251,17 @@ class SystemController:
                     raise RuntimeError(f"raspi-config {action}: code {result.returncode}")
                 if action == "disable_overlayfs":
                     self._set_maintenance(overlay_configured=False, restart_required=state["overlay_current"] is True)
-                    target.send_notification("WARNING", "Protection SD désactivée (Mode RW). Redémarrez pour valider.", 5000)
+                    target.send_notification("WARNING", "SD protection disabled (RW mode). Reboot to apply.", 5000)
                 else:
                     self._set_maintenance(overlay_configured=True, restart_required=state["overlay_current"] is False)
-                    target.send_notification("SUCCESS", "Protection SD activée (Lecture Seule). Redémarrez pour valider.", 5000)
+                    target.send_notification("SUCCESS", "SD protection enabled (read-only). Reboot to apply.", 5000)
             except (OSError, subprocess.TimeoutExpired, RuntimeError) as exc:
                 target.logger.error(
                     "Erreur bascule SD: %s", exc,
                     extra={"error_code": "SD_TOGGLE_ERROR", "exception_type": type(exc).__name__},
                 )
                 self._set_maintenance(overlay_error=str(exc)[:240])
-                target.send_notification("ERROR", f"Erreur SD: {str(exc)[:50]}", 4000)
+                target.send_notification("ERROR", f"SD error: {str(exc)[:50]}", 4000)
             finally:
                 self._set_maintenance(overlay_busy=False)
 
@@ -275,12 +275,12 @@ class SystemController:
                 "Action %s refusée pendant la mise à jour", action,
                 extra={"error_code": "POWER_BLOCKED_BY_UPDATE", "action": action},
             )
-            target.send_notification("ERROR", "Extinction bloquée : mise à jour en cours", 5000)
+            target.send_notification("ERROR", "Shutdown blocked: update in progress", 5000)
             return
         messages = {
-            "poweroff": ("warning", "Extinction système demandée", "SYS_SHUTDOWN", "Extinction du système..."),
-            "reboot": ("warning", "Redémarrage matériel demandé", "SYS_REBOOT", "Redémarrage du système..."),
-            "quit": ("info", "Fermeture manuelle de l'application", "APP_QUIT", "Fermeture de l'application..."),
+            "poweroff": ("warning", "System shutdown requested", "SYS_SHUTDOWN", "Shutting down the system..."),
+            "reboot": ("warning", "Hardware reboot requested", "SYS_REBOOT", "Rebooting the system..."),
+            "quit": ("info", "Manual application exit", "APP_QUIT", "Closing the application..."),
         }
         log_level, log_message, error_code, notice = messages[action]
         getattr(target.logger, log_level)(log_message, extra={"error_code": error_code})

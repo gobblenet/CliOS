@@ -116,7 +116,7 @@ Item {
             }
 
             Text {
-                text: tickTempDelegate.tickVal
+                text: S.UiState.imperial ? Math.round(S.UiState.toTemperature(tickTempDelegate.tickVal)) : tickTempDelegate.tickVal
 
                 visible: index !== 0
 
@@ -132,12 +132,12 @@ Item {
 
     // --- Affichage Numérique ---
     Column {
-        x: gaugeRoot.endXG - 45
+        x: gaugeRoot.endXG - 24 - width  // right-aligned so 3-digit °F readings clear the scale
         y: gaugeRoot.yPos - 30
         spacing: 0
 
         Text {
-            text: gaugeRoot.smoothTemp.toFixed(0)
+            text: S.UiState.toTemperature(gaugeRoot.smoothTemp).toFixed(0)
             color: Theme.textMain
             font.pixelSize: 18
             font.bold: true
@@ -146,7 +146,7 @@ Item {
         }
 
         Text {
-            text: "°C"
+            text: S.UiState.temperatureUnit
             color: Theme.textDimmed
             font.pixelSize: 10
             font.family: "Arial"

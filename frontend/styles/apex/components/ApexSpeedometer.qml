@@ -8,8 +8,8 @@ Item {
     implicitWidth: 540
     implicitHeight: 540
 
-    property real speed:    S.UiState.speed
-    property real maxSpeed: S.UiState.maxSpeed > 0 ? S.UiState.maxSpeed : 250
+    property real speed:    S.UiState.displaySpeed
+    property real maxSpeed: S.UiState.displayMaxSpeed > 0 ? S.UiState.displayMaxSpeed : 250
     property real rpm:      S.UiState.rpm
     property real maxRpm:   S.UiState.maxRpm > 0 ? S.UiState.maxRpm : 7000
     property real redline:  S.UiState.redlineRpm > 0 ? S.UiState.redlineRpm : 6500
@@ -298,7 +298,7 @@ Item {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "KM/H"
+                text: S.UiState.speedUnit.toUpperCase()
                 color: Qt.rgba(1.0, 1.0, 1.0, 0.50)
                 font.pixelSize: 16
                 font.weight: Font.Black

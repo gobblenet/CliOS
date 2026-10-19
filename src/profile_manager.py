@@ -64,7 +64,7 @@ class ProfileManager:
             "active_profile": "default",
             "profiles": {
                 "default": {
-                    "name": "Profil par défaut",
+                    "name": "Default profile",
                     "can_file": "default_can.json",
                     "config_file": "default_config.json",
                     "save_file": "save.json"
@@ -111,13 +111,13 @@ class ProfileManager:
         if catalog_errors:
             self.has_error = True
             self.recovery_mode = True
-            self.error_message = "Catalogue de profils invalide : " + " | ".join(catalog_errors)
+            self.error_message = "Invalid profile catalog: " + " | ".join(catalog_errors)
             return
         errors = validate_profile_references(self.data, self.config_dir, self.can_dir, self.styles_dir)
         if errors:
             self.has_error = True
             self.recovery_mode = True
-            self.error_message = "Profils invalides : " + " | ".join(errors) + ". Mode récupération actif."
+            self.error_message = "Invalid profiles: " + " | ".join(errors) + ". Recovery mode active."
 
     def get_available_profiles(self) -> list:
         """Retourne la liste des identifiants (clés) des profils disponibles."""
@@ -170,7 +170,7 @@ class ProfileManager:
                         return payload
             except (OSError, json.JSONDecodeError, TypeError):
                 pass
-        raise RuntimeError(f"Configuration véhicule illisible: {filename}")
+        raise RuntimeError(f"Unreadable vehicle configuration: {filename}")
 
     def get_can_path(self) -> str:
         filename = self._safe_json_filename(self.active_info.get("can_file"), "default_can.json")
@@ -210,7 +210,7 @@ class ProfileManager:
             "ui": {"visual_style": "apex"},
             "tachometer": {"max_rpm": 7000, "redline_rpm": 6500, "idle_rpm": 850},
             "speedometer": {"max_speed": 220},
-            "engine": {"label": "Véhicule personnalisé", "max_torque_nm": 200, "performance_curve": []},
+            "engine": {"label": "Custom vehicle", "max_torque_nm": 200, "performance_curve": []},
             "fuel": {"max_liters": 50, "reserve_percentage": 0.15},
             "engine_temp": {"min_display": 40, "optimal": 90, "warning": 105, "max_display": 120},
             "transmission": {"type": "manual", "gears_count": 5, "tolerance": 5.0, "ratios": {}},

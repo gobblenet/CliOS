@@ -100,7 +100,7 @@ class ReleaseManagerTest(unittest.TestCase):
         payload["archive_sha256"] = "f" * 64
         manifest.write_text(json.dumps(payload), encoding="utf-8")
 
-        with self.assertRaisesRegex(ReleaseError, "déjà préparée mais invalide"):
+        with self.assertRaisesRegex(ReleaseError, "already staged but invalid"):
             self.manager.stage(str(manifest))
 
     def test_manual_rollback_can_reactivate_already_prepared_release(self):

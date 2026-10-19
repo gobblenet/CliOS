@@ -1,5 +1,5 @@
 [Unit]
-Description=Reveil materiel du modem CAN (DFU)
+Description=Hardware wake-up of the CAN adapter (DFU)
 After=local-fs.target
 
 [Service]

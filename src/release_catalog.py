@@ -82,7 +82,7 @@ class ReleaseCatalog:
     def check(self, channel: str, current_version: str) -> dict | None:
         self.last_error = None
         if channel not in self.VALID_CHANNELS:
-            raise CatalogConfigurationError("canal inconnu")
+            raise CatalogConfigurationError("unknown channel")
         try:
             current = SemVer.parse(current_version)
             releases = self._fetch_releases()
@@ -111,9 +111,9 @@ class ReleaseCatalog:
             manifest = self._fetch_json(str(asset["browser_download_url"]), use_cache=False)
             normalized = validate_manifest(manifest)
             if normalized["version"] != str(version):
-                raise CatalogResponseError("tag et version du manifeste différents")
+                raise CatalogResponseError("manifest tag and version differ")
             if normalized["platform"] != self.platform.identifier:
-                raise CatalogResponseError("plateforme du manifeste différente de la machine")
+                raise CatalogResponseError("manifest platform differs from this machine")
             self._validate_asset_url(normalized["archive_url"])
             archive_name = f"clios-{version}-{self.platform.target}.tar.gz"
             release_assets = {
@@ -122,7 +122,7 @@ class ReleaseCatalog:
             }
             archive_asset = release_assets.get(archive_name)
             if not archive_asset or archive_asset.get("browser_download_url") != normalized["archive_url"]:
-                raise CatalogResponseError("archive manifestée absente de la release GitHub")
+                raise CatalogResponseError("manifest archive missing from the GitHub release")
             normalized["release_url"] = str(release.get("html_url", ""))
             normalized["published_at"] = str(release.get("published_at", ""))
             normalized["manifest_url"] = str(asset["browser_download_url"])
@@ -166,7 +166,7 @@ class ReleaseCatalog:
                     break
                 manifest["_manifest_url"] = manifest_url
                 return manifest
-            raise CatalogResponseError(f"release introuvable: {version}")
+            raise CatalogResponseError(f"release not found: {version}")
         except CatalogError as exc:
             self.last_error = {"code": exc.code, "message": str(exc)}
             raise
@@ -181,14 +181,14 @@ class ReleaseCatalog:
         try:
             info = self.config_path.stat()
             if enforce_root and (info.st_uid != 0 or info.st_mode & (stat.S_IWGRP | stat.S_IWOTH)):
-                raise CatalogConfigurationError("updater.json doit appartenir à root et ne pas être modifiable par le groupe")
+                raise CatalogConfigurationError("updater.json must be owned by root and not group-writable")
             payload = json.loads(self.config_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            raise CatalogConfigurationError(f"configuration updater invalide: {exc}") from exc
+            raise CatalogConfigurationError(f"invalid updater configuration: {exc}") from exc
         if not isinstance(payload, dict) or set(payload) - {"schema_version", "repository"}:
-            raise CatalogConfigurationError("configuration updater contient des clés interdites")
+            raise CatalogConfigurationError("updater configuration contains forbidden keys")
         if payload.get("schema_version", 1) != 1:
-            raise CatalogConfigurationError("schéma updater non pris en charge")
+            raise CatalogConfigurationError("unsupported updater schema")
         return payload
 
     @staticmethod
@@ -196,13 +196,13 @@ class ReleaseCatalog:
         parts = repository.split("/")
         allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
         if len(parts) != 2 or any(not part or not set(part) <= allowed for part in parts):
-            raise CatalogConfigurationError("dépôt GitHub invalide")
+            raise CatalogConfigurationError("invalid GitHub repository")
 
     def _fetch_releases(self) -> list:
         url = f"{self.api_base}/repos/{self.repository}/releases?per_page=100"
         payload = self._fetch_json(url, use_cache=True)
         if not isinstance(payload, list):
-            raise CatalogResponseError("réponse GitHub Releases invalide")
+            raise CatalogResponseError("invalid GitHub Releases response")
         return payload
 
     def _fetch_json(self, url: str, *, use_cache: bool) -> object:
@@ -241,7 +241,7 @@ class ReleaseCatalog:
                 return cache["payload"]
             raise CatalogNetworkError(f"GitHub inaccessible: {exc}") from exc
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-            raise CatalogResponseError("réponse GitHub non JSON") from exc
+            raise CatalogResponseError("non-JSON GitHub response") from exc
 
     def _manifest_asset(self, release: dict, version: str) -> dict | None:
         channel = "beta" if SemVer.parse(version).prerelease else "stable"
@@ -256,7 +256,7 @@ class ReleaseCatalog:
         if self.api_base == "https://api.github.com":
             prefix = f"/{self.repository}/releases/download/"
             if parsed.scheme != "https" or parsed.hostname != "github.com" or not parsed.path.startswith(prefix):
-                raise CatalogResponseError("URL d'asset hors du dépôt GitHub autorisé")
+                raise CatalogResponseError("asset URL outside the allowed GitHub repository")
 
     def _read_cache(self) -> dict:
         try:

@@ -67,7 +67,7 @@ class VehicleRuntime:
                         "stop_warning": "alerts", "service_warning": "trip",
                     }.get(key)
                     if domain is None:
-                        raise ValueError(f"Signal de présentation non catalogué: {key}")
+                        raise ValueError(f"Uncatalogued presentation signal: {key}")
                 self._startup_overrides.setdefault(domain, {})[key] = value
 
     def run_startup_sequence(self, duration_sec=2.0):

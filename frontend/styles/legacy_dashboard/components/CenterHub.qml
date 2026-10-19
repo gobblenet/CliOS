@@ -22,12 +22,12 @@ Item {
         spacing: 18
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: Math.round(S.UiState.speed)
+            text: Math.round(S.UiState.displaySpeed)
             color: "white"; font.pixelSize: 120; font.bold: true
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "km/h · " + Math.round(S.UiState.rpm) + " tr/min"
+            text: S.UiState.speedUnit + " · " + Math.round(S.UiState.rpm) + " rpm"
             color: T.StyleManager.textSecondary; font.pixelSize: 24
         }
         RowLayout {

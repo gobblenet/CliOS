@@ -445,7 +445,7 @@ class DashboardBridge(QObject):
         try:
             self.led_service._registry.get(protocol)
             if not address.strip() or not char_uuid.strip():
-                raise ValueError("Adresse ou caracteristique GATT manquante")
+                raise ValueError("Missing GATT address or characteristic")
             self.led_catalog.add_device(BleDevice(
                 id="", name=name.strip() or "Eclairage", ble_address=address.strip(),
                 protocol=protocol, gatt_char_uuid=char_uuid.strip(),
@@ -480,7 +480,7 @@ class DashboardBridge(QObject):
             elif key == "color_override":
                 parsed = value.upper() or None
                 if parsed and not re.fullmatch(r"#[0-9A-F]{6}", parsed):
-                    raise ValueError("Couleur invalide")
+                    raise ValueError("Invalid color")
             elif key == "name":
                 parsed = value.strip()[:64] or "Eclairage"
             else:
@@ -523,7 +523,7 @@ class DashboardBridge(QObject):
             elif key == "color_override":
                 parsed = value.upper() or None
                 if parsed and not re.fullmatch(r"#[0-9A-F]{6}", parsed):
-                    raise ValueError("Couleur invalide")
+                    raise ValueError("Invalid color")
             else:
                 parsed = value.strip()[:64] or "Groupe"
         except ValueError:
@@ -602,7 +602,7 @@ class DashboardBridge(QObject):
                 self.logger.info("Configuration sauvegardee", extra={"error_code": "CONFIG_SAVED"})
             else:
                 self.logger.error("Echec sauvegarde configuration", extra={"error_code": "CONFIG_SAVE_ERROR"})
-                self.send_notification("WARNING", "Réglage conservé en mémoire uniquement", 4000)
+                self.send_notification("WARNING", "Setting kept in memory only", 4000)
 
     def relocate_config(self, new_config_path: str) -> bool:
         with self._config_lock:
@@ -719,7 +719,7 @@ class DashboardBridge(QObject):
     @Slot()
     def restartApplication(self):
         self.logger.warning("Ordre de redemarrage recu", extra={"error_code": "APP_RESTART_REQUEST"})
-        self.send_notification("INFO", "Redémarrage de CliOS en cours...", 2000)
+        self.send_notification("INFO", "Restarting CliOS...", 2000)
         self.needs_restart = True
         QTimer.singleShot(400, self.exitRequested.emit)
 
@@ -762,7 +762,7 @@ class DashboardBridge(QObject):
     def triggerGitUpdate(self):
         """Compatibilité dev uniquement; aucune mise à jour Git n'est lancée."""
         self.logger.warning("triggerGitUpdate obsolète", extra={"error_code": "GIT_UPDATE_DISABLED"})
-        self.send_notification("WARNING", "Mise à jour Git désactivée en production", 4000)
+        self.send_notification("WARNING", "Git update disabled in production", 4000)
 
     @Slot(result=str)
     def getUpdateChannel(self) -> str:

@@ -8,7 +8,7 @@ Item {
 
     Text {
         anchors.centerIn: parent
-        text: Math.round(S.UiState.speed) + " km/h"
+        text: Math.round(S.UiState.displaySpeed) + " " + S.UiState.speedUnit
         color: "white"
         font.pixelSize: 72
     }

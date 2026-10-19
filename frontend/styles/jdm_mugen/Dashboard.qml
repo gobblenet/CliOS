@@ -152,7 +152,7 @@ Item {
                             anchors.centerIn: parent
                             spacing: 8
                             Text { text: "◀"; color: T.StyleManager.accent; font.pixelSize: 14; font.bold: true }
-                            Text { text: "RETOUR AU COMBINÉ"; color: "#FFFFFF"; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.0 }
+                            Text { text: "BACK TO CLUSTER"; color: "#FFFFFF"; font.pixelSize: 12; font.bold: true; font.letterSpacing: 1.0 }
                         }
 
                         MouseArea {

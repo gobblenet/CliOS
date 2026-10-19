@@ -3,7 +3,7 @@ import "../../../style" as T
 
 Column {
     id: root
-    property string label: "MÉTRIQUE"
+    property string label: "METRIC"
     property string value: "—"
     property string unit: ""
     property color valueColor: T.StyleManager.text

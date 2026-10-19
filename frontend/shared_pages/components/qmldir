@@ -7,3 +7,4 @@ Metric 1.0 Metric.qml
 PageHeader 1.0 PageHeader.qml
 Progress 1.0 Progress.qml
 Toggle 1.0 Toggle.qml
+LiveTile 1.0 LiveTile.qml

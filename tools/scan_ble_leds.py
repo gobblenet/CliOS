@@ -41,8 +41,8 @@ except ImportError as exc:
 def require_bleak():
     if BLEAK_IMPORT_ERROR is not None or BleakScanner is None or BleakClient is None:
         raise RuntimeError(
-            "La bibliothèque 'bleak' n'est pas installée. "
-            "Installez-la avec : pip install bleak"
+            "The 'bleak' library is not installed. "
+            "Install it with: pip install bleak"
         ) from BLEAK_IMPORT_ERROR
 
 
@@ -70,7 +70,7 @@ def build_protocol_payloads(protocol_key: str, r: int, g: int, b: int) -> list[b
     try:
         identifier = _PROTOCOL_KEYS[protocol_key]
     except KeyError as exc:
-        raise ValueError(f"Protocole de test inconnu: {protocol_key}") from exc
+        raise ValueError(f"Unknown test protocol: {protocol_key}") from exc
     return registry.build_payloads(identifier, r, g, b, 100.0, power_on=True)
 
 
@@ -94,10 +94,10 @@ def select_write_characteristic(characteristics):
     if len(characteristics) == 1:
         return characteristics[0]
 
-    print("\nPlusieurs caractéristiques acceptent une écriture.")
-    print("Choisissez celle à tester ; Entrée conserve la cible recommandée.")
+    print("\nSeveral characteristics accept writes.")
+    print("Choose the one to test; Enter keeps the recommended target.")
     try:
-        choice = input(f"> [défaut {default_index + 1}] ").strip()
+        choice = input(f"> [default {default_index + 1}] ").strip()
     except (EOFError, KeyboardInterrupt):
         return characteristics[default_index]
     if choice.isdigit() and 1 <= int(choice) <= len(characteristics):
@@ -113,15 +113,15 @@ def write_requires_response(characteristic) -> bool:
 def ask_protocol_result(color_name: str) -> str:
     """Attend explicitement l'observation humaine avant le protocole suivant."""
     prompt = (
-        f"La couleur {color_name} est-elle apparue ? "
-        "[o] oui  [r] réessayer  [Entrée] protocole suivant  [q] arrêter\n> "
+        f"Did the color {color_name} appear? "
+        "[y] yes  [r] retry  [Enter] next protocol  [q] quit\n> "
     )
     while True:
         try:
             answer = input(prompt).strip().lower()
         except (EOFError, KeyboardInterrupt):
             return "quit"
-        if answer in {"", "n", "non"}:
+        if answer in {"", "n", "no", "non"}:
             return "next"
         if answer in {"o", "oui", "y", "yes"}:
             return "success"
@@ -129,28 +129,28 @@ def ask_protocol_result(color_name: str) -> str:
             return "retry"
         if answer in {"q", "quit", "quitter"}:
             return "quit"
-        print("Réponse inconnue.")
+        print("Unknown answer.")
 
 
 async def scan_devices():
     require_bleak()
-    print("\n🔍 Recherche des appareils Bluetooth BLE à proximité (5 secondes)...")
+    print("\n🔍 Searching for nearby Bluetooth BLE devices (5 seconds)...")
     discovered = await BleakScanner.discover(timeout=5.0, return_adv=True)
     entries = list(discovered.values())
 
     if not entries:
-        print("❌ Aucun appareil Bluetooth détecté. Vérifiez que le Bluetooth est activé.")
+        print("❌ No Bluetooth device detected. Check that Bluetooth is enabled.")
         return []
 
-    print(f"\n📡 {len(entries)} appareils détectés :\n")
+    print(f"\n📡 {len(entries)} devices detected:\n")
     candidates = []
 
     for idx, (d, advertisement) in enumerate(entries, 1):
         name = d.name or "Inconnu"
         is_candidate = any(k in name.lower() for k in KNOWN_LED_NAMES)
-        marker = "💡 [POTENTIEL CONTRÔLEUR LED]" if is_candidate else ""
+        marker = "💡 [POSSIBLE LED CONTROLLER]" if is_candidate else ""
         rssi = getattr(advertisement, "rssi", "?")
-        print(f"  [{idx:02d}] {d.address} | Nom: {name:<24} | RSSI: {rssi} dBm {marker}")
+        print(f"  [{idx:02d}] {d.address} | Name: {name:<24} | RSSI: {rssi} dBm {marker}")
         if is_candidate or name != "Inconnu":
             candidates.append(d)
 
@@ -159,42 +159,42 @@ async def scan_devices():
 
 async def test_device(address: str, name: str):
     require_bleak()
-    print(f"\n🔌 Connexion à {name} ({address})...")
+    print(f"\n🔌 Connecting to {name} ({address})...")
     try:
         async with BleakClient(address, timeout=6.0) as client:
-            print("✅ Connecté avec succès !")
+            print("✅ Connected successfully!")
 
             # Recherche des caractéristiques d'écriture
             write_chars = []
-            print("\n📋 Caractéristiques GATT disponibles :")
+            print("\n📋 Available GATT characteristics:")
             for service in client.services:
                 for char in service.characteristics:
                     props = ", ".join(char.properties)
                     is_writable = "write" in char.properties or "write-without-response" in char.properties
-                    marker = "✏️ [ÉCRITURE POSSIBLE]" if is_writable else ""
+                    marker = "✏️ [WRITABLE]" if is_writable else ""
                     if is_writable:
                         write_chars.append(char)
-                        marker = f"✏️ [ÉCRITURE {len(write_chars)}]"
+                        marker = f"✏️ [WRITE {len(write_chars)}]"
                     print(f"   Service: {service.uuid[:8]}... | Char: {char.uuid} ({props}) {marker}")
 
             if not write_chars:
-                print("❌ Aucune caractéristique d'écriture trouvée sur ce périphérique.")
+                print("❌ No writable characteristic found on this device.")
                 return
 
             target_char = select_write_characteristic(write_chars)
             response = write_requires_response(target_char)
-            write_mode = "avec réponse" if response else "sans réponse"
-            print(f"\n🎯 Caractéristique sélectionnée : {target_char.uuid}")
-            print(f"   Mode d'écriture : {write_mode}")
+            write_mode = "with response" if response else "without response"
+            print(f"\n🎯 Selected characteristic: {target_char.uuid}")
+            print(f"   Write mode: {write_mode}")
 
-            print("\n🧪 Chaque protocole utilise une couleur distincte.")
-            print("Le script attend votre validation avant de poursuivre.")
+            print("\n🧪 Each protocol uses a distinct color.")
+            print("The script waits for your confirmation before continuing.")
 
             for proto_key in protocol_order(name):
                 protocol = PROTOCOLS[proto_key]
-                print(f"\n--- Protocole {proto_key}: {protocol.identifier} ---")
-                print(f"    Famille : {protocol.label}")
-                print(f"    Couleur témoin : {protocol.color_name} {protocol.color}")
+                print(f"\n--- Protocol {proto_key}: {protocol.identifier} ---")
+                print(f"    Family: {protocol.label}")
+                print(f"    Test color: {protocol.color_name} {protocol.color}")
                 while True:
                     payloads = build_protocol_payloads(proto_key, *protocol.color)
                     sent = True
@@ -205,52 +205,52 @@ async def test_device(address: str, name: str):
                             await asyncio.sleep(0.05)
                         except Exception as exc:
                             sent = False
-                            print(f"    ⚠️ Erreur d'envoi : {exc}")
+                            print(f"    ⚠️ Send error: {exc}")
                             break
 
                     if sent:
-                        print(f"    Couleur {protocol.color_name} envoyée. Observez le bandeau.")
+                        print(f"    Color {protocol.color_name} sent. Watch the LED strip.")
                     action = ask_protocol_result(protocol.color_name)
                     if action == "retry":
                         continue
                     if action == "success":
-                        print("\n✅ Protocole confirmé :")
-                        print(f"   Appareil : {name} ({address})")
-                        print(f"   Protocole : {protocol.identifier}")
-                        print(f"   Caractéristique : {target_char.uuid}")
-                        print(f"   Écriture : {write_mode}")
+                        print("\n✅ Protocol confirmed:")
+                        print(f"   Device: {name} ({address})")
+                        print(f"   Protocol: {protocol.identifier}")
+                        print(f"   Characteristic: {target_char.uuid}")
+                        print(f"   Write: {write_mode}")
                         return
                     if action == "quit":
-                        print("\nTest interrompu par l'utilisateur.")
+                        print("\nTest interrupted by the user.")
                         return
                     break
 
-            print("\n❌ Aucun protocole n'a été confirmé sur cette caractéristique.")
+            print("\n❌ No protocol was confirmed on this characteristic.")
             if len(write_chars) > 1:
-                print("Relancez le test et sélectionnez une autre caractéristique d'écriture.")
-            print("Conservez la liste GATT et les lignes TX pour identifier un protocole supplémentaire.")
+                print("Run the test again and select another writable characteristic.")
+            print("Keep the GATT list and TX lines to identify an additional protocol.")
 
     except BleakError as e:
-        print(f"❌ Échec de connexion : {e}")
+        print(f"❌ Connection failed: {e}")
     except Exception as e:
-        print(f"❌ Erreur inattendue : {e}")
+        print(f"❌ Unexpected error: {e}")
 
 
 async def main():
     print("=" * 65)
-    print("   🚗 CliOS - Diagnostic & Scanner Bandeaux LED Bluetooth")
+    print("   🚗 CliOS - Bluetooth LED Strip Diagnostics & Scanner")
     print("=" * 65)
 
     try:
         devices = await scan_devices()
     except RuntimeError as exc:
-        print(f"\n[ERREUR] {exc}\n")
+        print(f"\n[ERROR] {exc}\n")
         return 1
     if not devices:
         return 0
 
-    print("\nEntrez le numéro, l'identifiant BLE ou l'adresse MAC de l'appareil à tester")
-    print("(ou 'q' pour quitter) :")
+    print("\nEnter the number, BLE identifier or MAC address of the device to test")
+    print("(or 'q' to quit):")
     try:
         choice = input("> ").strip()
     except (EOFError, KeyboardInterrupt):
@@ -271,7 +271,7 @@ async def main():
     if target:
         await test_device(target.address, target.name or "Inconnu")
     else:
-        print(f"❌ Appareil '{choice}' non trouvé dans la liste.")
+        print(f"❌ Device '{choice}' not found in the list.")
     return 0
 
 
@@ -279,4 +279,4 @@ if __name__ == "__main__":
     try:
         raise SystemExit(asyncio.run(main()))
     except KeyboardInterrupt:
-        print("\nArrêt.")
+        print("\nStopped.")

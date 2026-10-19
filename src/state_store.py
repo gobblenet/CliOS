@@ -11,10 +11,10 @@ from typing import Any
 
 DOMAINS = (
     "powertrain", "motion", "wheels", "body", "assistance", "dynamics",
-    "environment", "controls", "alerts", "trip", "diagnostics", "session",
-    "calibration", "system",
+    "environment", "controls", "alerts", "navigation", "obd", "trip",
+    "diagnostics", "session", "calibration", "system",
 )
-VEHICLE_DOMAINS = DOMAINS[:9]
+VEHICLE_DOMAINS = DOMAINS[:11]
 
 
 @dataclass(frozen=True)
@@ -35,7 +35,7 @@ class RuntimeSnapshot:
 
     def domain(self, name: str) -> dict[str, Any]:
         if name not in DOMAINS:
-            raise KeyError(f"Domaine runtime inconnu: {name}")
+            raise KeyError(f"Unknown runtime domain: {name}")
         return self.domains[name]
 
     def as_dict(self, selected: tuple[str, ...] | None = None) -> dict[str, Any]:
@@ -77,9 +77,9 @@ class VehicleStateStore:
             return self.revision
         for patch in patches:
             if patch.domain not in DOMAINS:
-                raise ValueError(f"Domaine runtime inconnu: {patch.domain}")
+                raise ValueError(f"Unknown runtime domain: {patch.domain}")
             if not isinstance(patch.values, dict):
-                raise TypeError("StatePatch.values doit être un dictionnaire")
+                raise TypeError("StatePatch.values must be a dictionary")
 
         with self._lock:
             touched = set()

@@ -18,13 +18,13 @@ class SystemMonitorService(BaseService):
         self.last_time = time.time()
         self.num_cores = psutil.cpu_count() or 1
 
-        self.register_param("refresh_rate", "Rafraîchissement (s)", ServiceParamType.SLIDER, 1.0,
+        self.register_param("refresh_rate", "Refresh interval (s)", ServiceParamType.SLIDER, 1.0,
                             min_val=0.5, max_val=10.0)
-        self.register_param("cpu_alert", "Alerte CPU (%)", ServiceParamType.SLIDER, 80.0,
+        self.register_param("cpu_alert", "CPU alert (%)", ServiceParamType.SLIDER, 80.0,
                             min_val=20.0, max_val=100.0)
-        self.register_param("ram_alert", "Alerte RAM (MB)", ServiceParamType.SLIDER, 500.0,
+        self.register_param("ram_alert", "RAM alert (MB)", ServiceParamType.SLIDER, 500.0,
                             min_val=100.0, max_val=2000.0)
-        self.register_param("console_debug", "Afficher Logs Console", ServiceParamType.TOGGLE, False)
+        self.register_param("console_debug", "Show console logs", ServiceParamType.TOGGLE, False)
 
     def start(self, stop_event):
         """Lance la boucle de surveillance dans un thread dédié."""
@@ -100,9 +100,9 @@ class SystemMonitorService(BaseService):
                 ram_limit = self._params["ram_alert"]["value"]
 
                 if cpu_total > cpu_limit or ram_mb > ram_limit:
-                    self.set_warning(f"Surcharge CPU ({cpu_total}%) ou RAM ({ram_mb} MB)")
+                    self.set_warning(f"CPU ({cpu_total}%) or RAM ({ram_mb} MB) overload")
                 else:
-                    self.set_ok("Ressources nominales.")
+                    self.set_ok("Resources nominal.")
 
                 if self._params["console_debug"]["value"]:
                     # Lecture d'un snapshot cohérent sans bloquer les producteurs.
@@ -121,4 +121,4 @@ class SystemMonitorService(BaseService):
                     print("=" * 45 + "\n")
 
             except Exception as e:
-                self.set_error(f"Erreur de lecture CPU : {e}")
+                self.set_error(f"CPU read error: {e}")

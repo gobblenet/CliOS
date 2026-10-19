@@ -5,7 +5,7 @@
     "capabilities": ["settings", "commands", "vehicle-state"],
     "id": "apex",
     "label": "Apex Obsidian",
-    "description": "Cockpit panoramique sculpté · Haute lisibilité · Commandes tactiles",
+    "description": "Sculpted panoramic cockpit · High readability · Touch controls",
     "order": 1,
     "dashboard": "Dashboard.qml",
     "palette": {

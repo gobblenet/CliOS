@@ -12,7 +12,11 @@
     },
     "ui": {
       "type": "object", "required": ["visual_style"],
-      "properties": {"visual_style": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}}
+      "properties": {
+        "visual_style": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "units": {"enum": ["imperial", "metric"]},
+        "live_tiles": {"type": "string"}
+      }
     },
     "tachometer": {
       "type": "object", "required": ["max_rpm", "redline_rpm"],

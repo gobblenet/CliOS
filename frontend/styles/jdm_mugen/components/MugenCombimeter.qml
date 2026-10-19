@@ -497,13 +497,13 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text: {
                         if (root.lcdMode === 0) {
-                            return Math.round(S.UiState.autonomy).toString() + " km"
+                            return Math.round(S.UiState.toDistance(S.UiState.autonomy)).toString() + " " + S.UiState.distanceUnit
                         } else if (root.lcdMode === 1) {
-                            return S.UiState.fixed(S.UiState.instantCons, 1, "0.0") + " L"
+                            return S.UiState.fixed(S.UiState.toConsumption(S.UiState.instantCons), 1, "0.0") + " " + S.UiState.consumptionUnit
                         } else if (root.lcdMode === 2) {
-                            return S.UiState.fixed(S.UiState.fuelLevel, 1, "0.0") + " L"
+                            return S.UiState.fixed(S.UiState.toVolume(S.UiState.fuelLevel), 1, "0.0") + " " + S.UiState.volumeUnit
                         } else {
-                            return S.UiState.fixed(S.UiState.tripCost, 2, "0.00") + " €"
+                            return S.UiState.money(S.UiState.tripCost)
                         }
                     }
                     color: "#D8E4F0"

@@ -155,22 +155,22 @@ Item {
             width: 86
             height: 26
             radius: 4
-            color: S.UiState.cruiseMode === "REG" ? Qt.rgba(0.2, 0.8, 0.4, 0.2) : Qt.rgba(1.0, 0.6, 0.0, 0.2)
+            color: S.UiState.cruiseMode === "CRUISE" ? Qt.rgba(0.2, 0.8, 0.4, 0.2) : Qt.rgba(1.0, 0.6, 0.0, 0.2)
             border.width: 1.2
-            border.color: S.UiState.cruiseMode === "REG" ? "#34D399" : "#F59E0B"
+            border.color: S.UiState.cruiseMode === "CRUISE" ? "#34D399" : "#F59E0B"
 
             Row {
                 anchors.centerIn: parent
                 spacing: 4
                 Text {
                     text: S.UiState.cruiseMode
-                    color: S.UiState.cruiseMode === "REG" ? "#34D399" : "#FBBF24"
+                    color: S.UiState.cruiseMode === "CRUISE" ? "#34D399" : "#FBBF24"
                     font.family: "Courier New, monospace"
                     font.pixelSize: 11
                     font.bold: true
                 }
                 Text {
-                    text: Math.round(S.UiState.cruiseTarget).toString()
+                    text: Math.round(S.UiState.toSpeed(S.UiState.cruiseTarget)).toString()
                     color: "#FFFFFF"
                     font.family: "Courier New, monospace"
                     font.pixelSize: 13
@@ -223,7 +223,7 @@ Item {
         // Température extérieure ("24 °C" sur la photo)
         Text {
             anchors.verticalCenter: parent.verticalCenter
-            text: S.UiState.fixed(S.UiState.outsideTemp, 0, "24") + " °C"
+            text: S.UiState.fixed(S.UiState.toTemperature(S.UiState.outsideTemp), 0, "24") + " " + S.UiState.temperatureUnit
             color: "#E2F0D9"
             font.family: "Courier New, monospace"
             font.pixelSize: 22

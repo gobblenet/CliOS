@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import "SignalCatalog.js" as Catalog
 
 QtObject {
     id: state
@@ -25,6 +26,8 @@ QtObject {
     readonly property var dynamics: presentedDomain("dynamics")
     readonly property var environment: presentedDomain("environment")
     readonly property var alerts: presentedDomain("alerts")
+    readonly property var navigation: vehicleState.navigation || ({})
+    readonly property var obd: vehicleState.obd || ({})
     readonly property var tripState: presentedStandaloneDomain("trip", rawTripState)
     readonly property var serviceHealth: systemState.health || ({})
     readonly property var storageState: systemState.storage || ({})
@@ -63,7 +66,7 @@ QtObject {
     readonly property real tempWarning: number(config.engine_temp && config.engine_temp.warning, 105)
     readonly property real tempMax: number(config.engine_temp && config.engine_temp.max_display, 120)
     readonly property real instantConsMax: number(config.instant_fuel_consumption && config.instant_fuel_consumption.max_display, 20.0)
-    readonly property string engineLabel: text(config.engine && config.engine.label, "Moteur")
+    readonly property string engineLabel: text(config.engine && config.engine.label, "Engine")
     readonly property real maxPowerKw: number(config.engine && config.engine.max_power_kw, 100)
     readonly property real maxPowerHp: maxPowerKw * 1.359621617
     readonly property real maxPowerRpm: number(config.engine && config.engine.max_power_rpm, maxRpm * 0.8)
@@ -126,6 +129,76 @@ QtObject {
     // 3. MÉTROLOGIE MOTEUR, VITESSE & TRANSMISSION
     // =========================================================================
     property real speed: rawSpeed
+
+    // Display units. Runtime data and logic stay metric; only what is shown
+    // on screen is converted. ui.units = "imperial" (default) or "metric".
+    readonly property string unitSystem: text(config.ui && config.ui.units, "imperial")
+    readonly property bool imperial: unitSystem !== "metric"
+    readonly property string speedUnit: imperial ? "mph" : "km/h"
+    readonly property string distanceUnit: imperial ? "mi" : "km"
+    readonly property string volumeUnit: imperial ? "gal" : "L"
+    readonly property string consumptionUnit: imperial ? "MPG" : "L/100"
+    readonly property string currency: imperial ? "$" : "€"
+    readonly property string priceUnit: currency + "/" + volumeUnit
+    readonly property string altitudeUnit: imperial ? "ft" : "m"
+    readonly property string temperatureUnit: imperial ? "°F" : "°C"
+    readonly property real displaySpeed: toSpeed(speed)
+    readonly property real displayMaxSpeed: imperial ? Math.ceil(toSpeed(maxSpeed) / 10) * 10 : maxSpeed
+
+    function toSpeed(kmh) { return imperial ? number(kmh, 0) * 0.621371 : number(kmh, 0) }
+    function toDistance(km) { return imperial ? number(km, 0) * 0.621371 : number(km, 0) }
+    function toVolume(liters) { return imperial ? number(liters, 0) * 0.264172 : number(liters, 0) }
+    // L/100 km -> US MPG is an inverse relation; 0 means "no consumption data".
+    function toConsumption(l100) {
+        const value = number(l100, 0)
+        if (!imperial) return value
+        return value > 0.05 ? 235.215 / value : 0
+    }
+    function toPrice(perLiter) { return imperial ? number(perLiter, 0) * 3.785411784 : number(perLiter, 0) }
+    function fromPrice(perVolume) { return imperial ? number(perVolume, 0) / 3.785411784 : number(perVolume, 0) }
+    function toTemperature(celsius) { return imperial ? number(celsius, 0) * 1.8 + 32 : number(celsius, 0) }
+    function toAltitude(meters) { return imperial ? number(meters, 0) * 3.28084 : number(meters, 0) }
+    // Converts a runtime value tagged with a metric unit to the display units.
+    function displayUnits(value, unit) {
+        if (!imperial || typeof value !== "number") return { value: value, unit: unit }
+        if (unit === "degC") return { value: value * 1.8 + 32, unit: "degF" }
+        const factors = { "km/h": [0.621371, "mph"], "km": [0.621371, "mi"], "L": [0.264172, "gal"],
+                          "L/h": [0.264172, "gal/h"], "m": [3.28084, "ft"] }
+        const factor = factors[unit]
+        if (!factor) return { value: value, unit: unit }
+        return { value: value * factor[0], unit: factor[1] }
+    }
+    // Inverse of displayUnits: converts a value typed in display units back to
+    // the runtime (metric) unit, used for live data alarm limits.
+    function fromDisplayUnits(value, unit) {
+        if (!imperial || typeof value !== "number") return value
+        if (unit === "degC") return (value - 32) / 1.8
+        const factors = { "km/h": 0.621371, "km": 0.621371, "L": 0.264172, "L/h": 0.264172, "m": 3.28084 }
+        return factors[unit] ? value / factors[unit] : value
+    }
+    function money(value) { return currency + fixed(value, 2, "0.00") }
+
+    // GPS navigation (clios.gps service)
+    readonly property bool gpsFix: navigation.gps_fix === true && navigation.latitude !== undefined
+                                   && signalFresh("navigation", "latitude")
+    readonly property real latitude: number(navigation.latitude, 0)
+    readonly property real longitude: number(navigation.longitude, 0)
+    readonly property real gpsSpeed: number(navigation.gps_speed, 0)
+    readonly property real heading: number(navigation.heading, 0)
+    readonly property bool headingValid: navigation.heading_valid === true
+    readonly property real altitude: number(navigation.altitude_m, 0)
+    readonly property real gpsAccuracy: number(navigation.gps_accuracy_m, 0)
+    readonly property int gpsSatellites: intValue(navigation.gps_satellites, 0)
+    readonly property int gpsSatellitesInView: intValue(navigation.gps_satellites_in_view, 0)
+    readonly property string gpsMode: text(navigation.gps_mode, "NO_FIX")
+    readonly property string gpsSource: text(navigation.gps_source, "")
+    readonly property string mapTileUrl: text(navigation.tile_url, "https://tile.openstreetmap.org/%z/%x/%y.png")
+
+    // Live data page: selected tiles and active alarms.
+    readonly property bool obdConnected: obd.obd_connected === true
+    readonly property string obdInterface: text(obd.obd_interface, "")
+    readonly property var liveTiles: parseLiveTiles(config.ui && config.ui.live_tiles)
+    readonly property var liveAlarms: buildLiveAlarms()
     readonly property real rpm: rawRpm
     readonly property string gear: text(motion.gear, "N")
     property real engineTemp: rawEngineTemp
@@ -306,17 +379,17 @@ QtObject {
     // 9. TABLEAU UNIVERSEL DES VOYANTS DU COMBINÉ
     // =========================================================================
     readonly property var indicators: [
-        { code: "G", label: "Clignotant gauche", active: turnLeftActive, color: "#4DDB8A", blink: true },
-        { code: "D", label: "Clignotant droit", active: turnRightActive, color: "#4DDB8A", blink: true },
-        { code: "FEU", label: "Feux", active: lightsActive || highBeamActive || fogFrontActive || fogRearActive, color: "#4DDB8A", blink: false },
-        { code: "STOP", label: "Frein", active: handbrakeActive || brakeWarning, color: "#FF4D5A", blink: false },
-        { code: "CEINT", label: "Ceinture", active: driverUnbelted, color: "#FF4D5A", blink: false },
-        { code: "PORTE", label: "Porte", active: doorOpen, color: "#FFB33B", blink: false },
-        { code: "HUILE", label: "Huile", active: oilWarning, color: "#FF4D5A", blink: false },
-        { code: "BAT", label: "Batterie", active: batteryWarning, color: "#FF4D5A", blink: false },
+        { code: "L", label: "Left turn signal", active: turnLeftActive, color: "#4DDB8A", blink: true },
+        { code: "R", label: "Right turn signal", active: turnRightActive, color: "#4DDB8A", blink: true },
+        { code: "LGT", label: "Lights", active: lightsActive || highBeamActive || fogFrontActive || fogRearActive, color: "#4DDB8A", blink: false },
+        { code: "STOP", label: "Brake", active: handbrakeActive || brakeWarning, color: "#FF4D5A", blink: false },
+        { code: "BELT", label: "Seatbelt", active: driverUnbelted, color: "#FF4D5A", blink: false },
+        { code: "DOOR", label: "Door", active: doorOpen, color: "#FFB33B", blink: false },
+        { code: "OIL", label: "Oil", active: oilWarning, color: "#FF4D5A", blink: false },
+        { code: "BAT", label: "Battery", active: batteryWarning, color: "#FF4D5A", blink: false },
         { code: "ABS", label: "ABS", active: absWarning, color: "#FFB33B", blink: false },
         { code: "ESP", label: "ESP", active: espWarning, color: "#FFB33B", blink: false },
-        { code: "MOT", label: "Moteur", active: engineWarning, color: "#FFB33B", blink: false }
+        { code: "ENG", label: "Engine", active: engineWarning, color: "#FFB33B", blink: false }
     ]
 
     // =========================================================================
@@ -341,14 +414,14 @@ QtObject {
     }
 
     function cruiseModeLabel(value) {
-        if (value === "REG" || Number(value) === 2) return "REG"
+        if (value === "REG" || value === "CRUISE" || Number(value) === 2) return "CRUISE"
         if (value === "LIM" || Number(value) === 3) return "LIM"
         return "OFF"
     }
 
     function cruiseStatusLabel(value) {
-        if (value === "ACTIF" || Number(value) === 4) return "ACTIF"
-        return "INACTIF"
+        if (value === "ACTIF" || value === "ACTIVE" || Number(value) === 4) return "ACTIVE"
+        return "INACTIVE"
     }
 
     function fixed(value, decimals, fallback) {
@@ -394,9 +467,47 @@ QtObject {
         })
     }
 
+    function parseLiveTiles(raw) {
+        let tiles = raw
+        if (typeof raw === "string" && raw !== "") {
+            try { tiles = JSON.parse(raw) } catch (error) { tiles = null }
+        }
+        if (!Array.isArray(tiles)) return Catalog.defaultTiles
+        return tiles.filter(function(tile) {
+            return tile && typeof tile.domain === "string" && typeof tile.key === "string"
+        })
+    }
+
+    function signalInfo(domainName, key) {
+        const values = vehicleState[domainName] || {}
+        const metadata = (dataQuality[domainName] || {})[key] || {}
+        const present = values[key] !== undefined
+        const shown = displayUnits(values[key], metadata.unit || "")
+        return {
+            present: present,
+            rawValue: values[key],
+            rawUnit: metadata.unit || "",
+            value: shown.value,
+            unit: Catalog.unit(shown.unit),
+            stale: !present || metadata.quality === "STALE",
+            label: Catalog.label(domainName, key)
+        }
+    }
+
+    function buildLiveAlarms() {
+        const alarms = []
+        liveTiles.forEach(function(tile) {
+            const info = signalInfo(tile.domain, tile.key)
+            if (info.stale) return
+            if (Catalog.level(tile, info.rawValue) === "alarm")
+                alarms.push({ label: info.label, text: info.label + " : " + Catalog.format(info.value) + " " + info.unit })
+        })
+        return alarms
+    }
+
     function buildDebugSignals() {
         const rows = []
-        const domainNames = ["powertrain", "motion", "wheels", "body", "assistance", "dynamics", "environment", "controls", "alerts"]
+        const domainNames = ["powertrain", "motion", "wheels", "body", "assistance", "dynamics", "environment", "controls", "alerts", "navigation", "obd"]
         domainNames.forEach(function(domainName) {
             const values = vehicleState[domainName] || {}
             const quality = dataQuality[domainName] || {}

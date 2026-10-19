@@ -189,11 +189,11 @@ Item {
             if (lvl === "CRITICAL" || lvl === "ERROR") {
                 root.levelColor = T.StyleManager.danger
                 root.levelIcon = "▲"
-                root.currentTitle = "ALERTE SYSTÈME CRITIQUE"
+                root.currentTitle = "CRITICAL SYSTEM ALERT"
             } else if (lvl === "WARNING") {
                 root.levelColor = T.StyleManager.warning
                 root.levelIcon = "!"
-                root.currentTitle = "AVERTISSEMENT VÉHICULE"
+                root.currentTitle = "VEHICLE WARNING"
             } else if (lvl === "OK" || lvl === "SUCCESS") {
                 root.levelColor = T.StyleManager.success
                 root.levelIcon = "✓"
@@ -201,7 +201,7 @@ Item {
             } else {
                 root.levelColor = T.StyleManager.accent
                 root.levelIcon = "◆"
-                root.currentTitle = "INFORMATION VÉHICULE"
+                root.currentTitle = "VEHICLE INFORMATION"
             }
 
             root.isVisible = true

@@ -64,14 +64,14 @@ class ReleaseSignatureTest(unittest.TestCase):
     def test_altered_manifest_is_refused(self):
         manifest, manifest_path, _ = self.make_signed_release()
         manifest_path.write_text(manifest_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
-        with self.assertRaisesRegex(ReleaseError, "hash signé du manifeste"):
+        with self.assertRaisesRegex(ReleaseError, "signed manifest hash"):
             self.manager._verify_signed_metadata(manifest, str(manifest_path))
 
     def test_altered_signature_is_refused(self):
         manifest, manifest_path, _ = self.make_signed_release()
         signature = self.root / "SHA256SUMS.sig"
         signature.write_bytes(signature.read_bytes()[:-1] + bytes([signature.read_bytes()[-1] ^ 1]))
-        with self.assertRaisesRegex(ReleaseError, "signature Ed25519"):
+        with self.assertRaisesRegex(ReleaseError, "Ed25519 signature"):
             self.manager._verify_signed_metadata(manifest, str(manifest_path))
 
     def test_wrong_key_is_refused(self):
@@ -84,7 +84,7 @@ class ReleaseSignatureTest(unittest.TestCase):
             "schema_version": 1,
             "keys": [{"id": "wrong", "public_key": wrong_public.read_text(encoding="utf-8")}],
         }), encoding="utf-8")
-        with self.assertRaisesRegex(ReleaseError, "signature Ed25519"):
+        with self.assertRaisesRegex(ReleaseError, "Ed25519 signature"):
             self.manager._verify_signed_metadata(manifest, str(manifest_path))
 
     def test_archive_hash_not_matching_signed_sums_is_refused(self):

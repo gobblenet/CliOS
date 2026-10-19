@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 
@@ -52,6 +53,63 @@ class UnifiedSettingsNavigationTest(unittest.TestCase):
         self.shell.openRoute("home")
         self.assertEqual(self.shell.property("route"), "home")
 
+    def test_map_route_is_fullscreen_and_returns_to_cockpit(self):
+        self.shell.openRoute("map")
+        self.app.processEvents()
+        self.assertEqual(self.shell.property("route"), "map")
+        page = self.shell.findChild(QObject, "mapPage")
+        self.assertIsNotNone(page)
+        settings = self.shell.findChild(QObject, "unifiedSettingsShell")
+        self.assertFalse(settings.property("visible"))
+
+        page.cockpitRequested.emit()
+        self.app.processEvents()
+        self.assertEqual(self.shell.property("route"), "home")
+        self.assertFalse(self.shell.findChild(QObject, "mapLoader").property("active"))
+
+    def test_live_page_adds_tiles_and_saves_limits(self):
+        def saved_tiles():
+            return json.loads(self.bridge._config["ui"]["live_tiles"])
+
+        self.shell.openRoute("data")
+        self.app.processEvents()
+        self.assertEqual(self.shell.property("route"), "live")
+        page = self.shell.findChild(QObject, "liveDataPage")
+        self.assertIsNotNone(page)
+        initial = len(page.property("tiles").toVariant())
+
+        page.addTile("navigation", "gps_speed")
+        self.app.processEvents()
+        tiles = saved_tiles()
+        self.assertEqual(len(tiles), initial + 1)
+        self.assertEqual(tiles[-1]["key"], "gps_speed")
+
+        page.setLimits(0, "", "6500,5")
+        tiles = saved_tiles()
+        self.assertIsNone(tiles[0]["low"])
+        self.assertEqual(tiles[0]["high"], 6500.5)
+
+        page.moveTile(0, 1)
+        page.removeTile(0)
+        self.assertEqual(len(saved_tiles()), initial)
+
+    def test_alarm_limits_are_edited_in_fahrenheit_and_stored_in_celsius(self):
+        self.bridge._data_quality = {"obd": {"coolant_temp": {"unit": "degC", "quality": "VALID"}}}
+        self.bridge.dataQualityChanged.emit()
+        self.bridge.save_setting("ui.units", "imperial")
+        self.shell.openRoute("live")
+        self.app.processEvents()
+        page = self.shell.findChild(QObject, "liveDataPage")
+        tiles = page.property("tiles").toVariant()
+        index = next(i for i, tile in enumerate(tiles) if tile["key"] == "coolant_temp")
+        coolant = tiles[index]
+        self.assertEqual(coolant["high"], 105)
+        self.assertEqual(page.limitText(coolant, coolant["high"]), "221")
+
+        page.setLimits(index, "", "230")
+        saved = json.loads(self.bridge._config["ui"]["live_tiles"])
+        self.assertAlmostEqual(saved[index]["high"], 110.0, places=2)
+
     def test_legacy_maintenance_signal_opens_storage(self):
         self.bridge.openMaintenanceRequested.emit()
         self.app.processEvents()
@@ -85,10 +143,10 @@ class UnifiedSettingsNavigationTest(unittest.TestCase):
         self.assertIsNotNone(page)
         self.assertTrue(page.property("embedded"))
 
-        self.assertFalse(page.serviceExpanded("CAN_Moteur"))
-        self.assertTrue(page.toggleServiceDetails("CAN_Moteur"))
+        self.assertFalse(page.serviceExpanded("CAN_Engine"))
+        self.assertTrue(page.toggleServiceDetails("CAN_Engine"))
         self.app.processEvents()
-        self.assertTrue(page.serviceExpanded("CAN_Moteur"))
+        self.assertTrue(page.serviceExpanded("CAN_Engine"))
 
 
 if __name__ == "__main__":

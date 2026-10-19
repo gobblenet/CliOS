@@ -120,7 +120,7 @@ class SchemaValidationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             errors = validate_theme_manifest(valid, "other", root)
         self.assertTrue(any(error.startswith("id:") for error in errors))
-        self.assertTrue(any("fichier introuvable" in error for error in errors))
+        self.assertTrue(any("file not found" in error for error in errors))
 
     def test_can_semantic_bounds_and_duplicates_are_checked(self):
         payload = {
@@ -130,9 +130,9 @@ class SchemaValidationTest(unittest.TestCase):
             }},
         }
         errors = validate_can_dictionary(payload)
-        for fragment in ("hors plage CAN", ".shift:", ".mask:", "positions de bits dupliquées", ".bits.c:"):
+        for fragment in ("outside the CAN range", ".shift:", ".mask:", "duplicate bit positions", ".bits.c:"):
             self.assertTrue(any(fragment in error for error in errors), fragment)
-        self.assertTrue(any("aucune trame" in error for error in validate_can_dictionary({"schema_version": 1})))
+        self.assertTrue(any("no CAN frame" in error for error in validate_can_dictionary({"schema_version": 1})))
         self.assertTrue(validate_can_dictionary([]))
 
     def test_profile_catalog_and_cross_file_references(self):
