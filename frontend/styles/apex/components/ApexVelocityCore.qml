@@ -290,7 +290,7 @@ Item {
 
                 Repeater {
                     model: [
-                        { label: "POWER", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "ch", accent: true },
+                        { label: "POWER", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "hp", accent: true },
                         { label: "TORQUE", value: S.UiState.fixed(S.UiState.torque, 0, "0"), unit: "N·m", accent: false },
                         { label: "THROTTLE", value: S.UiState.fixed(S.UiState.throttle, 0, "0"), unit: "%", accent: false }
                     ]
