@@ -35,7 +35,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libegl1 libgl1 libxkbcommon-x11-0 shellcheck
           python -m pip install --upgrade pip
-          python -m pip install PySide6 jsonschema psutil python-can pyserial coverage ruff mypy
+          # PySide6 6.12 aborts with "bool_dealloc" on Python 3.11 after the QML smoke
+          # test (a refcount bug on True/False; 3.12+ is immune), and 6.8 segfaults in
+          # the UI tests. 6.11 passes on both supported Python versions.
+          python -m pip install "PySide6~=6.11.0" jsonschema psutil python-can pyserial coverage ruff mypy
       - name: Compile Python
         run: python -m compileall -q main.py src tools tests
       - name: Validate JSON and manifests
