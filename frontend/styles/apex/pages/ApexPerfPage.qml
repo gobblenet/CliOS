@@ -35,7 +35,7 @@ Item {
 
                     Repeater {
                         model: [
-                            { label: "POWER", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "ch", color: T.StyleManager.accent },
+                            { label: "POWER", value: S.UiState.fixed(S.UiState.powerHp, 0, "0"), unit: "hp", color: T.StyleManager.accent },
                             { label: "TORQUE", value: S.UiState.fixed(S.UiState.torque, 0, "0"), unit: "N·m", color: "#FFFFFF" },
                             { label: "RPM", value: Math.round(S.UiState.rpm), unit: "rpm", color: S.UiState.redline ? "#FF6670" : "#FFFFFF" }
                         ]

@@ -1,6 +1,6 @@
 """Panneau de contrôle graphique complet pour la simulation et le moteur physique de CliOS."""
 
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QSlider,
     QComboBox, QTabWidget, QProgressBar, QGroupBox, QGridLayout,
@@ -10,6 +10,10 @@ from PySide6.QtWidgets import (
 
 class MockControlPanel(QWidget):
     """Fenêtre de débogage et de contrôle multi-onglets pour la simulation véhicule."""
+
+    # Scenario progress arrives from the runner's worker thread; a signal
+    # queues it onto the GUI thread (a QTimer created there would never fire).
+    scenario_progress = Signal(int, int, str, float)
 
     def __init__(self, physics_mock):
         super().__init__()
@@ -39,7 +43,8 @@ class MockControlPanel(QWidget):
         self._ui_timer.start(100)
 
         # Branchement du callback de scénario
-        self.mock.scenario_runner.set_progress_callback(self._on_scenario_progress)
+        self.scenario_progress.connect(self._update_scenario_progress)
+        self.mock.scenario_runner.set_progress_callback(self.scenario_progress.emit)
 
     # =========================================================================
     # ONGLET 1 : PILOTAGE & DYNAMIQUE
@@ -50,7 +55,7 @@ class MockControlPanel(QWidget):
         layout = QVBoxLayout()
 
         # Contact et Starter
-        pwr_group = QGroupBox("Power & Engine")
+        pwr_group = QGroupBox("Power && Engine")
         pwr_layout = QHBoxLayout()
 
         self.btn_ignition = QPushButton("Ignition: ON")
@@ -68,7 +73,7 @@ class MockControlPanel(QWidget):
         layout.addWidget(pwr_group)
 
         # Boîte de vitesses et Handbrake
-        trans_group = QGroupBox("Transmission & Parking")
+        trans_group = QGroupBox("Transmission && Parking")
         trans_layout = QHBoxLayout()
 
         trans_layout.addWidget(QLabel("Gear:"))
@@ -86,7 +91,7 @@ class MockControlPanel(QWidget):
         layout.addWidget(trans_group)
 
         # Pédales
-        pedals_group = QGroupBox("Pedals & Steering")
+        pedals_group = QGroupBox("Pedals && Steering")
         pedals_layout = QGridLayout()
 
         # Accélérateur
@@ -151,7 +156,7 @@ class MockControlPanel(QWidget):
         layout = QVBoxLayout()
 
         # Éclairage
-        lights_group = QGroupBox("Lighting & Signals")
+        lights_group = QGroupBox("Lighting && Signals")
         lights_layout = QGridLayout()
 
         self.chk_pos = QCheckBox("Parking lights")
@@ -190,7 +195,7 @@ class MockControlPanel(QWidget):
         layout.addWidget(lights_group)
 
         # Portières et Sécurité
-        doors_group = QGroupBox("Doors & Cabin")
+        doors_group = QGroupBox("Doors && Cabin")
         doors_layout = QGridLayout()
 
         self.chk_d_fl = QCheckBox("Front left door")
@@ -236,7 +241,7 @@ class MockControlPanel(QWidget):
 
         layout.addStretch()
         tab.setLayout(layout)
-        self.tabs.addTab(tab, "Body & Lights")
+        self.tabs.addTab(tab, "Body && Lights")
 
     # =========================================================================
     # ONGLET 3 : SCÉNARIOS & PILOTE AUTO
@@ -467,15 +472,12 @@ class MockControlPanel(QWidget):
                 self.btn_run_scenario.setStyleSheet("background-color: #d9534f; color: white; font-weight: bold; padding: 8px;")
                 self.mock.scenario_runner.start_scenario(sc)
 
-    def _on_scenario_progress(self, current: int, total: int, desc: str, pct: float):
-        # Callback thread-safe via QTimer
-        def update_ui():
-            self.progress_scenario.setValue(int(pct))
-            self.lbl_scenario_step.setText(f"Step {current}/{total}: {desc}")
-            if not self.mock.scenario_runner.is_running:
-                self.btn_run_scenario.setText("Run scenario")
-                self.btn_run_scenario.setStyleSheet("background-color: #2d5b88; color: white; font-weight: bold; padding: 8px;")
-        QTimer.singleShot(0, update_ui)
+    def _update_scenario_progress(self, current: int, total: int, desc: str, pct: float):
+        self.progress_scenario.setValue(int(pct))
+        self.lbl_scenario_step.setText(f"Step {current}/{total}: {desc}")
+        if not self.mock.scenario_runner.is_running:
+            self.btn_run_scenario.setText("Run scenario")
+            self.btn_run_scenario.setStyleSheet("background-color: #2d5b88; color: white; font-weight: bold; padding: 8px;")
 
     def _apply_dtcs(self):
         raw = self.txt_dtc_input.text().strip()
