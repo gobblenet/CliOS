@@ -1,0 +1,60 @@
+name: Hardware check
+
+# Runs on the car's Raspberry Pi through a self-hosted runner labelled
+# "clios-pi" (set up with tools/setup_pi_runner.sh). It is never triggered by
+# pull requests, so code from forks cannot run on the car computer.
+on:
+  workflow_dispatch:
+    inputs:
+      require_gps:
+        description: Fail unless the GPS receiver sends valid NMEA
+        type: boolean
+        default: true
+      require_obd:
+        description: Fail unless an ECU answers OBD-II (ignition must be on)
+        type: boolean
+        default: false
+      gps_port:
+        description: GPS serial device (empty = first USB serial adapter)
+        type: string
+        default: ""
+      elm_port:
+        description: ELM327 serial device to check (empty = skip)
+        type: string
+        default: ""
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hardware-check
+  cancel-in-progress: false
+
+jobs:
+  hardware:
+    runs-on: [self-hosted, linux, clios-pi]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Prepare Python environment
+        run: |
+          python3 -m venv "$HOME/.cache/clios-hardware-venv"
+          "$HOME/.cache/clios-hardware-venv/bin/pip" install --quiet --upgrade pyserial python-can
+      - name: GPS and OBD unit tests
+        run: |
+          "$HOME/.cache/clios-hardware-venv/bin/python" -m unittest -v tests.test_gps_service tests.test_hardware_check
+      - name: Check GPS, CAN and OBD-II hardware
+        env:
+          REQUIRE_GPS: ${{ github.event_name == 'workflow_dispatch' && inputs.require_gps }}
+          REQUIRE_OBD: ${{ github.event_name == 'workflow_dispatch' && inputs.require_obd }}
+          GPS_PORT: ${{ inputs.gps_port }}
+          ELM_PORT: ${{ inputs.elm_port }}
+        run: |
+          args=()
+          [[ "$REQUIRE_GPS" == "true" ]] && args+=(--require-gps)
+          [[ "$REQUIRE_OBD" == "true" ]] && args+=(--require-obd)
+          [[ -n "$GPS_PORT" ]] && args+=(--gps-port "$GPS_PORT")
+          [[ -n "$ELM_PORT" ]] && args+=(--elm-port "$ELM_PORT")
+          "$HOME/.cache/clios-hardware-venv/bin/python" tools/hardware_check.py "${args[@]}"
